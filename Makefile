@@ -13,11 +13,11 @@ BIN_DIR = bin
 TESTS_DIR = test
 
 # Source and Object files
-SRCS = $(wildcard $(SRC_DIR)/*.c)
+SRCS = $(shell find $(SRC_DIR) -name '*.c')
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/src/%.o, $(SRCS))
 
 # Test source and object files
-TEST_SRCS = $(wildcard $(TESTS_DIR)/*.c)
+TEST_SRCS = $(shell find $(TESTS_DIR) -name '*.c')
 TEST_OBJS = $(patsubst $(TESTS_DIR)/%.c, $(BUILD_DIR)/tests/%.o, $(TEST_SRCS))
 
 # Exclude main.o from OBJS for tests
@@ -47,12 +47,14 @@ $(TEST_TARGET): $(OBJS_WITHOUT_MAIN) $(TEST_OBJS) | $(BIN_DIR)
 
 # Compile every source file (into build/src/)
 $(BUILD_DIR)/src/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)/src
-	@echo "Compiling $<..."
+	@echo "Compiling $<"
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -I$(INC_DIR) -c $< -o $@
 
 # Compile every test file (into build/tests/)
 $(BUILD_DIR)/tests/%.o: $(TESTS_DIR)/%.c | $(BUILD_DIR)/tests
-	@echo "Compiling test $<..."
+	@echo "Compiling test $<"
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -I$(INC_DIR) -c $< -o $@
 
 # Create directories if they don't exist
