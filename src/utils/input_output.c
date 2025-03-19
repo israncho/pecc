@@ -31,70 +31,95 @@ void read_file(char *file_name, file_line **ptr_to_array_of_lines,
 
   char buffer[256];
   size_t buffer_str_len = 0;
-  bool no_new_line_at_end = false;
+  size_t array_of_lines_capacity = 10;
+  size_t previous_str_len = 0;
+  size_t str_len = 0;
+  bool just_processed_one_line = false;
 
-  while (fgets(buffer, sizeof(buffer), file)) {
-    no_new_line_at_end = false;
-    buffer_str_len = strlen(buffer);
-
-    if (buffer_str_len > 0 && buffer[buffer_str_len - 1] == '\n') {
-      *ptr_to_num_lines += 1;
-    } else {
-      no_new_line_at_end = true;
-    }
-  }
-
-  if (no_new_line_at_end) {
-    *ptr_to_num_lines += 1;
-  }
-
-  *ptr_to_array_of_lines =
-      (file_line *)malloc(sizeof(file_line) * (*ptr_to_num_lines));
-
+  *ptr_to_array_of_lines = malloc(array_of_lines_capacity * sizeof(file_line));
   if (!*ptr_to_array_of_lines) {
-    perror("Error allocating memory for array_of_lines in \'read_file\'");
+    perror("Error while reallocating memory for ptr_to_array_of_lines in "
+           "\'read_file\' at the beginning.");
     fclose(file);
     return;
   }
 
-  rewind(file);
+  while (fgets(buffer, sizeof(buffer), file)) {
+    size_t i = *ptr_to_num_lines;
 
-  for (size_t i = 0; i < *ptr_to_num_lines; i++) {
-    (*ptr_to_array_of_lines)[i].content = NULL;
-    (*ptr_to_array_of_lines)[i].length = 0;
-    size_t previous_str_len = 0;
-    size_t str_len = 0;
-
-    do {
-      if (fgets(buffer, sizeof(buffer), file) ==
-          NULL) // read and check if something was read
-        break;  // if file consumed then stop
-
-      buffer_str_len = strlen(buffer);
-      previous_str_len = (*ptr_to_array_of_lines)[i].length;
-      str_len = buffer_str_len + previous_str_len;
-      (*ptr_to_array_of_lines)[i].length = str_len;
-
-      char *temp =
-          realloc((*ptr_to_array_of_lines)[i].content, sizeof(char) * str_len);
-
-      if (!temp) {
-        perror(
-            "Error while allocating memory for line.content in \'read_file\'");
+    if (i + 1 >=
+        array_of_lines_capacity) { // out of space in the array of lines
+      array_of_lines_capacity *= 2;
+      *ptr_to_array_of_lines = realloc(
+          *ptr_to_array_of_lines, array_of_lines_capacity * sizeof(file_line));
+      if (!*ptr_to_array_of_lines) {
+        perror("Error while reallocating memory for ptr_to_array_of_lines in "
+               "\'read_file\' while reading file.");
         fclose(file);
         return;
       }
-
-      (*ptr_to_array_of_lines)[i].content = temp;
-
-      memcpy((*ptr_to_array_of_lines)[i].content + previous_str_len, buffer,
-             buffer_str_len);
-    } while (buffer_str_len > 0 && buffer[buffer_str_len - 1] != '\n');
-
-    if ((*ptr_to_array_of_lines)[i].content[str_len - 1] == '\n') {
-      (*ptr_to_array_of_lines)[i].content[str_len - 1] = '\0';
-      (*ptr_to_array_of_lines)[i].length--;
     }
+
+    if (just_processed_one_line) {
+      (*ptr_to_array_of_lines)[i].content = NULL;
+      (*ptr_to_array_of_lines)[i].length = 0;
+      previous_str_len = 0;
+      str_len = 0;
+      just_processed_one_line = false;
+    }
+
+    buffer_str_len = strlen(buffer);
+    previous_str_len = (*ptr_to_array_of_lines)[i].length;
+    str_len = previous_str_len + buffer_str_len;
+    (*ptr_to_array_of_lines)[i].length = str_len;
+
+    if (buffer_str_len > 0 && buffer[buffer_str_len - 1] == '\n') {
+      just_processed_one_line = true;
+      str_len++; // reaching end of line, adding space for empty (\0) char
+    }
+
+    char *tmp =
+        realloc((*ptr_to_array_of_lines)[i].content, str_len * sizeof(char));
+
+    if (!tmp) {
+      perror(
+          "Error while reallocating memory for line.content in \'read_file\'.");
+      fclose(file);
+      return;
+    }
+
+    (*ptr_to_array_of_lines)[i].content = tmp;
+
+    memcpy((*ptr_to_array_of_lines)[i].content + previous_str_len, buffer,
+           buffer_str_len);
+
+    if (just_processed_one_line) {
+      (*ptr_to_array_of_lines)[i].content[str_len - 1] =
+          '\0'; // add the empty char
+      *ptr_to_num_lines += 1;
+    }
+  }
+
+  if (!just_processed_one_line) {
+    char *tmp = realloc((*ptr_to_array_of_lines)[*ptr_to_num_lines - 1].content,
+                        str_len + 1);
+    if (!tmp) {
+      perror("Error while reallocating memory for line.content in "
+             "\'read_file\' at the end.");
+      fclose(file);
+      return;
+    }
+    (*ptr_to_array_of_lines)[*ptr_to_num_lines - 1].content = tmp;
+    (*ptr_to_array_of_lines)[*ptr_to_num_lines - 1].content[str_len] = '\0';
+    *ptr_to_num_lines += 1;
+  }
+
+  *ptr_to_array_of_lines =
+      realloc(*ptr_to_array_of_lines, *ptr_to_num_lines * sizeof(file_line));
+
+  if (!*ptr_to_array_of_lines) {
+    perror("Error while reallocating memory for ptr_to_array_of_lines in "
+           "\'read_file\' at the end");
   }
 
   fclose(file);
