@@ -35,29 +35,33 @@ void read_file(char *file_name, file_line **ptr_to_array_of_lines,
   size_t previous_str_len = 0;
   size_t str_len = 0;
   bool just_processed_one_line = false;
+  file_line *tmp_ptr_to_arr_lines = NULL;
 
-  *ptr_to_array_of_lines = malloc(array_of_lines_capacity * sizeof(file_line));
-  if (!*ptr_to_array_of_lines) {
+  tmp_ptr_to_arr_lines = malloc(array_of_lines_capacity * sizeof(file_line));
+  if (!tmp_ptr_to_arr_lines) {
     perror("Error while reallocating memory for ptr_to_array_of_lines in "
            "\'read_file\' at the beginning.");
     fclose(file);
     return;
   }
+  *ptr_to_array_of_lines = tmp_ptr_to_arr_lines;
+  tmp_ptr_to_arr_lines = NULL;
 
   while (fgets(buffer, sizeof(buffer), file)) {
     size_t i = *ptr_to_num_lines;
 
-    if (i + 1 >=
-        array_of_lines_capacity) { // out of space in the array of lines
+    if (i + 1 >= array_of_lines_capacity) { // out of space in the array of lines
       array_of_lines_capacity *= 2;
-      *ptr_to_array_of_lines = realloc(
+      tmp_ptr_to_arr_lines = realloc(
           *ptr_to_array_of_lines, array_of_lines_capacity * sizeof(file_line));
-      if (!*ptr_to_array_of_lines) {
+      if (!tmp_ptr_to_arr_lines) {
         perror("Error while reallocating memory for ptr_to_array_of_lines in "
                "\'read_file\' while reading file.");
         fclose(file);
         return;
       }
+      *ptr_to_array_of_lines = tmp_ptr_to_arr_lines;
+      tmp_ptr_to_arr_lines = NULL;
     }
 
     if (just_processed_one_line) {
@@ -114,13 +118,15 @@ void read_file(char *file_name, file_line **ptr_to_array_of_lines,
     *ptr_to_num_lines += 1;
   }
 
-  *ptr_to_array_of_lines =
+  tmp_ptr_to_arr_lines =
       realloc(*ptr_to_array_of_lines, *ptr_to_num_lines * sizeof(file_line));
 
-  if (!*ptr_to_array_of_lines) {
+  if (!tmp_ptr_to_arr_lines) {
     perror("Error while reallocating memory for ptr_to_array_of_lines in "
            "\'read_file\' at the end");
   }
+  *ptr_to_array_of_lines = tmp_ptr_to_arr_lines;
+  tmp_ptr_to_arr_lines = NULL;
 
   fclose(file);
 }
