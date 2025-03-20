@@ -34,7 +34,7 @@ void read_file(char *file_name, file_line **ptr_to_array_of_lines,
   size_t array_of_lines_capacity = 10;
   size_t previous_str_len = 0;
   size_t str_len = 0;
-  bool just_processed_one_line = false;
+  bool just_processed_one_line = true;
   file_line *tmp_ptr_to_arr_lines = NULL;
 
   tmp_ptr_to_arr_lines = malloc(array_of_lines_capacity * sizeof(file_line));
@@ -76,11 +76,10 @@ void read_file(char *file_name, file_line **ptr_to_array_of_lines,
     previous_str_len = (*ptr_to_array_of_lines)[i].length;
     str_len = previous_str_len + buffer_str_len;
     (*ptr_to_array_of_lines)[i].length = str_len;
+    str_len++; // adding space for empty (\0) char
 
-    if (buffer_str_len > 0 && buffer[buffer_str_len - 1] == '\n') {
+    if (buffer_str_len > 0 && buffer[buffer_str_len - 1] == '\n')
       just_processed_one_line = true;
-      str_len++; // reaching end of line, adding space for empty (\0) char
-    }
 
     char *tmp =
         realloc((*ptr_to_array_of_lines)[i].content, str_len * sizeof(char));
@@ -97,26 +96,14 @@ void read_file(char *file_name, file_line **ptr_to_array_of_lines,
     memcpy((*ptr_to_array_of_lines)[i].content + previous_str_len, buffer,
            buffer_str_len);
 
-    if (just_processed_one_line) {
-      (*ptr_to_array_of_lines)[i].content[str_len - 1] =
-          '\0'; // add the empty char
+
+    (*ptr_to_array_of_lines)[i].content[str_len - 1] = '\0'; // add the empty char
+    if (just_processed_one_line)
       *ptr_to_num_lines += 1;
-    }
   }
 
-  if (!just_processed_one_line) {
-    char *tmp = realloc((*ptr_to_array_of_lines)[*ptr_to_num_lines - 1].content,
-                        str_len + 1);
-    if (!tmp) {
-      perror("Error while reallocating memory for line.content in "
-             "\'read_file\' at the end.");
-      fclose(file);
-      return;
-    }
-    (*ptr_to_array_of_lines)[*ptr_to_num_lines - 1].content = tmp;
-    (*ptr_to_array_of_lines)[*ptr_to_num_lines - 1].content[str_len] = '\0';
+  if (!just_processed_one_line)
     *ptr_to_num_lines += 1;
-  }
 
   tmp_ptr_to_arr_lines =
       realloc(*ptr_to_array_of_lines, *ptr_to_num_lines * sizeof(file_line));
