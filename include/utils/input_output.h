@@ -26,6 +26,19 @@ typedef struct {
 void free_file_line(file_line *file_line_to_free);
 
 /**
+ * @brief Frees the memory allocated for an array of file_line structures.
+ *
+ * This function iterates over an array of `file_line` structures, freeing the
+ * memory allocated for the `content` field of each structure. Once all the
+ * individual `content` fields are freed, the memory allocated for the array
+ * itself is also freed.
+ *
+ * @param array_of_lines A pointer to an array of `file_line` structures.
+ * @param array_size Size of the given array.
+ */
+void free_array_of_lines(file_line *array_of_lines, size_t array_size);
+
+/**
  * @brief Reads the contents of a file and stores each line in an array of
  * file_line structures.
  *

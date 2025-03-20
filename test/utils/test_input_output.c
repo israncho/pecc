@@ -28,11 +28,109 @@ void test_read_file() {
       array_of_lines, *ptr_to_num_of_lines, file1, 10);
   assert(test_result);
 
-  for (size_t i = 0; i < *ptr_to_num_of_lines; i++)
-    free_file_line(&array_of_lines[i]);
-
+  free_array_of_lines(array_of_lines, *ptr_to_num_of_lines);
   free(array_of_lines);
   array_of_lines = NULL;
+
+  // sub-test 2
+  *ptr_to_num_of_lines = 0;
+  filename = "instances/test/input_output2.txt";
+  read_file(filename, &array_of_lines, ptr_to_num_of_lines);
+
+  file_line file2[35] = {
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+  };
+
+  test_result = equality_test_for_line_arrays(array_of_lines,
+                                              *ptr_to_num_of_lines, file2, 35);
+  assert(test_result);
+
+  free_array_of_lines(array_of_lines, *ptr_to_num_of_lines);
+  free(array_of_lines);
+  array_of_lines = NULL;
+
+  // sub-test 3
+  *ptr_to_num_of_lines = 0;
+  filename = "instances/test/input_output3.txt";
+  read_file(filename, &array_of_lines, ptr_to_num_of_lines);
+  file_line file3[50] = {
+      {"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+       "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n",
+       261},
+      {"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+       "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+       "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+       "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n",
+       261},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"\n", 1},
+      {"ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+       "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+       "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+       "ccccccccccccccccccccccccccccccccccccccccccccccc\n",
+       261}};
+
+  test_result = equality_test_for_line_arrays(array_of_lines,
+                                              *ptr_to_num_of_lines, file3, 50);
+  assert(test_result);
+
+  free_array_of_lines(array_of_lines, *ptr_to_num_of_lines);
+  free(array_of_lines);
+  array_of_lines = NULL;
+
   free(ptr_to_num_of_lines);
   ptr_to_num_of_lines = NULL;
   printf("- read_file: PASSED\n");
