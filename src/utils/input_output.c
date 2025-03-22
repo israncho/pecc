@@ -115,6 +115,13 @@ void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
   if (!just_processed_one_line)
     *ptr_to_num_lines += 1;
 
+  if (*ptr_to_num_lines == 0) {
+    free(*ptr_to_array_of_lines);
+    *ptr_to_array_of_lines = NULL;
+    fclose(file);
+    return;
+  }
+
   tmp_ptr_to_arr_lines =
       realloc(*ptr_to_array_of_lines, *ptr_to_num_lines * sizeof(file_line));
 

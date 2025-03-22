@@ -131,6 +131,17 @@ void test_read_file() {
   free(array_of_lines);
   array_of_lines = NULL;
 
+  // sub-test 4 - empty file
+  filename = "instances/test/input_output4.txt";
+  read_file(filename, &array_of_lines, ptr_to_num_of_lines);
+  file_line *file4 = NULL;
+  test_result = equality_test_for_line_arrays(array_of_lines,
+                                              *ptr_to_num_of_lines, file4, 0);
+  assert(test_result);
+  free_array_of_lines(array_of_lines, *ptr_to_num_of_lines);
+  free(array_of_lines);
+  array_of_lines = NULL;
+
   free(ptr_to_num_of_lines);
   ptr_to_num_of_lines = NULL;
   printf("- read_file: PASSED\n");
