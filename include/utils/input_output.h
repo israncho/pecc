@@ -53,7 +53,7 @@ void free_array_of_lines(file_line *array_of_lines, size_t array_size);
  * @param ptr_to_num_lines A pointer to the variable where the number of lines
  * in the file will be stored.
  */
-void read_file(char *file_name, file_line **ptr_to_array_of_lines,
+void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
                size_t *ptr_to_num_lines);
 
 #endif
