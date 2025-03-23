@@ -56,4 +56,24 @@ void free_array_of_lines(file_line *array_of_lines, size_t array_size);
 void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
                size_t *ptr_to_num_lines);
 
+/**
+ * @brief Writes the contents of an array of file_line structures to a file.
+ *
+ * This function writes each line stored in the array of file_line structures to
+ * the specified file. It supports different file modes (e.g., "w" for write, "a"
+ * for append), allowing the caller to overwrite or append to the file.
+ *
+ * @param file_name Path to the file where the lines will be written.
+ * @param array_of_lines Array of file_line structures containing the lines to write.
+ * @param num_lines Number of lines in the array.
+ * @param mode File mode to use when opening the file (e.g., "w" for write, "a" for append).
+ *
+ * @note If the file does not exist, it will be created. If it exists, its contents
+ * will be overwritten or appended based on the specified mode.
+ */
+void write_to_file(const char *file_name,
+                   const file_line *array_of_lines,
+                   const size_t num_lines,
+                   const char *mode);
+
 #endif

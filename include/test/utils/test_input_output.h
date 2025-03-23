@@ -9,28 +9,37 @@
  * @brief Tests the read_file function to verify its correctness.
  *
  * This function performs a series of test cases on the read_file function,
- * checking whether it correctly reads a file into an array of file_line structures.
- * The results of the test are displayed on the standard output.
+ * checking whether it correctly reads a file into an array of file_line
+ * structures. The results of the test are displayed on the standard output.
  */
 void test_read_file();
+
+/**
+ * @brief Tests the write_to_file function to verify its correctness.
+ *
+ * This function performs a series of test cases on the write_to_file function,
+ * checking whether it correctly writes an array of file_line structures to a
+ * file. The results of the test are displayed on the standard output.
+ */
+void test_write_to_file();
 
 /**
  * @brief Compares two arrays of file_line structures for equality.
  *
  * This function checks if two arrays of file_line structures are equal in terms
- * of size and content. It compares both the number of elements in the arrays and
- * the content of each line.
+ * of size and content. It compares both the number of elements in the arrays
+ * and the content of each line.
  *
  * @param array_of_lines1 Pointer to the first array of file_line structures.
  * @param arr1_size The number of elements in the first array.
  * @param array_of_lines2 Pointer to the second array of file_line structures.
  * @param arr2_size The number of elements in the second array.
- * @return true if both arrays are identical in size and content, false otherwise.
+ * @return true if both arrays are identical in size and content, false
+ * otherwise.
  */
 bool equality_test_for_line_arrays(file_line *array_of_lines1,
                                    size_t arr1_size,
                                    file_line *array_of_lines2,
                                    size_t arr2_size);
-
 
 #endif

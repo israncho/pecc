@@ -134,3 +134,42 @@ void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
 
   fclose(file);
 }
+
+void write_to_file(const char *file_name, const file_line *array_of_lines,
+                   const size_t num_lines, const char *mode) {
+  assert(file_name != NULL);
+  assert(mode != NULL);
+
+  if (strcmp("w", mode) != 0 && strcmp("a", mode) != 0) {
+    char error_msg[100];
+    snprintf(error_msg, sizeof(error_msg),
+             "Wrong mode given as argument for \'write_to_file\':%s\n", mode);
+    perror(error_msg);
+    return;
+  }
+
+  FILE *file = fopen(file_name, mode);
+
+  if (!file) {
+    perror("Error while opening file in \'read_file\'");
+    return;
+  }
+
+  if (num_lines == 0) {
+    fclose(file);
+    return;
+  }
+
+  assert(array_of_lines != NULL);
+
+  for (size_t i = 0; i < num_lines; i++) {
+    if (fputs(array_of_lines[i].content, file) == EOF) {
+      char error_msg[100];
+      snprintf(error_msg, sizeof(error_msg),
+               "Error while trying to write to the file\'%s\'\n", file_name);
+      perror(error_msg);
+      return;
+    }
+  }
+  fclose(file);
+}

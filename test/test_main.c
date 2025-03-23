@@ -3,8 +3,9 @@
 #include "../include/test/utils/test_input_output.h"
 
 int main() {
-  printf("Starting tests...\n");
+  printf("Starting tests\n\n");
   test_read_file();
-  printf("All tests passed!\n");
+  test_write_to_file();
+  printf("\nFinished testing\n");
   return 0;
 }

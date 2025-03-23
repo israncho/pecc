@@ -146,6 +146,85 @@ void test_read_file() {
   printf("- read_file: PASSED\n");
 }
 
+void test_write_to_file() {
+  char *filename4 = "instances/test/input_output4.txt";
+  bool test_result = false;
+
+  // sub-test 1
+  file_line *array_of_lines = NULL;
+  size_t num_of_lines = 0;
+  file_line file1[10] = {{"aaaaaaaaaa\n", 11},
+                         {"\n", 1},
+                         {"bbbbbbbbbb\n", 11},
+                         {"\n", 1},
+                         {"cccccccccc\n", 11},
+                         {"\n", 1},
+                         {"dddddddddd\n", 11},
+                         {"\n", 1},
+                         {"\n", 1},
+                         {"eeeeeeeeee", 10}};
+  write_to_file(filename4, file1, 10, "w");
+
+  read_file(filename4, &array_of_lines, &num_of_lines);
+  test_result =
+      equality_test_for_line_arrays(array_of_lines, num_of_lines, file1, 10);
+  assert(test_result);
+  free_array_of_lines(array_of_lines, num_of_lines);
+  free(array_of_lines);
+  array_of_lines = NULL;
+
+  // subtest 2
+  num_of_lines = 0;
+  file_line file2[35] = {
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+      {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
+  };
+  write_to_file(filename4, file2, 35, "w");
+  read_file(filename4, &array_of_lines, &num_of_lines);
+  test_result =
+      equality_test_for_line_arrays(array_of_lines, num_of_lines, file2, 35);
+  assert(test_result);
+  free_array_of_lines(array_of_lines, num_of_lines);
+  free(array_of_lines);
+  array_of_lines = NULL;
+
+  // subtest 4 - append
+  num_of_lines = 0;
+  file_line appended_content[5] = {{"abcd\n", 5},
+                                   {"abcd\n", 5},
+                                   {"abcd\n", 5},
+                                   {"abcd\n", 5},
+                                   {"abcd\n", 5}};
+  write_to_file(filename4, NULL, 0, "w"); // cleaning file
+  for (size_t i = 0; i < 5; i++)
+    write_to_file(filename4, appended_content, 1, "a");
+  read_file(filename4, &array_of_lines, &num_of_lines);
+  test_result = equality_test_for_line_arrays(array_of_lines, num_of_lines, appended_content, 5);
+  assert(test_result);
+  free_array_of_lines(array_of_lines, num_of_lines);
+  free(array_of_lines);
+  array_of_lines = NULL;
+
+  // subtest 3 - cleaning file
+  file_line *file4 = NULL;
+  num_of_lines = 0;
+  write_to_file(filename4, array_of_lines, 0, "w");
+  read_file(filename4, &array_of_lines, &num_of_lines);
+  test_result =
+      equality_test_for_line_arrays(array_of_lines, num_of_lines, file4, 0);
+  assert(test_result);
+  free_array_of_lines(array_of_lines, num_of_lines);
+  free(array_of_lines);
+  array_of_lines = NULL;
+
+  printf("- write_to_file: PASSED\n");
+}
+
 bool equality_test_for_line_arrays(file_line *array_of_lines1, size_t arr1_size,
                                    file_line *array_of_lines2,
                                    size_t arr2_size) {
