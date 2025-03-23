@@ -14,7 +14,7 @@ void free_file_line(file_line *file_line_to_free) {
   file_line_to_free->length = 0;
 }
 
-void free_array_of_lines(file_line *array_of_lines, size_t array_size) {
+void free_array_of_lines(file_line *array_of_lines, const size_t array_size) {
   if (array_of_lines == NULL)
     return;
   for (size_t i = 0; i < array_size; i++) {

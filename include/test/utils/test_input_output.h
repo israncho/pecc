@@ -37,9 +37,9 @@ void test_write_to_file();
  * @return true if both arrays are identical in size and content, false
  * otherwise.
  */
-bool equality_test_for_line_arrays(file_line *array_of_lines1,
-                                   size_t arr1_size,
-                                   file_line *array_of_lines2,
-                                   size_t arr2_size);
+bool equality_test_for_line_arrays(const file_line *array_of_lines1,
+                                   const size_t arr1_size,
+                                   const file_line *array_of_lines2,
+                                   const size_t arr2_size);
 
 #endif

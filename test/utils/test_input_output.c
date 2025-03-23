@@ -13,19 +13,14 @@ void test_read_file() {
   size_t num_of_lines = 0;
   read_file(filename, &array_of_lines, &num_of_lines);
 
-  file_line file1[10] = {{"aaaaaaaaaa\n", 11},
-                         {"\n", 1},
-                         {"bbbbbbbbbb\n", 11},
-                         {"\n", 1},
-                         {"cccccccccc\n", 11},
-                         {"\n", 1},
-                         {"dddddddddd\n", 11},
-                         {"\n", 1},
-                         {"\n", 1},
-                         {"eeeeeeeeee", 10}};
+  file_line content_of_file1[10] = {{"aaaaaaaaaa\n", 11},
+                         {"\n", 1},                    {"bbbbbbbbbb\n", 11},
+                         {"\n", 1},                    {"cccccccccc\n", 11},
+                         {"\n", 1},                    {"dddddddddd\n", 11},
+                         {"\n", 1},                    {"\n", 1},                    {"eeeeeeeeee", 10}};
 
   bool test_result =
-      equality_test_for_line_arrays(array_of_lines, num_of_lines, file1, 10);
+      equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file1, 10);
   assert(test_result);
 
   free_array_of_lines(array_of_lines, num_of_lines);
@@ -37,7 +32,7 @@ void test_read_file() {
   filename = "instances/test/input_output2.txt";
   read_file(filename, &array_of_lines, &num_of_lines);
 
-  file_line file2[35] = {
+  file_line content_of_file2[35] = {
       {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
       {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
       {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
@@ -48,7 +43,7 @@ void test_read_file() {
   };
 
   test_result =
-      equality_test_for_line_arrays(array_of_lines, num_of_lines, file2, 35);
+      equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file2, 35);
   assert(test_result);
 
   free_array_of_lines(array_of_lines, num_of_lines);
@@ -59,7 +54,7 @@ void test_read_file() {
   num_of_lines = 0;
   filename = "instances/test/input_output3.txt";
   read_file(filename, &array_of_lines, &num_of_lines);
-  file_line file3[50] = {
+  file_line content_of_file3[50] = {
       {"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -70,53 +65,16 @@ void test_read_file() {
        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
        "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n",
        261},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
-      {"\n", 1},
+      {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1},
+      {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1},
+      {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1},
+      {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1},
+      {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1},
+      {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1},
+      {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1},
+      {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1},
+      {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1}, {"\n", 1},
+      {"\n", 1}, {"\n", 1},
       {"ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
        "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
        "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
@@ -124,7 +82,7 @@ void test_read_file() {
        261}};
 
   test_result =
-      equality_test_for_line_arrays(array_of_lines, num_of_lines, file3, 50);
+      equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file3, 50);
   assert(test_result);
 
   free_array_of_lines(array_of_lines, num_of_lines);
@@ -135,9 +93,9 @@ void test_read_file() {
   num_of_lines = 0;
   filename = "instances/test/input_output4.txt";
   read_file(filename, &array_of_lines, &num_of_lines);
-  file_line *file4 = NULL;
+  file_line *content_of_file4 = NULL;
   test_result =
-      equality_test_for_line_arrays(array_of_lines, num_of_lines, file4, 0);
+      equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file4, 0);
   assert(test_result);
   free_array_of_lines(array_of_lines, num_of_lines);
   free(array_of_lines);
@@ -153,7 +111,7 @@ void test_write_to_file() {
   // sub-test 1
   file_line *array_of_lines = NULL;
   size_t num_of_lines = 0;
-  file_line file1[10] = {{"aaaaaaaaaa\n", 11},
+  file_line content_of_file1[10] = {{"aaaaaaaaaa\n", 11},
                          {"\n", 1},
                          {"bbbbbbbbbb\n", 11},
                          {"\n", 1},
@@ -163,11 +121,11 @@ void test_write_to_file() {
                          {"\n", 1},
                          {"\n", 1},
                          {"eeeeeeeeee", 10}};
-  write_to_file(filename4, file1, 10, "w");
+  write_to_file(filename4, content_of_file1, 10, "w");
 
   read_file(filename4, &array_of_lines, &num_of_lines);
   test_result =
-      equality_test_for_line_arrays(array_of_lines, num_of_lines, file1, 10);
+      equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file1, 10);
   assert(test_result);
   free_array_of_lines(array_of_lines, num_of_lines);
   free(array_of_lines);
@@ -175,7 +133,7 @@ void test_write_to_file() {
 
   // subtest 2
   num_of_lines = 0;
-  file_line file2[35] = {
+  file_line content_of_file2[35] = {
       {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
       {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
       {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
@@ -184,10 +142,10 @@ void test_write_to_file() {
       {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
       {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
   };
-  write_to_file(filename4, file2, 35, "w");
+  write_to_file(filename4, content_of_file2, 35, "w");
   read_file(filename4, &array_of_lines, &num_of_lines);
   test_result =
-      equality_test_for_line_arrays(array_of_lines, num_of_lines, file2, 35);
+      equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file2, 35);
   assert(test_result);
   free_array_of_lines(array_of_lines, num_of_lines);
   free(array_of_lines);
@@ -211,12 +169,12 @@ void test_write_to_file() {
   array_of_lines = NULL;
 
   // subtest 3 - cleaning file
-  file_line *file4 = NULL;
+  file_line *content_of_file4 = NULL;
   num_of_lines = 0;
   write_to_file(filename4, array_of_lines, 0, "w");
   read_file(filename4, &array_of_lines, &num_of_lines);
   test_result =
-      equality_test_for_line_arrays(array_of_lines, num_of_lines, file4, 0);
+      equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file4, 0);
   assert(test_result);
   free_array_of_lines(array_of_lines, num_of_lines);
   free(array_of_lines);
@@ -225,9 +183,10 @@ void test_write_to_file() {
   printf("- write_to_file: PASSED\n");
 }
 
-bool equality_test_for_line_arrays(file_line *array_of_lines1, size_t arr1_size,
-                                   file_line *array_of_lines2,
-                                   size_t arr2_size) {
+bool equality_test_for_line_arrays(const file_line *array_of_lines1,
+                                   const size_t arr1_size,
+                                   const file_line *array_of_lines2,
+                                   const size_t arr2_size) {
   if (arr1_size != arr2_size) {
     printf("arr1_size: %zu != arr2_size %zu\n", arr1_size, arr2_size);
     return false;
