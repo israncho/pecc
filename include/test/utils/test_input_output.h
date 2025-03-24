@@ -6,6 +6,15 @@
 #include <stddef.h>
 
 /**
+ * @brief Orchestrates and executes all available module tests for
+ * `input_output`.
+ *
+ * This function serves as the main test runner for the `input_output` module.
+ * It coordinates and runs all individual test cases.
+ */
+void test_input_output();
+
+/**
  * @brief Tests the read_file function to verify its correctness.
  *
  * This function performs a series of test cases on the read_file function,

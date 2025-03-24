@@ -4,8 +4,7 @@
 
 int main() {
   printf("Starting tests\n\n");
-  test_read_file();
-  test_write_to_file();
+  test_input_output();
   printf("\nFinished testing\n");
   return 0;
 }

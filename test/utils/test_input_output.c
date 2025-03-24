@@ -101,7 +101,7 @@ void test_read_file() {
   free(array_of_lines);
   array_of_lines = NULL;
 
-  printf("- read_file: PASSED\n");
+  printf("\t- read_file: PASSED\n");
 }
 
 void test_write_to_file() {
@@ -180,7 +180,7 @@ void test_write_to_file() {
   free(array_of_lines);
   array_of_lines = NULL;
 
-  printf("- write_to_file: PASSED\n");
+  printf("\t- write_to_file: PASSED\n");
 }
 
 bool equality_test_for_line_arrays(const file_line *array_of_lines1,
@@ -215,4 +215,10 @@ bool equality_test_for_line_arrays(const file_line *array_of_lines1,
   }
 
   return true;
+}
+
+void test_input_output() {
+  printf("Testing: input_output\n");
+  test_read_file();
+  test_write_to_file();
 }
