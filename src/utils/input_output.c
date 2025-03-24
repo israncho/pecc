@@ -33,7 +33,7 @@ void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
   FILE *file = fopen(file_name, "r");
 
   if (!file) {
-    perror("Error while opening file in \'read_file\'");
+    perror("Error while opening file in \'read_file\'\n");
     return;
   }
 
@@ -49,8 +49,8 @@ void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
 
   tmp_ptr_to_arr_lines = malloc(array_of_lines_capacity * sizeof(file_line));
   if (!tmp_ptr_to_arr_lines) {
-    perror("Error while reallocating memory for ptr_to_array_of_lines in "
-           "\'read_file\' at the beginning.");
+    perror("Error while allocating memory for ptr_to_array_of_lines in "
+           "\'read_file\' at the beginning.\n");
     fclose(file);
     return;
   }
@@ -66,7 +66,7 @@ void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
           *ptr_to_array_of_lines, array_of_lines_capacity * sizeof(file_line));
       if (!tmp_ptr_to_arr_lines) {
         perror("Error while reallocating memory for ptr_to_array_of_lines in "
-               "\'read_file\' while reading file.");
+               "\'read_file\' while reading file.\n");
         fclose(file);
         return;
       }
@@ -91,17 +91,18 @@ void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
     if (buffer_str_len > 0 && buffer[buffer_str_len - 1] == '\n')
       just_processed_one_line = true;
 
-    char *tmp =
+    char *tmp_ptr_to_char =
         realloc((*ptr_to_array_of_lines)[i].content, str_len * sizeof(char));
 
-    if (!tmp) {
+    if (!tmp_ptr_to_char) {
       perror(
-          "Error while reallocating memory for line.content in \'read_file\'.");
+          "Error while reallocating memory for line.content in \'read_file\'.\n");
       fclose(file);
       return;
     }
 
-    (*ptr_to_array_of_lines)[i].content = tmp;
+    (*ptr_to_array_of_lines)[i].content = tmp_ptr_to_char;
+    tmp_ptr_to_char = NULL;
 
     memcpy((*ptr_to_array_of_lines)[i].content + previous_str_len, buffer,
            buffer_str_len);
@@ -127,7 +128,7 @@ void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
 
   if (!tmp_ptr_to_arr_lines) {
     perror("Error while reallocating memory for ptr_to_array_of_lines in "
-           "\'read_file\' at the end");
+           "\'read_file\' at the end.\n");
   }
   *ptr_to_array_of_lines = tmp_ptr_to_arr_lines;
   tmp_ptr_to_arr_lines = NULL;
@@ -151,7 +152,7 @@ void write_to_file(const char *file_name, const file_line *array_of_lines,
   FILE *file = fopen(file_name, mode);
 
   if (!file) {
-    perror("Error while opening file in \'read_file\'");
+    perror("Error while opening file in \'read_file\'.\n");
     return;
   }
 
@@ -166,7 +167,7 @@ void write_to_file(const char *file_name, const file_line *array_of_lines,
     if (fputs(array_of_lines[i].content, file) == EOF) {
       char error_msg[100];
       snprintf(error_msg, sizeof(error_msg),
-               "Error while trying to write to the file\'%s\'\n", file_name);
+               "Error while trying to write to the file\'%s\'.\n", file_name);
       perror(error_msg);
       return;
     }
