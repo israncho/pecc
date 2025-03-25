@@ -6,15 +6,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-void free_file_line(file_line *file_line_to_free) {
-  if (file_line_to_free == NULL)
+void free_file_line(file_line **ptr_to_file_line_to_free) {
+  if (*ptr_to_file_line_to_free == NULL)
     return;
-  free(file_line_to_free->content);
-  file_line_to_free->content = NULL;
-  file_line_to_free->length = 0;
+  free((*ptr_to_file_line_to_free)->content);
+  (*ptr_to_file_line_to_free)->content = NULL;
+  (*ptr_to_file_line_to_free)->length = 0;
+  *ptr_to_file_line_to_free = NULL;
 }
 
-void free_array_of_lines(file_line *array_of_lines, const size_t array_size) {
+void free_lines_array_content(file_line *array_of_lines,
+                              const size_t array_size) {
   if (array_of_lines == NULL)
     return;
   for (size_t i = 0; i < array_size; i++) {
@@ -24,22 +26,39 @@ void free_array_of_lines(file_line *array_of_lines, const size_t array_size) {
   }
 }
 
-void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
-               size_t *ptr_to_num_lines) {
-  assert(file_name != NULL);
-  assert(ptr_to_num_lines != NULL);
-  assert(*ptr_to_array_of_lines == NULL);
+static int cleanup_resources(FILE *file,
+                             file_line **ptr_to_array_of_lines,
+                             const size_t array_size_in_use,
+                             const int exit_code) {
+  if (*ptr_to_array_of_lines != NULL) {
+    if (array_size_in_use > 0)
+      free_lines_array_content(*ptr_to_array_of_lines, array_size_in_use);
+    free(*ptr_to_array_of_lines);
+    *ptr_to_array_of_lines = NULL;
+  }
+  if (file)
+    fclose(file);
+  return exit_code;
+}
+
+int read_file(const char *file_name, file_line **ptr_to_array_of_lines,
+              size_t *ptr_to_num_lines) {
+  if (file_name == NULL)
+    return 1;
+  if (ptr_to_num_lines == NULL)
+    return 2;
+  if (*ptr_to_array_of_lines != NULL)
+    return 3;
 
   FILE *file = fopen(file_name, "r");
 
-  if (!file) {
-    perror("Error while opening file in \'read_file\'\n");
-    return;
-  }
+  if (!file)
+    return 4;
 
   *ptr_to_num_lines = 0;
 
   char buffer[256];
+  const size_t file_line_size = sizeof(file_line);
   size_t buffer_str_len = 0;
   size_t array_of_lines_capacity = 10;
   size_t previous_str_len = 0;
@@ -47,29 +66,22 @@ void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
   bool just_processed_one_line = true;
   file_line *tmp_ptr_to_arr_lines = NULL;
 
-  tmp_ptr_to_arr_lines = malloc(array_of_lines_capacity * sizeof(file_line));
-  if (!tmp_ptr_to_arr_lines) {
-    perror("Error while allocating memory for ptr_to_array_of_lines in "
-           "\'read_file\' at the beginning.\n");
-    fclose(file);
-    return;
-  }
+  tmp_ptr_to_arr_lines = malloc(array_of_lines_capacity * file_line_size);
+  if (!tmp_ptr_to_arr_lines)
+    return cleanup_resources(file, ptr_to_array_of_lines, 0, 5);
   *ptr_to_array_of_lines = tmp_ptr_to_arr_lines;
   tmp_ptr_to_arr_lines = NULL;
 
   while (fgets(buffer, sizeof(buffer), file)) {
     size_t i = *ptr_to_num_lines;
 
-    if (i + 1 >= array_of_lines_capacity) { // out of space in the array of lines
+    if (i + 1 == array_of_lines_capacity) {
+      // ran out of space in the array of lines, increment needed.
       array_of_lines_capacity *= 2;
       tmp_ptr_to_arr_lines = realloc(
-          *ptr_to_array_of_lines, array_of_lines_capacity * sizeof(file_line));
-      if (!tmp_ptr_to_arr_lines) {
-        perror("Error while reallocating memory for ptr_to_array_of_lines in "
-               "\'read_file\' while reading file.\n");
-        fclose(file);
-        return;
-      }
+          *ptr_to_array_of_lines, array_of_lines_capacity * file_line_size);
+      if (!tmp_ptr_to_arr_lines)
+        return cleanup_resources(file, ptr_to_array_of_lines, i + 1, 5);
       *ptr_to_array_of_lines = tmp_ptr_to_arr_lines;
       tmp_ptr_to_arr_lines = NULL;
     }
@@ -94,12 +106,8 @@ void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
     char *tmp_ptr_to_char =
         realloc((*ptr_to_array_of_lines)[i].content, str_len * sizeof(char));
 
-    if (!tmp_ptr_to_char) {
-      perror(
-          "Error while reallocating memory for line.content in \'read_file\'.\n");
-      fclose(file);
-      return;
-    }
+    if (!tmp_ptr_to_char)
+      return cleanup_resources(file, ptr_to_array_of_lines, i + 1, 5);
 
     (*ptr_to_array_of_lines)[i].content = tmp_ptr_to_char;
     tmp_ptr_to_char = NULL;
@@ -107,8 +115,8 @@ void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
     memcpy((*ptr_to_array_of_lines)[i].content + previous_str_len, buffer,
            buffer_str_len);
 
-
-    (*ptr_to_array_of_lines)[i].content[str_len - 1] = '\0'; // add the empty char
+    // add the empty char
+    (*ptr_to_array_of_lines)[i].content[str_len - 1] = '\0';
     if (just_processed_one_line)
       *ptr_to_num_lines += 1;
   }
@@ -116,24 +124,19 @@ void read_file(const char *file_name, file_line **ptr_to_array_of_lines,
   if (!just_processed_one_line)
     *ptr_to_num_lines += 1;
 
-  if (*ptr_to_num_lines == 0) {
-    free(*ptr_to_array_of_lines);
-    *ptr_to_array_of_lines = NULL;
-    fclose(file);
-    return;
-  }
+  if (*ptr_to_num_lines == 0)
+    return cleanup_resources(file, ptr_to_array_of_lines, 0, 0);
 
   tmp_ptr_to_arr_lines =
-      realloc(*ptr_to_array_of_lines, *ptr_to_num_lines * sizeof(file_line));
+      realloc(*ptr_to_array_of_lines, *ptr_to_num_lines * file_line_size);
 
-  if (!tmp_ptr_to_arr_lines) {
-    perror("Error while reallocating memory for ptr_to_array_of_lines in "
-           "\'read_file\' at the end.\n");
-  }
+  if (!tmp_ptr_to_arr_lines)
+    return cleanup_resources(file, ptr_to_array_of_lines, *ptr_to_num_lines, 6);
   *ptr_to_array_of_lines = tmp_ptr_to_arr_lines;
   tmp_ptr_to_arr_lines = NULL;
 
   fclose(file);
+  return 0;
 }
 
 void write_to_file(const char *file_name, const file_line *array_of_lines,

@@ -23,7 +23,7 @@ void test_read_file() {
       equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file1, 10);
   assert(test_result);
 
-  free_array_of_lines(array_of_lines, num_of_lines);
+  free_lines_array_content(array_of_lines, num_of_lines);
   free(array_of_lines);
   array_of_lines = NULL;
 
@@ -46,7 +46,7 @@ void test_read_file() {
       equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file2, 35);
   assert(test_result);
 
-  free_array_of_lines(array_of_lines, num_of_lines);
+  free_lines_array_content(array_of_lines, num_of_lines);
   free(array_of_lines);
   array_of_lines = NULL;
 
@@ -85,7 +85,7 @@ void test_read_file() {
       equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file3, 50);
   assert(test_result);
 
-  free_array_of_lines(array_of_lines, num_of_lines);
+  free_lines_array_content(array_of_lines, num_of_lines);
   free(array_of_lines);
   array_of_lines = NULL;
 
@@ -97,7 +97,7 @@ void test_read_file() {
   test_result =
       equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file4, 0);
   assert(test_result);
-  free_array_of_lines(array_of_lines, num_of_lines);
+  free_lines_array_content(array_of_lines, num_of_lines);
   free(array_of_lines);
   array_of_lines = NULL;
 
@@ -127,7 +127,7 @@ void test_write_to_file() {
   test_result =
       equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file1, 10);
   assert(test_result);
-  free_array_of_lines(array_of_lines, num_of_lines);
+  free_lines_array_content(array_of_lines, num_of_lines);
   free(array_of_lines);
   array_of_lines = NULL;
 
@@ -147,7 +147,7 @@ void test_write_to_file() {
   test_result =
       equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file2, 35);
   assert(test_result);
-  free_array_of_lines(array_of_lines, num_of_lines);
+  free_lines_array_content(array_of_lines, num_of_lines);
   free(array_of_lines);
   array_of_lines = NULL;
 
@@ -164,7 +164,7 @@ void test_write_to_file() {
   read_file(filename4, &array_of_lines, &num_of_lines);
   test_result = equality_test_for_line_arrays(array_of_lines, num_of_lines, appended_content, 5);
   assert(test_result);
-  free_array_of_lines(array_of_lines, num_of_lines);
+  free_lines_array_content(array_of_lines, num_of_lines);
   free(array_of_lines);
   array_of_lines = NULL;
 
@@ -176,7 +176,7 @@ void test_write_to_file() {
   test_result =
       equality_test_for_line_arrays(array_of_lines, num_of_lines, content_of_file4, 0);
   assert(test_result);
-  free_array_of_lines(array_of_lines, num_of_lines);
+  free_lines_array_content(array_of_lines, num_of_lines);
   free(array_of_lines);
   array_of_lines = NULL;
 
