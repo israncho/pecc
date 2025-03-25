@@ -83,7 +83,7 @@ rebuild: clean all
 # Run tests
 test: $(TEST_TARGET)
 	@echo "--------Beginning Test Session-------"
-	./$(TEST_TARGET)
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --error-exitcode=1 --quiet ./$(TEST_TARGET)
 	@echo "--------End Test Session-------"
 
 .PHONY: all clean rebuild test
