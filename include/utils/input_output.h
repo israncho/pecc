@@ -4,6 +4,22 @@
 #include <stddef.h>
 
 /**
+ * @enum FileReadStatus
+ * @brief Status codes for the `read_file` function.
+ */
+typedef enum {
+  FILE_READ_SUCCESS = 0,          // Succesful operation.
+  FILE_READ_NULL_FILENAME,        // `file_name` is NULL.
+  FILE_READ_NULL_NUM_LINES_PTR,   // `ptr_to_num_lines` is NULL.
+  FILE_READ_NULL_LINES_ARRAY_PTR, // `ptr_to_array_of_lines` is NULL.
+  FILE_READ_LINES_ARRAY_IN_USE, // `*ptr_to_array_of_lines` is not NULL, i.e. in
+                                // use.
+  FILE_READ_OPEN_FAILED,        // Could not open file.
+  FILE_READ_MEMORY_ERROR,       // Could not allocate memory for the array of
+                                // `file_line`.
+} FileReadStatus;
+
+/**
  * @struct file_line
  * @brief Structure to represent a line in a file.
  *
@@ -63,8 +79,9 @@ void free_lines_array_content(file_line *array_of_lines,
  * @param ptr_to_num_lines A pointer to the variable where the number of lines
  * in the file will be stored.
  */
-int read_file(const char *file_name, file_line **ptr_to_array_of_lines,
-               size_t *ptr_to_num_lines);
+FileReadStatus read_file(const char *file_name,
+                         file_line **ptr_to_array_of_lines,
+                         size_t *ptr_to_num_lines);
 
 /**
  * @brief Writes the contents of an array of file_line structures to a file.

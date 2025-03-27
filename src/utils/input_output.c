@@ -41,19 +41,22 @@ static int cleanup_resources(FILE *file, file_line **ptr_to_array_of_lines,
   return exit_code;
 }
 
-int read_file(const char *file_name, file_line **ptr_to_array_of_lines,
-              size_t *ptr_to_num_lines) {
+FileReadStatus read_file(const char *file_name,
+                         file_line **ptr_to_array_of_lines,
+                         size_t *ptr_to_num_lines) {
   if (file_name == NULL)
-    return 1;
+    return FILE_READ_NULL_FILENAME;
   if (ptr_to_num_lines == NULL)
-    return 2;
+    return FILE_READ_NULL_NUM_LINES_PTR;
+  if (ptr_to_array_of_lines == NULL)
+    return FILE_READ_NULL_LINES_ARRAY_PTR;
   if (*ptr_to_array_of_lines != NULL)
-    return 3;
+    return FILE_READ_LINES_ARRAY_IN_USE;
 
   FILE *file = fopen(file_name, "r");
 
   if (!file)
-    return 4;
+    return FILE_READ_OPEN_FAILED;
 
   *ptr_to_num_lines = 0;
 
@@ -68,7 +71,8 @@ int read_file(const char *file_name, file_line **ptr_to_array_of_lines,
 
   if (init_array((void **)ptr_to_array_of_lines, array_of_lines_capacity,
                  file_line_size) != ARRAY_OK)
-    return cleanup_resources(file, ptr_to_array_of_lines, 0, 5);
+    return cleanup_resources(file, ptr_to_array_of_lines, 0,
+                             FILE_READ_MEMORY_ERROR);
 
   while (fgets(buffer, sizeof(buffer), file)) {
     size_t i = *ptr_to_num_lines;
@@ -78,7 +82,8 @@ int read_file(const char *file_name, file_line **ptr_to_array_of_lines,
       array_of_lines_capacity *= 2;
       if (resize_array((void **)ptr_to_array_of_lines, array_of_lines_capacity,
                        file_line_size) != ARRAY_OK)
-        return cleanup_resources(file, ptr_to_array_of_lines, i, 5);
+        return cleanup_resources(file, ptr_to_array_of_lines, i,
+                                 FILE_READ_MEMORY_ERROR);
     }
 
     if (just_processed_one_line) {
@@ -100,7 +105,8 @@ int read_file(const char *file_name, file_line **ptr_to_array_of_lines,
 
     if (resize_array((void **)&((*ptr_to_array_of_lines)[i].content), str_len,
                      char_size) != ARRAY_OK)
-      return cleanup_resources(file, ptr_to_array_of_lines, i, 5);
+      return cleanup_resources(file, ptr_to_array_of_lines, i,
+                               FILE_READ_MEMORY_ERROR);
 
     memcpy((*ptr_to_array_of_lines)[i].content + previous_str_len * char_size,
            buffer, buffer_str_len);
@@ -115,14 +121,14 @@ int read_file(const char *file_name, file_line **ptr_to_array_of_lines,
     *ptr_to_num_lines += 1;
 
   if (*ptr_to_num_lines == 0)
-    return cleanup_resources(file, ptr_to_array_of_lines, 0, 0);
+    return cleanup_resources(file, ptr_to_array_of_lines, 0, FILE_READ_SUCCESS);
 
   if (resize_array((void **)ptr_to_array_of_lines, *ptr_to_num_lines,
                    file_line_size) != ARRAY_OK)
     return cleanup_resources(file, ptr_to_array_of_lines, *ptr_to_num_lines, 6);
 
   fclose(file);
-  return 0;
+  return FILE_READ_SUCCESS;
 }
 
 void write_to_file(const char *file_name, const file_line *array_of_lines,
