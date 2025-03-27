@@ -73,11 +73,24 @@ void free_lines_array_content(file_line *array_of_lines,
  * structures. It dynamically allocates memory for the array and the content of
  * each line.
  *
- * @param file_name Path to the file to read.
- * @param ptr_to_array_of_lines A pointer to the array that will hold the file
- * lines.
- * @param ptr_to_num_lines A pointer to the variable where the number of lines
- * in the file will be stored.
+ * @param[in] file_name Path to the file to read. Must be a valid non-NULL
+ * string.
+ * @param[out] ptr_to_array_of_lines Pointer to the array that will hold the
+ * file lines. The pointer must point to NULL initially (*ptr_to_array_of_lines
+ * == NULL).
+ * @param[out] ptr_to_num_lines Pointer to store the number of lines read.
+ *
+ * @return FileReadStatus indicating operation result
+ *
+ * @note The caller is responsible for freeing both:
+ *       - Each line's content (file_line[i].content)
+ *       - The array itself (file_line*)
+ * @warning If the function returns any value other than FILE_READ_SUCCESS,
+ *          no memory needs to be freed by the caller as the function handles
+ *          cleanup of partial allocations.
+ *
+ * @see FileReadStatus
+ * @see file_line
  */
 FileReadStatus read_file(const char *file_name,
                          file_line **ptr_to_array_of_lines,
