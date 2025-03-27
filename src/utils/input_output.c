@@ -73,12 +73,12 @@ int read_file(const char *file_name, file_line **ptr_to_array_of_lines,
   while (fgets(buffer, sizeof(buffer), file)) {
     size_t i = *ptr_to_num_lines;
 
-    if (i + 1 == array_of_lines_capacity) {
+    if (i == array_of_lines_capacity) {
       // ran out of space in the array of lines, increment needed.
       array_of_lines_capacity *= 2;
       if (resize_array((void **)ptr_to_array_of_lines, array_of_lines_capacity,
                        file_line_size) != ARRAY_OK)
-        return cleanup_resources(file, ptr_to_array_of_lines, i + 1, 5);
+        return cleanup_resources(file, ptr_to_array_of_lines, i, 5);
     }
 
     if (just_processed_one_line) {
@@ -100,7 +100,7 @@ int read_file(const char *file_name, file_line **ptr_to_array_of_lines,
 
     if (resize_array((void **)&((*ptr_to_array_of_lines)[i].content), str_len,
                      char_size) != ARRAY_OK)
-      return cleanup_resources(file, ptr_to_array_of_lines, i + 1, 5);
+      return cleanup_resources(file, ptr_to_array_of_lines, i, 5);
 
     memcpy((*ptr_to_array_of_lines)[i].content + previous_str_len * char_size,
            buffer, buffer_str_len);
