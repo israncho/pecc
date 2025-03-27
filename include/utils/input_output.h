@@ -14,10 +14,23 @@ typedef enum {
   FILE_READ_NULL_LINES_ARRAY_PTR, // `ptr_to_array_of_lines` is NULL.
   FILE_READ_LINES_ARRAY_IN_USE, // `*ptr_to_array_of_lines` is not NULL, i.e. in
                                 // use.
-  FILE_READ_OPEN_FAILED,        // Could not open file.
+  FILE_READ_ERR_OPEN_FAILED,    // Could not open file.
   FILE_READ_MEMORY_ERROR,       // Could not allocate memory for the array of
                                 // `file_line`.
 } FileReadStatus;
+
+/**
+ * @enum FileWriteStatus
+ * @brief Status codes for the `write_to_file` function.
+ */
+typedef enum {
+  FILE_WRITE_SUCCESS = 0,       // Succesful operation.
+  FILE_WRITE_NULL_FILENAME,     // `file_name` is NULL.
+  FILE_WRITE_NULL_MODE,         // `mode` is NULL.
+  FILE_WRITE_ERR_WRONG_MODE,    // `mode` is not "a" or "w".
+  FILE_WRITE_ERR_WHILE_WRITING, // Error while writing in the given file.
+  FILE_WRITE_ERR_OPEN_FAILED,   // Could not open file.
+} FileWriteStatus;
 
 /**
  * @struct file_line
@@ -100,20 +113,36 @@ FileReadStatus read_file(const char *file_name,
  * @brief Writes the contents of an array of file_line structures to a file.
  *
  * This function writes each line stored in the array of file_line structures to
- * the specified file. It supports different file modes (e.g., "w" for write,
- * "a" for append), allowing the caller to overwrite or append to the file.
+ * the specified file, with control over writing mode (overwrite/append).
+ * The function handles all file operations safely and reports detailed status.
  *
- * @param file_name Path to the file where the lines will be written.
- * @param array_of_lines Array of file_line structures containing the lines to
- * write.
- * @param num_lines Number of lines in the array.
- * @param mode File mode to use when opening the file (e.g., "w" for write, "a"
- * for append).
+ * @param[in] file_name Path to the target file. Must be a valid non-NULL
+ * string.
+ * @param[in] array_of_lines Array of file_line structures containing text
+ * lines.
+ * @param[in] num_lines Number of elements in array_of_lines.
+ * @param[in] mode File access mode:
+ *             - "w": Truncate and overwrite file (creates if nonexistent)
+ *             - "a": Append to existing file (creates if nonexistent)
  *
- * @note If the file does not exist, it will be created. If it exists, its
- * contents will be overwritten or appended based on the specified mode.
+ * @return FileWriteStatus indicating operation result.
+ * @note Behavior details:
+ *       - Empty arrays (num_lines == 0) will create/truncate the file if mode
+ * is "w"
+ *       - File permissions follow umask settings
+ *       - Line endings are preserved as stored in file_line.content
+ *       - No buffering: content is written to disk before returning
+ *
+ * @warning Special cases:
+ *          - Concurrent access to the same file may cause race conditions
+ *          - On writing errors, the file may be partially written
+ *          - Large files may require streaming instead of full buffering
+ * @see file_line
+ * @see FileWriteStatus
+ * @see fopen() for underlying file operations
  */
-void write_to_file(const char *file_name, const file_line *array_of_lines,
-                   const size_t num_lines, const char *mode);
+FileWriteStatus write_to_file(const char *file_name,
+                              const file_line *array_of_lines,
+                              const size_t num_lines, const char *mode);
 
 #endif

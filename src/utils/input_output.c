@@ -56,7 +56,7 @@ FileReadStatus read_file(const char *file_name,
   FILE *file = fopen(file_name, "r");
 
   if (!file)
-    return FILE_READ_OPEN_FAILED;
+    return FILE_READ_ERR_OPEN_FAILED;
 
   *ptr_to_num_lines = 0;
 
@@ -131,41 +131,33 @@ FileReadStatus read_file(const char *file_name,
   return FILE_READ_SUCCESS;
 }
 
-void write_to_file(const char *file_name, const file_line *array_of_lines,
+FileWriteStatus write_to_file(const char *file_name, const file_line *array_of_lines,
                    const size_t num_lines, const char *mode) {
-  assert(file_name != NULL);
-  assert(mode != NULL);
-
-  if (strcmp("w", mode) != 0 && strcmp("a", mode) != 0) {
-    char error_msg[100];
-    snprintf(error_msg, sizeof(error_msg),
-             "Wrong mode given as argument for \'write_to_file\':%s\n", mode);
-    perror(error_msg);
-    return;
-  }
+  if (file_name == NULL)
+    return FILE_WRITE_NULL_FILENAME;
+  if (mode == NULL)
+    return FILE_WRITE_NULL_MODE;
+  if (strcmp("w", mode) != 0 && strcmp("a", mode) != 0)
+    return FILE_WRITE_ERR_WRONG_MODE;
 
   FILE *file = fopen(file_name, mode);
 
-  if (!file) {
-    perror("Error while opening file in \'read_file\'.\n");
-    return;
-  }
+  if (!file)
+    return FILE_WRITE_ERR_OPEN_FAILED;
 
   if (num_lines == 0) {
     fclose(file);
-    return;
+    return FILE_WRITE_SUCCESS;
   }
 
   assert(array_of_lines != NULL);
 
   for (size_t i = 0; i < num_lines; i++) {
     if (fputs(array_of_lines[i].content, file) == EOF) {
-      char error_msg[100];
-      snprintf(error_msg, sizeof(error_msg),
-               "Error while trying to write to the file\'%s\'.\n", file_name);
-      perror(error_msg);
-      return;
+      fclose(file);
+      return FILE_WRITE_ERR_WHILE_WRITING;
     }
   }
   fclose(file);
+  return FILE_WRITE_SUCCESS;
 }

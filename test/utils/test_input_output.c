@@ -8,7 +8,7 @@
 
 void test_read_file() {
   char *filename = "instances/test/input_output1.txt";
-  FileReadStatus read_status = -1;
+  FileReadStatus read_status = 0;
   file_line *array_of_lines = NULL;
   size_t num_of_lines = 0;
   read_status = read_file(filename, &array_of_lines, &num_of_lines);
@@ -116,7 +116,8 @@ void test_read_file() {
 void test_write_to_file() {
   char *filename4 = "instances/test/input_output4.txt";
   bool test_result = false;
-  FileReadStatus read_status = -1;
+  FileReadStatus read_status = 0;
+  FileWriteStatus write_status = 0;
 
   // sub-test 1
   file_line *array_of_lines = NULL;
@@ -131,7 +132,8 @@ void test_write_to_file() {
                                     {"\n", 1},
                                     {"\n", 1},
                                     {"eeeeeeeeee", 10}};
-  write_to_file(filename4, content_of_file1, 10, "w");
+  write_status = write_to_file(filename4, content_of_file1, 10, "w");
+  assert(write_status == FILE_WRITE_SUCCESS);
 
   read_status = read_file(filename4, &array_of_lines, &num_of_lines);
   assert(read_status == FILE_READ_SUCCESS);
@@ -153,7 +155,8 @@ void test_write_to_file() {
       {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
       {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3}, {"aa\n", 3},
   };
-  write_to_file(filename4, content_of_file2, 35, "w");
+  write_status = write_to_file(filename4, content_of_file2, 35, "w");
+  assert(write_status == FILE_WRITE_SUCCESS);
   read_status = read_file(filename4, &array_of_lines, &num_of_lines);
   assert(read_status == FILE_READ_SUCCESS);
   test_result = equality_test_for_line_arrays(array_of_lines, num_of_lines,
@@ -170,9 +173,12 @@ void test_write_to_file() {
                                    {"abcd\n", 5},
                                    {"abcd\n", 5},
                                    {"abcd\n", 5}};
-  write_to_file(filename4, NULL, 0, "w"); // cleaning file
-  for (size_t i = 0; i < 5; i++)
-    write_to_file(filename4, appended_content, 1, "a");
+  write_status = write_to_file(filename4, NULL, 0, "w"); // cleaning file
+  assert(write_status == FILE_WRITE_SUCCESS);
+  for (size_t i = 0; i < 5; i++) {
+    write_status = write_to_file(filename4, appended_content, 1, "a");
+    assert(write_status == FILE_WRITE_SUCCESS);
+  }
   read_status = read_file(filename4, &array_of_lines, &num_of_lines);
   assert(read_status == FILE_READ_SUCCESS);
   test_result = equality_test_for_line_arrays(array_of_lines, num_of_lines,
@@ -185,7 +191,8 @@ void test_write_to_file() {
   // subtest 3 - cleaning file
   file_line *content_of_file4 = NULL;
   num_of_lines = 0;
-  write_to_file(filename4, array_of_lines, 0, "w");
+  write_status = write_to_file(filename4, array_of_lines, 0, "w");
+  assert(write_status == FILE_WRITE_SUCCESS);
   read_status = read_file(filename4, &array_of_lines, &num_of_lines);
   assert(read_status == FILE_READ_SUCCESS);
   test_result = equality_test_for_line_arrays(array_of_lines, num_of_lines,
