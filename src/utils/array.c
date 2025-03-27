@@ -1,5 +1,5 @@
-#include "../../include/utils/array.h"
 #include <stdlib.h>
+#include "../../include/utils/array.h"
 
 ArrayStatus resize_array(void **ptr_to_array, const size_t new_size, const size_t type_size) {
   if (ptr_to_array == NULL)

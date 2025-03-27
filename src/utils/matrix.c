@@ -1,8 +1,8 @@
-#include "../../include/utils/matrix.h"
 #include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "../../include/utils/matrix.h"
 
 int init_matrix(void ***ptr_to_matrix,
                 const size_t rows,

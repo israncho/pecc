@@ -1,10 +1,10 @@
-#include "../../include/test/utils/test_input_output.h"
-#include "../../include/utils/input_output.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../../include/test/utils/test_input_output.h"
+#include "../../include/utils/input_output.h"
 
 void test_read_file() {
   char *filename = "instances/test/input_output1.txt";

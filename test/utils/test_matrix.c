@@ -1,10 +1,10 @@
-#include "../../include/test/utils/test_matrix.h"
-#include "../../include/utils/matrix.h"
 #include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../../include/test/utils/test_matrix.h"
+#include "../../include/utils/matrix.h"
 
 void test_init_and_free_matrix() {
   float **matrix = NULL;

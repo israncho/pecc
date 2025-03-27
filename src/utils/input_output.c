@@ -1,11 +1,11 @@
-#include "../../include/utils/input_output.h"
-#include "../../include/utils/array.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../../include/utils/input_output.h"
+#include "../../include/utils/array.h"
 
 void free_file_line(file_line **ptr_to_file_line_to_free) {
   if (*ptr_to_file_line_to_free == NULL)

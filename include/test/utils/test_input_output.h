@@ -1,9 +1,9 @@
 #ifndef TEST_INPUT_OUTPUT_H
 #define TEST_INPUT_OUTPUT_H
 
-#include "../../utils/input_output.h"
 #include <stdbool.h>
 #include <stddef.h>
+#include "../../utils/input_output.h"
 
 /**
  * @brief Orchestrates and executes all available module tests for
