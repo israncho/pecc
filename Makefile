@@ -3,7 +3,7 @@ CC = clang
 
 # Compiler Flags
 CFLAGS = -Wall -Wextra -O3 -march=native -fopenmp
-LDFLAGS = -fopenmp
+LDFLAGS = -fopenmp -lm
 
 # Directories
 SRC_DIR = src
