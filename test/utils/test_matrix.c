@@ -186,7 +186,7 @@ void test_double_init() {
       matrix[i][j] = val++;
 
   status = init_matrix((void ***)&matrix, 3, 3, sizeof(int));
-  assert(status == 1); // MATRIX_ERROR_ALREADY_INIT
+  assert(status == 2); // MATRIX_ERROR_ALREADY_INIT
   assert(matrix != NULL);
   assert(matrix == tmp_ptr);
 
