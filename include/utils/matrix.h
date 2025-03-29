@@ -14,12 +14,14 @@
  * @param[in]  columns      Number of columns (must be > 0).
  * @param[in]  type_size    Size in bytes of each element (e.g., sizeof(float)).
  *
- * @return int              Status code:
- *                          - 0: Success
- *                          - 1: Error - Input matrix pointer is not NULL
- * (already initialized)
- *                          - 2: Error - Memory allocation failed
- *
+ * @return int Status code:
+ *             - 0: Success (matrix initialized or empty matrix requested)
+ *             - 1: Error - ptr_to_matrix is NULL
+ *             - 2: Error - Target matrix pointer is not NULL (already
+ * initialized)
+ *             - 3: Error - Size overflow detected (rows*columns*type_size >
+ * SIZE_MAX)
+ *             - 4: Error - Memory allocation failed
  * @note
  * - The allocated memory is uninitialized (contents are undefined).
  * - If failed, ptr_to_matrix remains unchanged, and no memory is allocated.
