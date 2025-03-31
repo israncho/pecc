@@ -4,12 +4,13 @@
 #include <string.h>
 #include "../../include/test/utils/test_mystring.h"
 #include "../../include/utils/array.h"
+#include "../../include/utils/matrix.h"
 #include "../../include/utils/mystring.h"
-
 
 void test_mystring() {
   printf("Testing: mystring\n");
   test_strip();
+  test_split();
 }
 
 void test_strip() {
@@ -118,4 +119,144 @@ void test_strip() {
 
   free(str);
   printf("\t- strip: PASSED\n");
+}
+
+void test_split() {
+  char **str_matrix = NULL;
+  size_t matrix_rows = 0;
+  int status_code = -1;
+
+  // subtest 1
+  char *test_split[] = {"hola", "amigo", "como", "estas"};
+  status_code = split("hola amigo como estas", 21, ' ', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 4);
+  for (size_t i = 0; i < 4; i++)
+    assert(strcmp(test_split[i], str_matrix[i]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 1.1
+  status_code = split("   hola   amigo   como    estas   ", 34, ' ', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 4);
+  for (size_t i = 0; i < 4; i++)
+    assert(strcmp(test_split[i], str_matrix[i]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 1.2
+  status_code = split("hola      amigo como      estas   ", 34, ' ', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 4);
+  for (size_t i = 0; i < 4; i++)
+    assert(strcmp(test_split[i], str_matrix[i]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 1.3
+  status_code = split("          hola    amigo como estas", 34, ' ', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 4);
+  for (size_t i = 0; i < 4; i++)
+    assert(strcmp(test_split[i], str_matrix[i]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 2
+  char *test_split2[] = {"a"};
+  status_code = split("a", 1, ' ', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 1);
+  assert(strcmp(test_split2[0], str_matrix[0]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 2.1
+  status_code = split("   a", 4, ' ', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 1);
+  assert(strcmp(test_split2[0], str_matrix[0]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 2.2
+  status_code = split("a   ", 4, ' ', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 1);
+  assert(strcmp(test_split2[0], str_matrix[0]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 2.3
+  status_code = split("  a ", 4, ' ', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 1);
+  assert(strcmp(test_split2[0], str_matrix[0]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 2.4
+  status_code = split("a", 1, ',', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 1);
+  assert(strcmp(test_split2[0], str_matrix[0]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+
+  // subtest 3
+  char *test_split3[] = {"1", "2", "3", "4"};
+  status_code = split("1,2,3,4", 7, ',', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 4);
+  for (size_t i = 0; i < 4; i++)
+    assert(strcmp(test_split3[i], str_matrix[i]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 3.1
+  status_code = split(",,,1,2,3,4,,,", 13, ',', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 4);
+  for (size_t i = 0; i < 4; i++)
+    assert(strcmp(test_split3[i], str_matrix[i]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 3.2
+  status_code = split("1-2-3-4", 7, '-', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 4);
+  for (size_t i = 0; i < 4; i++)
+    assert(strcmp(test_split3[i], str_matrix[i]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 3.3
+  status_code = split("1\n2\n3\n4", 7, '\n', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 4);
+  for (size_t i = 0; i < 4; i++)
+    assert(strcmp(test_split3[i], str_matrix[i]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 4
+  char *test_split4[] = {"hola_amigo_como_estas"};
+  status_code = split("hola_amigo_como_estas", 21, ',', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 1);
+  assert(strcmp(test_split4[0], str_matrix[0]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 4.1
+  status_code = split("hola_amigo_como_estas", 21, ' ', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 1);
+  assert(strcmp(test_split4[0], str_matrix[0]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 4.2
+  status_code = split("hola_amigo_como_estas,", 22, ',', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 1);
+  assert(strcmp(test_split4[0], str_matrix[0]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  // subtest 4.2
+  status_code = split(",hola_amigo_como_estas", 22, ',', &str_matrix, &matrix_rows);
+  assert(status_code == 0);
+  assert(matrix_rows == 1);
+  assert(strcmp(test_split4[0], str_matrix[0]) == 0);
+  free_matrix((void ***)&str_matrix);
+
+  printf("\t- split: PASSED\n");
 }

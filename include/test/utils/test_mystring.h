@@ -5,4 +5,6 @@ void test_mystring();
 
 void test_strip();
 
+void test_split();
+
 #endif
