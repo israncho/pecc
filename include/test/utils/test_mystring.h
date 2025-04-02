@@ -3,7 +3,9 @@
 
 void test_mystring();
 
-void test_strip();
+void test_strip_in_place();
+
+void test_strip_to_buffer();
 
 void test_split();
 
