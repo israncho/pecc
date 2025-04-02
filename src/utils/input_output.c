@@ -1,9 +1,12 @@
 #include <assert.h>
+#include <errno.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include "../../include/utils/input_output.h"
 #include "../../include/utils/array.h"
 
@@ -131,8 +134,10 @@ FileReadStatus read_file(const char *file_name,
   return FILE_READ_SUCCESS;
 }
 
-FileWriteStatus write_to_file(const char *file_name, const file_line *array_of_lines,
-                   const size_t num_lines, const char *mode) {
+FileWriteStatus write_to_file(const char *file_name,
+                              const file_line *array_of_lines,
+                              const size_t num_lines,
+                              const char *mode) {
   if (file_name == NULL)
     return FILE_WRITE_NULL_FILENAME;
   if (mode == NULL)
@@ -160,4 +165,52 @@ FileWriteStatus write_to_file(const char *file_name, const file_line *array_of_l
   }
   fclose(file);
   return FILE_WRITE_SUCCESS;
+}
+
+int str_to_size_t(const char *str, size_t *result) {
+  if (str == NULL)
+    return 1;
+  if (result == NULL)
+    return 2;
+
+  errno = 0;
+  char *endptr = NULL;
+  unsigned long long tmp = strtoull(str, &endptr, 10);
+
+  if (errno == ERANGE)
+    return 3;
+  if (endptr == str)
+    return 4;
+  if (*endptr != '\0')
+    return 5;
+
+#if SIZE_MAX < ULLONG_MAX
+  if (tmp > SIZE_MAX)
+    return 6;
+#endif
+
+  *result = (size_t)tmp;
+  return 0;
+}
+
+int str_to_double(const char *str, double *result) {
+  if (str == NULL)
+    return 1;
+  if (result == NULL)
+    return 2;
+
+  errno = 0;
+  char *endptr = NULL;
+  double tmp = strtod(str, &endptr);
+
+  if (errno == ERANGE)
+    return 3;
+  if (endptr == str)
+    return 4;
+  if (*endptr != '\0')
+    return 5;
+  if (isnan(tmp) || isinf(tmp))
+    return 7;
+  *result = tmp;
+  return 0;
 }

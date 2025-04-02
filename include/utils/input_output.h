@@ -145,4 +145,9 @@ FileWriteStatus write_to_file(const char *file_name,
                               const file_line *array_of_lines,
                               const size_t num_lines, const char *mode);
 
+
+
+int str_to_size_t(const char *str, size_t *result);
+
+int str_to_double(const char *str, double *result);
 #endif

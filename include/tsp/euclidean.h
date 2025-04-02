@@ -7,7 +7,7 @@
 typedef struct {
   double **cities; // array/matrix of cities.
   size_t number_of_cities;
-  size_t size_of_cities;
+  size_t city_size;
   double **distances; // array/matrix of distances between cities.
   char *name;
   char *type;
@@ -18,8 +18,10 @@ typedef struct {
 double euclidean_distance(const double *array1, const double *array2,
                           const size_t size);
 
-int fill_distance_matrix(const double **cities, const size_t number_of_cities,
-                         const size_t city_size, double **distance_matrix);
+int fill_distance_matrix(const double *const *cities,
+                         const size_t number_of_cities,
+                         const size_t city_size,
+                         double **distance_matrix);
 
 double tour_distance(const void *solution, const void *instance_details);
 
