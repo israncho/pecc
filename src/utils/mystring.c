@@ -132,22 +132,22 @@ int strip_to_buffer(const char *str_to_strip,
 }
 
 int split(const char *str, const size_t str_len, const char delimiter,
-          char ***ptr_to_char_matrix, size_t *matrix_rows) {
+          char ***ptr_to_tokens_array, size_t *tokens_number) {
   if (str == NULL)
     return 1;
   if (str_len == 0) // all well formed strings have at least \0
     return 2;
   if (delimiter == '\0') // not well formed string was given
     return 3;
-  if (ptr_to_char_matrix == NULL)
+  if (ptr_to_tokens_array == NULL)
     return 4;
-  if (matrix_rows == NULL)
+  if (tokens_number == NULL)
     return 5;
 
-  char **matrix_ptrs_to_rows = *ptr_to_char_matrix;
+  char **matrix_ptrs_to_rows = *ptr_to_tokens_array;
   if (matrix_ptrs_to_rows != NULL)
     return 6;
-  size_t start_i = 0, end_i = 0, tokens_number = 0, total_size = 0,
+  size_t start_i = 0, end_i = 0, curr_tokens_number = 0, total_size = 0,
          last_i = str_len - 1;
   bool processing_token = false;
 
@@ -163,21 +163,21 @@ int split(const char *str, const size_t str_len, const char delimiter,
     }
     if ((curr_char == delimiter || i == last_i) && processing_token) {
       processing_token = false;
-      tokens_number++;
+      curr_tokens_number++;
       total_size += end_i - start_i;
     }
   }
 
   const size_t char_size = sizeof(char);
   char *matrix_data = NULL;
-  if (init_array((void **)&matrix_ptrs_to_rows, tokens_number,
+  if (init_array((void **)&matrix_ptrs_to_rows, curr_tokens_number,
                  sizeof(char *)) != ARRAY_OK)
     return 7;
-  if (init_array((void **)&matrix_data, total_size + tokens_number,
+  if (init_array((void **)&matrix_data, total_size + curr_tokens_number,
                  char_size) != ARRAY_OK)
     return 7;
 
-  *matrix_rows = tokens_number;
+  *tokens_number = curr_tokens_number;
   processing_token = false;
   size_t token_i = 0;
   size_t bytes_used = 0;
@@ -200,6 +200,6 @@ int split(const char *str, const size_t str_len, const char delimiter,
       bytes_used += end_i - start_i + 1;
     }
   }
-  *ptr_to_char_matrix = matrix_ptrs_to_rows;
+  *ptr_to_tokens_array = matrix_ptrs_to_rows;
   return 0;
 }

@@ -94,11 +94,11 @@ int strip_to_buffer(const char *str_to_strip, const size_t str_len,
  *
  * @param[in] str The input string to split. Must be null-terminated within
  * str_len.
- * @param[in] str_len Length of the input string including null terminator.
+ * @param[in] str_len Length of the input string.
  * @param[in] delimiter The character used to split the string (cannot be '\0').
- * @param[out] ptr_to_char_matrix Pointer to store the resulting string matrix.
+ * @param[out] ptr_to_tokens_array Pointer to store the resulting string matrix.
  *                                Will contain pointers to each token.
- * @param[out] matrix_rows Pointer to store the number of tokens found.
+ * @param[out] tokens_number Pointer to store the number of tokens found.
  *
  * @return int Status code:
  *   - 0: Success
@@ -124,6 +124,6 @@ int strip_to_buffer(const char *str_to_strip, const size_t str_len,
  * - Not thread-safe during memory allocation.
  */
 int split(const char *str, const size_t str_len, const char delimiter,
-          char ***ptr_to_char_matrix, size_t *matrix_rows);
+          char ***ptr_to_tokens_array, size_t *tokens_number);
 
 #endif
