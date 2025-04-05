@@ -34,7 +34,7 @@ static void verify_strip_in_place_operation(const char *unstripped_str,
   assert(strcmp(buffer, unstripped_str) == 0);
   assert(buffer[unstripped_str_len] == '\0');
 
-  strip_in_place(&buffer, &computed_str_len);
+  assert(strip_in_place(&buffer, &computed_str_len) == 0);
 
   assert(computed_str_len == stripped_str_len);
   assert(buffer[stripped_str_len] == '\0');
@@ -74,77 +74,59 @@ void test_strip_in_place() {
   printf("\t- strip_in_place: PASSED\n");
 }
 
+static void verify_strip_to_buffer_operation(
+    const char *unstripped_str, const size_t unstripped_str_len,
+    const char *stripped_str, const size_t stripped_str_len,
+    char **ptr_to_buffer, const size_t initial_buffer_capacity) {
+  assert(unstripped_str != NULL);
+  assert(stripped_str != NULL);
+  assert(ptr_to_buffer != NULL);
+  assert(*ptr_to_buffer != NULL);
+
+  size_t buffer_capacity = initial_buffer_capacity;
+  assert(resize_array((void **)ptr_to_buffer, initial_buffer_capacity,
+                      sizeof(char)) == ARRAY_OK);
+  size_t computed_str_len = 0;
+
+  assert(strip_to_buffer(unstripped_str, unstripped_str_len, ptr_to_buffer,
+                         &computed_str_len, &buffer_capacity) == 0);
+
+  char *buffer = *ptr_to_buffer;
+  assert(computed_str_len == stripped_str_len);
+  assert(buffer[stripped_str_len] == '\0');
+  assert(strcmp(buffer, stripped_str) == 0);
+  assert(buffer_capacity >= stripped_str_len + 1);
+}
+
 void test_strip_to_buffer() {
   size_t char_size = sizeof(char);
 
   char *buffer = NULL;
 
-  size_t stripped_len = 0;
-  size_t buffer_capacity = 2;
-  assert(init_array((void **)&buffer, buffer_capacity, char_size) == 0);
+  assert(init_array((void **)&buffer, 1, char_size) == 0);
 
-  // subtest 1
-  assert(strip_to_buffer("   hola   ", 10, &buffer, &stripped_len,
-                         &buffer_capacity) == 0);
-  assert(buffer[4] == '\0');
-  assert(strcmp(buffer, "hola") == 0 && stripped_len == 4 &&
-         buffer_capacity >= stripped_len + 1);
+  verify_strip_to_buffer_operation("   hola   ", 10, "hola", 4, &buffer, 2);
 
-  // subtest 2
-  assert(strip_to_buffer("   Mundo", 8, &buffer, &stripped_len,
-                         &buffer_capacity) == 0);
-  assert(buffer[5] == '\0');
-  assert(strcmp(buffer, "Mundo") == 0 && stripped_len == 5 &&
-         buffer_capacity >= stripped_len + 1);
+  verify_strip_to_buffer_operation("   Mundo", 8, "Mundo", 5, &buffer, 6);
 
-  // subtest 3
-  assert(strip_to_buffer("Mundo   ", 8, &buffer, &stripped_len,
-                         &buffer_capacity) == 0);
-  assert(buffer[5] == '\0');
-  assert(strcmp(buffer, "Mundo") == 0 && stripped_len == 5 &&
-         buffer_capacity >= stripped_len + 1);
+  verify_strip_to_buffer_operation("Mundo   ", 8, "Mundo", 5, &buffer, 1);
 
-  // subtest 4
-  assert(strip_to_buffer("\t\n \v\f\rTexto\f \n\t\r\v", 17, &buffer,
-                         &stripped_len, &buffer_capacity) == 0);
-  assert(buffer[5] == '\0');
-  assert(strcmp(buffer, "Texto") == 0 && stripped_len == 5 &&
-         buffer_capacity >= stripped_len + 1);
+  verify_strip_to_buffer_operation("\t\n \v\f\rTexto\f \n\t\r\v", 17, "Texto",
+                                   5, &buffer, 10);
 
-  // subtest 5
-  assert(strip_to_buffer("\t\n \v\f\r\f \n\t\r\v", 12, &buffer, &stripped_len,
-                         &buffer_capacity) == 0);
-  assert(buffer[0] == '\0');
-  assert(strcmp(buffer, "") == 0 && stripped_len == 0 &&
-         buffer_capacity >= stripped_len + 1);
+  verify_strip_to_buffer_operation("\t\n \v\f\r\f \n\t\r\v", 12, "", 0, &buffer,
+                                   1);
 
-  // subtest 6
-  assert(strip_to_buffer("", 0, &buffer, &stripped_len, &buffer_capacity) == 0);
-  assert(buffer[0] == '\0');
-  assert(strcmp(buffer, "") == 0 && stripped_len == 0 &&
-         buffer_capacity >= stripped_len + 1);
+  verify_strip_to_buffer_operation("", 0, "", 0, &buffer, 2);
 
-  // subtest 7
-  assert(strip_to_buffer("Hola mundo!", 11, &buffer, &stripped_len,
-                         &buffer_capacity) == 0);
-  assert(buffer[11] == '\0');
-  assert(strcmp(buffer, "Hola mundo!") == 0 && stripped_len == 11 &&
-         buffer_capacity >= stripped_len + 1);
+  verify_strip_to_buffer_operation("Hola mundo!", 11, "Hola mundo!", 11,
+                                   &buffer, 2);
 
-  // subtest 8
-  assert(
-      strip_to_buffer("\t\n  \v\f\rH o l a\f \n\t\r\v M u n d o !\f  \n\t\r\v",
-                      39, &buffer, &stripped_len, &buffer_capacity) == 0);
-  assert(buffer[25] == '\0');
-  assert(strcmp(buffer, "H o l a\f \n\t\r\v M u n d o !") == 0 &&
-         stripped_len == 25 && buffer_capacity >= stripped_len + 1);
+  verify_strip_to_buffer_operation(
+      "\t\n  \v\f\rH o l a\f \n\t\r\v M u n d o !\f  \n\t\r\v", 39,
+      "H o l a\f \n\t\r\v M u n d o !", 25, &buffer, 5);
 
-  // subtest 9
-  assert(strip_to_buffer("\t\n \v\f\rA\f \n\t\r\v", 13, &buffer, &stripped_len,
-                         &buffer_capacity) == 0);
-  assert(buffer[1] == '\0');
-  assert(strcmp(buffer, "A") == 0 && stripped_len == 1 &&
-         buffer_capacity >= stripped_len + 1);
+  verify_strip_to_buffer_operation("\t\n \v\f\rA\f \n\t\r\v", 13, "A", 1, &buffer, 1);
 
   free(buffer);
   printf("\t- strip_to_buffer: PASSED\n");

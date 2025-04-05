@@ -13,7 +13,7 @@ int strip_in_place(char **ptr_to_str, size_t *ptr_to_str_len) {
 
   size_t str_len = *ptr_to_str_len;
   if (str_len == 0)
-    return 3;
+    return 0;
 
   size_t start_i = str_len;
   char val = '\0';
