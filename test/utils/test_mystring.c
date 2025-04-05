@@ -126,223 +126,122 @@ void test_strip_to_buffer() {
       "\t\n  \v\f\rH o l a\f \n\t\r\v M u n d o !\f  \n\t\r\v", 39,
       "H o l a\f \n\t\r\v M u n d o !", 25, &buffer, 5);
 
-  verify_strip_to_buffer_operation("\t\n \v\f\rA\f \n\t\r\v", 13, "A", 1, &buffer, 1);
+  verify_strip_to_buffer_operation("\t\n \v\f\rA\f \n\t\r\v", 13, "A", 1,
+                                   &buffer, 1);
 
   free(buffer);
   printf("\t- strip_to_buffer: PASSED\n");
 }
 
+static void verify_split_to_buffer_operation(
+    const char *target[], const char *str, const size_t str_len,
+    const char delimiter, char ***ptr_to_tokens_array,
+    const size_t array_of_tokens_initial_capacity, const size_t expected_tokens,
+    char **ptr_to_buffer, const size_t buffer_initial_capacity,
+    const size_t minimum_expected_buffer_capacity) {
+  assert(target != NULL);
+  assert(str != NULL);
+  assert(ptr_to_tokens_array != NULL);
+  assert(*ptr_to_tokens_array != NULL);
+  assert(ptr_to_buffer != NULL);
+  assert(*ptr_to_buffer != NULL);
+
+  size_t computed_number_of_tokens = 0;
+  size_t tokens_array_capacity = array_of_tokens_initial_capacity;
+  size_t buffer_capacity = buffer_initial_capacity;
+
+  assert(resize_array((void **)ptr_to_tokens_array, tokens_array_capacity,
+                      sizeof(char *)) == ARRAY_OK);
+  assert(resize_array((void **)ptr_to_buffer, buffer_capacity, sizeof(char)) ==
+         ARRAY_OK);
+  assert(split_to_buffer(str, str_len, delimiter, ptr_to_tokens_array,
+                         &tokens_array_capacity, &computed_number_of_tokens,
+                         ptr_to_buffer, &buffer_capacity) == 0);
+  char **tokens_array = *ptr_to_tokens_array;
+  assert(computed_number_of_tokens == expected_tokens);
+  assert(tokens_array_capacity >= computed_number_of_tokens);
+  assert(buffer_capacity >= minimum_expected_buffer_capacity);
+  for (size_t i = 0; i < expected_tokens; i++)
+    assert(strcmp(target[i], tokens_array[i]) == 0);
+}
+
 void test_split_to_buffer() {
-  size_t number_of_tokens = 0;
   size_t char_size = sizeof(char);
-  int status_code = -1;
 
   char **array_of_tokens = NULL;
-  size_t array_of_tokens_capacity = 1;
   assert(init_array((void **)&array_of_tokens, 1, sizeof(char *)) == ARRAY_OK);
 
   char *buffer = NULL;
-  size_t buffer_capacity = 1;
   assert(init_array((void **)&buffer, 1, char_size) == ARRAY_OK);
 
   // subtest 1
   char *test_split[] = {"hola", "amigo", "como", "estas"};
-  status_code = split_to_buffer("hola amigo como estas", 21, ' ',
-                                &array_of_tokens, &array_of_tokens_capacity,
-                                &number_of_tokens, &buffer, &buffer_capacity);
 
-  assert(status_code == 0);
-  assert(number_of_tokens == 4);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 22);
-  for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split[i], array_of_tokens[i]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split,
+                                   "hola amigo como estas", 21, ' ',
+                                   &array_of_tokens, 1, 4, &buffer, 1, 22);
 
-  // subtest 1.1
-  status_code = split_to_buffer("   hola   amigo   como    estas   ", 34, ' ',
-                                &array_of_tokens, &array_of_tokens_capacity,
-                                &number_of_tokens, &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 4);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 22);
-  for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split[i], array_of_tokens[i]) == 0);
+  verify_split_to_buffer_operation(
+      (const char **)test_split, "   hola   amigo   como    estas   ", 34, ' ',
+      &array_of_tokens, 2, 4, &buffer, 22, 22);
 
-  // subtest 1.2
-  status_code = split_to_buffer("hola      amigo como      estas   ", 34, ' ',
-                                &array_of_tokens, &array_of_tokens_capacity,
-                                &number_of_tokens, &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 4);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 22);
-  for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split[i], array_of_tokens[i]) == 0);
+  verify_split_to_buffer_operation(
+      (const char **)test_split, "hola      amigo como      estas   ", 34, ' ',
+      &array_of_tokens, 4, 4, &buffer, 50, 22);
 
-  // subtest 1.3
-  status_code = split_to_buffer("          hola    amigo como estas", 34, ' ',
-                                &array_of_tokens, &array_of_tokens_capacity,
-                                &number_of_tokens, &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 4);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 22);
-  for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split[i], array_of_tokens[i]) == 0);
+  verify_split_to_buffer_operation(
+      (const char **)test_split, "          hola    amigo como estas", 34, ' ',
+      &array_of_tokens, 10, 4, &buffer, 1, 22);
 
   // subtest 2
-  assert(resize_array((void **)&buffer, 1, char_size) == ARRAY_OK);
-  buffer_capacity = 1;
-  assert(resize_array((void **)&array_of_tokens, 1, sizeof(char *)) ==
-         ARRAY_OK);
-  array_of_tokens_capacity = 1;
   char *test_split2[] = {"a"};
-  status_code =
-      split_to_buffer("a", 1, ' ', &array_of_tokens, &array_of_tokens_capacity,
-                      &number_of_tokens, &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 1);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 2);
-  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split2, "a", 1, ' ',
+                                   &array_of_tokens, 1, 1, &buffer, 1, 2);
 
-  // subtest 2.1
-  status_code = split_to_buffer("   a", 4, ' ', &array_of_tokens,
-                                &array_of_tokens_capacity, &number_of_tokens,
-                                &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 1);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 2);
-  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split2, "   a", 4, ' ',
+                                   &array_of_tokens, 2, 1, &buffer, 2, 2);
 
-  // subtest 2.2
-  status_code = split_to_buffer("a   ", 4, ' ', &array_of_tokens,
-                                &array_of_tokens_capacity, &number_of_tokens,
-                                &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 1);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 2);
-  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split2, "a   ", 4, ' ',
+                                   &array_of_tokens, 4, 1, &buffer, 4, 2);
 
-  // subtest 2.3
-  status_code = split_to_buffer("  a ", 4, ' ', &array_of_tokens,
-                                &array_of_tokens_capacity, &number_of_tokens,
-                                &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 1);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 2);
-  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split2, "  a ", 4, ' ',
+                                   &array_of_tokens, 1, 1, &buffer, 1, 2);
 
-  // subtest 2.4
-  status_code =
-      split_to_buffer("a", 1, ',', &array_of_tokens, &array_of_tokens_capacity,
-                      &number_of_tokens, &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 1);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 2);
-  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split2, "a", 1, ',',
+                                   &array_of_tokens, 1, 1, &buffer, 1, 2);
 
   // subtest 3
-  assert(resize_array((void **)&buffer, 1, char_size) == ARRAY_OK);
-  buffer_capacity = 1;
-  assert(resize_array((void **)&array_of_tokens, 1, sizeof(char *)) ==
-         ARRAY_OK);
-  array_of_tokens_capacity = 1;
   char *test_split3[] = {"1", "2", "3", "4"};
-  status_code = split_to_buffer("1,2,3,4", 7, ',', &array_of_tokens,
-                                &array_of_tokens_capacity, &number_of_tokens,
-                                &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 4);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 8);
-  for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split3[i], array_of_tokens[i]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split3, "1,2,3,4", 7,
+                                   ',', &array_of_tokens, 1, 4, &buffer, 1, 8);
 
-  // subtest 3.1
-  status_code = split_to_buffer(",,,1,2,3,4,,,", 13, ',', &array_of_tokens,
-                                &array_of_tokens_capacity, &number_of_tokens,
-                                &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 4);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 8);
-  for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split3[i], array_of_tokens[i]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split3,
+                                   ",,,1,,2,3,,4,,,", 15, ',', &array_of_tokens,
+                                   4, 4, &buffer, 8, 8);
 
-  // subtest 3.2
-  status_code = split_to_buffer("1-2-3-4", 7, '-', &array_of_tokens,
-                                &array_of_tokens_capacity, &number_of_tokens,
-                                &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 4);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 8);
-  for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split3[i], array_of_tokens[i]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split3, "1-2-3-4", 7,
+                                   '-', &array_of_tokens, 8, 4, &buffer, 16, 8);
 
-  // subtest 3.3
-  status_code = split_to_buffer("1\n2\n3\n4", 7, '\n', &array_of_tokens,
-                                &array_of_tokens_capacity, &number_of_tokens,
-                                &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 4);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 8);
-  for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split3[i], array_of_tokens[i]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split3, "1\n2\n3\n4", 7,
+                                   '\n', &array_of_tokens, 1, 4, &buffer, 1, 8);
 
   // subtest 4
-  assert(resize_array((void **)&buffer, 1, char_size) == ARRAY_OK);
-  buffer_capacity = 1;
-  assert(resize_array((void **)&array_of_tokens, 1, sizeof(char *)) ==
-         ARRAY_OK);
-  array_of_tokens_capacity = 1;
-
   char *test_split4[] = {"hola_amigo_como_estas"};
-  status_code = split_to_buffer("hola_amigo_como_estas", 21, ',',
-                                &array_of_tokens, &array_of_tokens_capacity,
-                                &number_of_tokens, &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 1);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 22);
-  assert(strcmp(test_split4[0], array_of_tokens[0]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split4,
+                                   "hola_amigo_como_estas", 21, ',',
+                                   &array_of_tokens, 1, 1, &buffer, 1, 22);
 
-  // subtest 4.1
-  status_code = split_to_buffer("hola_amigo_como_estas", 21, ' ',
-                                &array_of_tokens, &array_of_tokens_capacity,
-                                &number_of_tokens, &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 1);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 22);
-  assert(strcmp(test_split4[0], array_of_tokens[0]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split4,
+                                   "hola_amigo_como_estas", 21, ' ',
+                                   &array_of_tokens, 2, 1, &buffer, 22, 22);
 
-  // subtest 4.2
-  status_code = split_to_buffer("hola_amigo_como_estas,", 22, ',',
-                                &array_of_tokens, &array_of_tokens_capacity,
-                                &number_of_tokens, &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 1);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 22);
-  assert(strcmp(test_split4[0], array_of_tokens[0]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split4,
+                                   "hola_amigo_como_estas,", 22, ',',
+                                   &array_of_tokens, 4, 1, &buffer, 30, 22);
 
-  // subtest 4.2
-  status_code = split_to_buffer(",hola_amigo_como_estas", 22, ',',
-                                &array_of_tokens, &array_of_tokens_capacity,
-                                &number_of_tokens, &buffer, &buffer_capacity);
-  assert(status_code == 0);
-  assert(number_of_tokens == 1);
-  assert(number_of_tokens == array_of_tokens_capacity);
-  assert(buffer_capacity == 22);
-  assert(strcmp(test_split4[0], array_of_tokens[0]) == 0);
+  verify_split_to_buffer_operation((const char **)test_split4,
+                                   ",hola_amigo_como_estas", 22, ',',
+                                   &array_of_tokens, 1, 1, &buffer, 5, 22);
 
   free_matrix((void ***)&array_of_tokens);
 
