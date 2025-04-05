@@ -15,112 +15,62 @@ void test_mystring() {
   test_split_in_place();
 }
 
+static void verify_strip_in_place_operation(const char *unstripped_str,
+                                            const size_t unstripped_str_len,
+                                            const char *stripped_str,
+                                            const size_t stripped_str_len,
+                                            char **ptr_to_buffer) {
+  assert(unstripped_str != NULL);
+  assert(stripped_str != NULL);
+  assert(ptr_to_buffer != NULL);
+  assert(*ptr_to_buffer != NULL);
+  assert(resize_array((void **)ptr_to_buffer, unstripped_str_len + 1,
+                      sizeof(char)) == ARRAY_OK);
+
+  size_t computed_str_len = unstripped_str_len;
+
+  char *buffer = *ptr_to_buffer;
+  strcpy(buffer, unstripped_str);
+  assert(strcmp(buffer, unstripped_str) == 0);
+  assert(buffer[unstripped_str_len] == '\0');
+
+  strip_in_place(&buffer, &computed_str_len);
+
+  assert(computed_str_len == stripped_str_len);
+  assert(buffer[stripped_str_len] == '\0');
+  assert(strcmp(buffer, stripped_str) == 0);
+}
+
 void test_strip_in_place() {
   size_t char_size = sizeof(char);
 
-  char *str = NULL;
+  char *buffer = NULL;
+  assert(init_array((void **)&buffer, 1, char_size) == ARRAY_OK);
 
-  // subtest 1
-  size_t str_len = 10;
-  assert(init_array((void **)&str, 11, char_size) == ARRAY_OK);
-  strcpy(str, "   hola   ");
-  assert(strcmp(str, "   hola   ") == 0);
+  verify_strip_in_place_operation("   hola   ", 10, "hola", 4, &buffer);
 
-  assert(str[10] == '\0');
-  strip_in_place(&str, &str_len);
-  assert(str[4] == '\0');
-  assert(strcmp(str, "hola") == 0 && str_len == 4);
+  verify_strip_in_place_operation("   Mundo", 8, "Mundo", 5, &buffer);
 
-  // subtest 2
-  str_len = 8;
-  assert(resize_array((void **)&str, 9, char_size) == ARRAY_OK);
-  strcpy(str, "   Mundo");
-  assert(strcmp(str, "   Mundo") == 0);
+  verify_strip_in_place_operation("Mundo   ", 8, "Mundo", 5, &buffer);
 
-  assert(str[8] == '\0');
-  strip_in_place(&str, &str_len);
-  assert(str[5] == '\0');
-  assert(strcmp(str, "Mundo") == 0 && str_len == 5);
+  verify_strip_in_place_operation("\t\n \v\f\rTexto\f \n\t\r\v", 17, "Texto", 5,
+                                  &buffer);
 
-  // subtest 3
-  str_len = 8;
-  assert(resize_array((void **)&str, 9, char_size) == ARRAY_OK);
-  strcpy(str, "Mundo   ");
-  assert(strcmp(str, "Mundo   ") == 0);
+  verify_strip_in_place_operation("\t\n \v\f\r\f \n\t\r\v", 12, "", 0, &buffer);
 
-  assert(str[8] == '\0');
-  strip_in_place(&str, &str_len);
-  assert(str[5] == '\0');
-  assert(strcmp(str, "Mundo") == 0 && str_len == 5);
+  verify_strip_in_place_operation("", 0, "", 0, &buffer);
 
-  // subtest 4
-  str_len = 17;
-  assert(resize_array((void **)&str, 18, char_size) == ARRAY_OK);
-  strcpy(str, "\t\n \v\f\rTexto\f \n\t\r\v");
-  assert(strcmp(str, "\t\n \v\f\rTexto\f \n\t\r\v") == 0);
+  verify_strip_in_place_operation("Hola mundo!", 11, "Hola mundo!", 11,
+                                  &buffer);
 
-  assert(str[17] == '\0');
-  strip_in_place(&str, &str_len);
-  assert(str[5] == '\0');
-  assert(strcmp(str, "Texto") == 0 && str_len == 5);
+  verify_strip_in_place_operation(
+      "\t\n  \v\f\rH o l a\f \n\t\r\v M u n d o !\f  \n\t\r\v", 39,
+      "H o l a\f \n\t\r\v M u n d o !", 25, &buffer);
 
-  // subtest 5
-  str_len = 12;
-  assert(resize_array((void **)&str, 13, char_size) == ARRAY_OK);
-  strcpy(str, "\t\n \v\f\r\f \n\t\r\v");
-  assert(strcmp(str, "\t\n \v\f\r\f \n\t\r\v") == 0);
+  verify_strip_in_place_operation("\t\n \v\f\rA\f \n\t\r\v", 13, "A", 1,
+                                  &buffer);
 
-  assert(str[12] == '\0');
-  strip_in_place(&str, &str_len);
-  assert(str[0] == '\0');
-  assert(strcmp(str, "") == 0 && str_len == 0);
-
-  // subtest 6
-  str_len = 0;
-  assert(resize_array((void **)&str, 1, char_size) == ARRAY_OK);
-  strcpy(str, "");
-  assert(strcmp(str, "") == 0);
-
-  assert(str[0] == '\0');
-  strip_in_place(&str, &str_len);
-  assert(str[0] == '\0');
-  assert(strcmp(str, "") == 0 && str_len == 0);
-
-  // subtest 7
-  str_len = 11;
-  assert(resize_array((void **)&str, 12, char_size) == ARRAY_OK);
-  strcpy(str, "Hola mundo!");
-  assert(strcmp(str, "Hola mundo!") == 0);
-
-  assert(str[11] == '\0');
-  strip_in_place(&str, &str_len);
-  assert(str[11] == '\0');
-  assert(strcmp(str, "Hola mundo!") == 0 && str_len == 11);
-
-  // subtest 8
-  str_len = 39;
-  assert(resize_array((void **)&str, 40, char_size) == ARRAY_OK);
-  strcpy(str, "\t\n  \v\f\rH o l a\f \n\t\r\v M u n d o !\f  \n\t\r\v");
-  assert(strcmp(str,
-                "\t\n  \v\f\rH o l a\f \n\t\r\v M u n d o !\f  \n\t\r\v") == 0);
-
-  assert(str[39] == '\0');
-  strip_in_place(&str, &str_len);
-  assert(str[25] == '\0');
-  assert(strcmp(str, "H o l a\f \n\t\r\v M u n d o !") == 0 && str_len == 25);
-
-  // subtest 9
-  str_len = 13;
-  assert(resize_array((void **)&str, 14, char_size) == ARRAY_OK);
-  strcpy(str, "\t\n \v\f\rA\f \n\t\r\v");
-  assert(strcmp(str, "\t\n \v\f\rA\f \n\t\r\v") == 0);
-
-  assert(str[13] == '\0');
-  strip_in_place(&str, &str_len);
-  assert(str[1] == '\0');
-  assert(strcmp(str, "A") == 0 && str_len == 1);
-
-  free(str);
+  free(buffer);
   printf("\t- strip_in_place: PASSED\n");
 }
 
