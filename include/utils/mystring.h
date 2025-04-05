@@ -93,10 +93,11 @@ int strip_to_buffer(const char *str_to_strip, const size_t str_len,
  *   1. An array of char pointers (one per token)
  *   2. A single buffer containing all string data (with null terminators)
  *
- * @param[in] str The input string to split_to_buffer. Must be null-terminated within
- * str_len.
+ * @param[in] str The input string to split_to_buffer. Must be null-terminated
+ * within str_len.
  * @param[in] str_len Length of the input string.
- * @param[in] delimiter The character used to split_to_buffer the string (cannot be '\0').
+ * @param[in] delimiter The character used to split_to_buffer the string (cannot
+ * be '\0').
  * @param[out] ptr_to_tokens_array Pointer to store the resulting string matrix.
  *                                Will contain pointers to each token.
  * @param[out] num_of_tokens Pointer to store the number of tokens found.
@@ -129,5 +130,45 @@ int split_to_buffer(const char *str, const size_t str_len, const char delimiter,
                     size_t *ptr_to_tokens_array_capacity,
                     size_t *ptr_to_num_of_tokens, char **ptr_to_buffer,
                     size_t *ptr_to_buffer_capacity);
+
+/**
+ * @brief Splits a string in-place into tokens using a delimiter character.
+ *
+ * This function modifies the original string by replacing delimiters with null
+ * terminators ('\0') and populates an array of pointers to the beginning of
+ * each token. Memory for the tokens array is automatically expanded as needed.
+ *
+ * @param[in,out] ptr_to_str                Pointer to the string to split (will
+ * be modified in-place).
+ * @param[in]     str_len                   Length of the input string.
+ * @param[in]     delimiter                 Character used to split the string
+ * (cannot be '\0').
+ * @param[in,out] ptr_to_tokens_array       Pointer to the tokens array (will be
+ * allocated/resized).
+ * @param[in,out] ptr_to_tokens_array_capacity Pointer to the current capacity
+ * of tokens array (updated if resized).
+ * @param[out]    ptr_to_number_of_tokens   Pointer to store the final number of
+ * tokens found.
+ *
+ * @retval 0  Success
+ * @retval 1  ptr_to_str is NULL
+ * @retval 2  *ptr_to_str is NULL
+ * @retval 3  delimiter is '\0'
+ * @retval 4  ptr_to_tokens_array is NULL
+ * @retval 5  *ptr_to_tokens_array is NULL
+ * @retval 6  ptr_to_tokens_array_capacity is NULL
+ * @retval 7  ptr_to_number_of_tokens is NULL
+ * @retval 8  Memory reallocation failed
+ *
+ * @note The original string is modified by replacing delimiters with null
+ * terminators.
+ * @note The tokens array must be freed by the caller when no longer needed.
+ * @note If the string ends with a delimiter, it does not create an additional
+ * empty token.
+ */
+int split_in_place(char **ptr_to_str, const size_t str_len,
+                   const char delimiter, char ***ptr_to_tokens_array,
+                   size_t *ptr_to_tokens_array_capacity,
+                   size_t *ptr_to_number_of_tokens);
 
 #endif

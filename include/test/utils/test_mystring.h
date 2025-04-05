@@ -9,4 +9,6 @@ void test_strip_to_buffer();
 
 void test_split_to_buffer();
 
+void test_split_in_place();
+
 #endif

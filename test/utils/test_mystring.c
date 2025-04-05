@@ -12,6 +12,7 @@ void test_mystring() {
   test_strip_in_place();
   test_strip_to_buffer();
   test_split_to_buffer();
+  test_split_in_place();
 }
 
 void test_strip_in_place() {
@@ -401,7 +402,6 @@ void test_split_to_buffer() {
   assert(buffer_capacity == 22);
   assert(strcmp(test_split4[0], array_of_tokens[0]) == 0);
 
-
   // subtest 4.2
   status_code = split_to_buffer(",hola_amigo_como_estas", 22, ',',
                                 &array_of_tokens, &array_of_tokens_capacity,
@@ -415,4 +415,178 @@ void test_split_to_buffer() {
   free_matrix((void ***)&array_of_tokens);
 
   printf("\t- split_to_buffer: PASSED\n");
+}
+
+void test_split_in_place() {
+  size_t char_size = sizeof(char);
+  size_t ptr_to_char_size = sizeof(char *);
+
+  char *buffer = NULL;
+  size_t buffer_capacity = 40;
+  assert(init_array((void **)&buffer, buffer_capacity, char_size) == ARRAY_OK);
+
+  char **array_of_tokens = NULL;
+  size_t array_of_tokens_capacity = 1;
+  assert(init_array((void **)&array_of_tokens, array_of_tokens_capacity,
+                    ptr_to_char_size) == ARRAY_OK);
+
+  size_t number_of_tokens = 0;
+
+  // subtest 1
+  char *test_split[] = {"hola", "amigo", "como", "estas"};
+  strcpy(buffer, "hola amigo como estas");
+  assert(split_in_place(&buffer, 21, ' ', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+  assert(number_of_tokens == 4);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  for (size_t i = 0; i < number_of_tokens; i++)
+    assert(strcmp(test_split[i], array_of_tokens[i]) == 0);
+
+  // subtest 1.2
+  strcpy(buffer, "   hola   amigo   como    estas   ");
+  assert(split_in_place(&buffer, 34, ' ', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+  assert(number_of_tokens == 4);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  for (size_t i = 0; i < number_of_tokens; i++)
+    assert(strcmp(test_split[i], array_of_tokens[i]) == 0);
+
+  // subtest 1.3
+  strcpy(buffer, "hola      amigo como      estas   ");
+  assert(split_in_place(&buffer, 34, ' ', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+  assert(number_of_tokens == 4);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  for (size_t i = 0; i < number_of_tokens; i++)
+    assert(strcmp(test_split[i], array_of_tokens[i]) == 0);
+
+  // subtest 2
+  char *test_split2[] = {"a"};
+  assert(resize_array((void **)&array_of_tokens, 1, ptr_to_char_size) ==
+         ARRAY_OK);
+  array_of_tokens_capacity = 1;
+
+  strcpy(buffer, "a");
+  assert(split_in_place(&buffer, 1, ' ', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+  assert(number_of_tokens == 1);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
+
+  // subtest 2.2
+  strcpy(buffer, "   a");
+  assert(split_in_place(&buffer, 4, ' ', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+  assert(number_of_tokens == 1);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
+
+  // subtest 2.3
+  strcpy(buffer, "   a");
+  assert(split_in_place(&buffer, 4, ' ', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+  assert(number_of_tokens == 1);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
+
+  // subtest 2.4
+  strcpy(buffer, "  a ");
+  assert(split_in_place(&buffer, 4, ' ', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+  assert(number_of_tokens == 1);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
+
+  // subtest 2.5
+  strcpy(buffer, "a");
+  assert(split_in_place(&buffer, 1, ',', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+  assert(number_of_tokens == 1);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
+
+  // subtest 3
+  char *test_split3[] = {"1", "2", "3", "4"};
+  assert(resize_array((void **)&array_of_tokens, 1, ptr_to_char_size) ==
+         ARRAY_OK);
+  array_of_tokens_capacity = 1;
+
+  strcpy(buffer, "1,2,3,4");
+  assert(split_in_place(&buffer, 7, ',', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+  assert(number_of_tokens == 4);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  for (size_t i = 0; i < 4; i++)
+    assert(strcmp(test_split3[i], array_of_tokens[i]) == 0);
+
+  // subtest 3.1
+  strcpy(buffer, ",,,1,2,3,4,,,");
+  assert(split_in_place(&buffer, 13, ',', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+  assert(number_of_tokens == 4);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  for (size_t i = 0; i < 4; i++)
+    assert(strcmp(test_split3[i], array_of_tokens[i]) == 0);
+
+  // subtest 3.2
+  strcpy(buffer, "1-2-3-4");
+  assert(split_in_place(&buffer, 7, '-', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+  assert(number_of_tokens == 4);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  for (size_t i = 0; i < 4; i++)
+    assert(strcmp(test_split3[i], array_of_tokens[i]) == 0);
+
+  // subtest 3.3
+  strcpy(buffer, "1\n2\n3\n4");
+  assert(split_in_place(&buffer, 7, '\n', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+  assert(number_of_tokens == 4);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  for (size_t i = 0; i < 4; i++)
+    assert(strcmp(test_split3[i], array_of_tokens[i]) == 0);
+
+  // subtest 4
+  char *test_split4[] = {"hola_amigo_como_estas"};
+  assert(resize_array((void **)&array_of_tokens, 1, ptr_to_char_size) ==
+         ARRAY_OK);
+  array_of_tokens_capacity = 1;
+
+  strcpy(buffer, "hola_amigo_como_estas");
+  assert(split_in_place(&buffer, 21, ',', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+
+  assert(number_of_tokens == 1);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  assert(strcmp(test_split4[0], array_of_tokens[0]) == 0);
+
+  // subtest 4.1
+  assert(split_in_place(&buffer, 21, ' ', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+
+  assert(number_of_tokens == 1);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  assert(strcmp(test_split4[0], array_of_tokens[0]) == 0);
+
+  // subtest 4.2
+  strcpy(buffer, ",hola_amigo_como_estas");
+  assert(split_in_place(&buffer, 22, ',', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+
+  assert(number_of_tokens == 1);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  assert(strcmp(test_split4[0], array_of_tokens[0]) == 0);
+
+  // subtest 4.2
+  strcpy(buffer, "hola_amigo_como_estas,");
+  assert(split_in_place(&buffer, 22, ',', &array_of_tokens,
+                        &array_of_tokens_capacity, &number_of_tokens) == 0);
+
+  assert(number_of_tokens == 1);
+  assert(array_of_tokens_capacity >= number_of_tokens);
+  assert(strcmp(test_split4[0], array_of_tokens[0]) == 0);
+
+  free(buffer);
+  free(array_of_tokens);
+  printf("\t- split_in_place: PASSED\n");
 }

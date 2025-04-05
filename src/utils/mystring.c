@@ -227,3 +227,51 @@ int split_to_buffer(const char *str, const size_t str_len, const char delimiter,
 
   return 0;
 }
+
+int split_in_place(char **ptr_to_str, const size_t str_len,
+                   const char delimiter, char ***ptr_to_tokens_array,
+                   size_t *ptr_to_tokens_array_capacity, size_t *ptr_to_number_of_tokens) {
+  if (ptr_to_str == NULL)
+    return 1;
+  char *str = *ptr_to_str;
+  if (str == NULL)
+    return 2;
+  if (delimiter == '\0')
+    return 3;
+  if (ptr_to_tokens_array == NULL)
+    return 4;
+  char **tokens_array = *ptr_to_tokens_array;
+  if (tokens_array == NULL)
+    return 5;
+  if (ptr_to_tokens_array_capacity == NULL)
+    return 6;
+  if (ptr_to_number_of_tokens == NULL)
+    return 7;
+
+  size_t tokens_array_capacity = *ptr_to_tokens_array_capacity,
+         token_i = 0;
+  bool processing_token = false;
+
+  for (size_t i = 0; i < str_len; i++) {
+    if (token_i == tokens_array_capacity) {
+      tokens_array_capacity *= 2;
+      if (resize_array((void **)&tokens_array, tokens_array_capacity,
+                       sizeof(char *)) != ARRAY_OK)
+        return 8;
+      *ptr_to_tokens_array_capacity = tokens_array_capacity;
+      *ptr_to_tokens_array = tokens_array;
+    }
+    char curr_char = str[i];
+    if (curr_char != delimiter)
+      if (!processing_token) {
+        processing_token = true;
+        tokens_array[token_i++] = &(str[i]);
+      }
+    if (curr_char == delimiter && processing_token) {
+      processing_token = false;
+      str[i] = '\0';
+    }
+  }
+  *ptr_to_number_of_tokens = token_i;
+  return 0;
+}
