@@ -7,6 +7,6 @@ void test_strip_in_place();
 
 void test_strip_to_buffer();
 
-void test_split();
+void test_split_to_buffer();
 
 #endif

@@ -60,10 +60,8 @@ int strip_in_place(char **ptr_to_str, size_t *ptr_to_str_len) {
   return 0;
 }
 
-int strip_to_buffer(const char *str_to_strip,
-                    const size_t str_len,
-                    char **ptr_to_buffer,
-                    size_t *stripped_len,
+int strip_to_buffer(const char *str_to_strip, const size_t str_len,
+                    char **ptr_to_buffer, size_t *stripped_len,
                     size_t *buffer_capacity) {
   if (str_to_strip == NULL)
     return 1;
@@ -131,23 +129,37 @@ int strip_to_buffer(const char *str_to_strip,
   return 0;
 }
 
-int split(const char *str, const size_t str_len, const char delimiter,
-          char ***ptr_to_tokens_array, size_t *tokens_number) {
+int split_to_buffer(const char *str, const size_t str_len, const char delimiter,
+                    char ***ptr_to_tokens_array,
+                    size_t *ptr_to_tokens_array_capacity,
+                    size_t *ptr_to_num_of_tokens, char **ptr_to_buffer,
+                    size_t *ptr_to_buffer_capacity) {
   if (str == NULL)
     return 1;
-  if (str_len == 0) // all well formed strings have at least \0
+  if (str_len == 0) // the result would be an empty array
     return 2;
-  if (delimiter == '\0') // not well formed string was given
+  if (delimiter == '\0') // wrong delimiter
     return 3;
   if (ptr_to_tokens_array == NULL)
     return 4;
-  if (tokens_number == NULL)
+  char **tokens_array = *ptr_to_tokens_array;
+  if (tokens_array == NULL)
     return 5;
-
-  char **matrix_ptrs_to_rows = *ptr_to_tokens_array;
-  if (matrix_ptrs_to_rows != NULL)
+  if (ptr_to_tokens_array_capacity == NULL)
     return 6;
-  size_t start_i = 0, end_i = 0, curr_tokens_number = 0, total_size = 0,
+  if (ptr_to_num_of_tokens == NULL)
+    return 7;
+  if (ptr_to_buffer == NULL)
+    return 8;
+  char *buffer = *ptr_to_buffer;
+  if (buffer == NULL)
+    return 9;
+  if (ptr_to_buffer_capacity == NULL)
+    return 10;
+  if (*ptr_to_buffer_capacity == 0)
+    return 11;
+
+  size_t start_i = 0, end_i = 0, num_of_tokens = 0, total_size = 0,
          last_i = str_len - 1;
   bool processing_token = false;
 
@@ -163,21 +175,33 @@ int split(const char *str, const size_t str_len, const char delimiter,
     }
     if ((curr_char == delimiter || i == last_i) && processing_token) {
       processing_token = false;
-      curr_tokens_number++;
+      num_of_tokens++;
       total_size += end_i - start_i;
     }
   }
 
-  const size_t char_size = sizeof(char);
-  char *matrix_data = NULL;
-  if (init_array((void **)&matrix_ptrs_to_rows, curr_tokens_number,
-                 sizeof(char *)) != ARRAY_OK)
-    return 7;
-  if (init_array((void **)&matrix_data, total_size + curr_tokens_number,
-                 char_size) != ARRAY_OK)
-    return 7;
+  if (num_of_tokens > *ptr_to_tokens_array_capacity) {
+    if (resize_array((void **)&tokens_array, num_of_tokens, sizeof(char *)) !=
+        ARRAY_OK)
+      return 12;
+    *ptr_to_tokens_array = tokens_array; // after resize the addr may change
+    *ptr_to_tokens_array_capacity = num_of_tokens;
+  }
 
-  *tokens_number = curr_tokens_number;
+  *ptr_to_num_of_tokens = num_of_tokens;
+
+  // considering the '\0' char at the end of each token
+  const size_t buffer_capacity_needed = total_size + num_of_tokens;
+  const size_t char_size = sizeof(char);
+
+  if (buffer_capacity_needed > *ptr_to_buffer_capacity) {
+    if (resize_array((void **)&buffer, buffer_capacity_needed, char_size) !=
+        ARRAY_OK)
+      return 13;
+    *ptr_to_buffer = buffer; // after resize the addr may change
+    *ptr_to_buffer_capacity = buffer_capacity_needed;
+  }
+
   processing_token = false;
   size_t token_i = 0;
   size_t bytes_used = 0;
@@ -188,18 +212,18 @@ int split(const char *str, const size_t str_len, const char delimiter,
         processing_token = true;
         start_i = i;
         end_i = i;
-        matrix_ptrs_to_rows[token_i] = matrix_data + bytes_used * char_size;
+        tokens_array[token_i] = buffer + bytes_used * char_size;
       }
-      matrix_data[bytes_used + end_i - start_i] = curr_char;
+      buffer[bytes_used + end_i - start_i] = curr_char;
       end_i++;
     }
     if ((curr_char == delimiter || i == last_i) && processing_token) {
-      matrix_data[bytes_used + end_i - start_i] = '\0';
+      buffer[bytes_used + end_i - start_i] = '\0';
       processing_token = false;
       token_i++;
       bytes_used += end_i - start_i + 1;
     }
   }
-  *ptr_to_tokens_array = matrix_ptrs_to_rows;
+
   return 0;
 }

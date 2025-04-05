@@ -70,7 +70,8 @@ int strip_in_place(char **ptr_to_str, size_t *ptr_to_str_len);
  * buffer).
  * @retval 4                     Error: `stripped_len` is NULL.
  * @retval 5                     Error: `buffer_capacity` is NULL.
- * @retval 6                     Error: `*buffer_capacity` is 0 (invalid capacity).
+ * @retval 6                     Error: `*buffer_capacity` is 0 (invalid
+ * capacity).
  * @retval 7                     Error: Failed to resize the destination buffer.
  *
  * @note If the input string contains only whitespace, the result will be an
@@ -92,13 +93,13 @@ int strip_to_buffer(const char *str_to_strip, const size_t str_len,
  *   1. An array of char pointers (one per token)
  *   2. A single buffer containing all string data (with null terminators)
  *
- * @param[in] str The input string to split. Must be null-terminated within
+ * @param[in] str The input string to split_to_buffer. Must be null-terminated within
  * str_len.
  * @param[in] str_len Length of the input string.
- * @param[in] delimiter The character used to split the string (cannot be '\0').
+ * @param[in] delimiter The character used to split_to_buffer the string (cannot be '\0').
  * @param[out] ptr_to_tokens_array Pointer to store the resulting string matrix.
  *                                Will contain pointers to each token.
- * @param[out] tokens_number Pointer to store the number of tokens found.
+ * @param[out] num_of_tokens Pointer to store the number of tokens found.
  *
  * @return int Status code:
  *   - 0: Success
@@ -113,7 +114,7 @@ int strip_to_buffer(const char *str_to_strip, const size_t str_len,
  *
  * @note
  * - The function ignores leading, trailing, and consecutive delimiters.
- *   Example: split(",,a,,b,,", ',') → {"a", "b"}
+ *   Example: split_to_buffer(",,a,,b,,", ',') → {"a", "b"}
  * - The caller must free both levels of allocation using free_matrix().
  * - For empty strings or no tokens found, returns success with:
  *   - *matrix_rows = 0
@@ -123,7 +124,10 @@ int strip_to_buffer(const char *str_to_strip, const size_t str_len,
  * - str must be null-terminated within str_len.
  * - Not thread-safe during memory allocation.
  */
-int split(const char *str, const size_t str_len, const char delimiter,
-          char ***ptr_to_tokens_array, size_t *tokens_number);
+int split_to_buffer(const char *str, const size_t str_len, const char delimiter,
+                    char ***ptr_to_tokens_array,
+                    size_t *ptr_to_tokens_array_capacity,
+                    size_t *ptr_to_num_of_tokens, char **ptr_to_buffer,
+                    size_t *ptr_to_buffer_capacity);
 
 #endif

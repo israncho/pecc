@@ -11,7 +11,7 @@ void test_mystring() {
   printf("Testing: mystring\n");
   test_strip_in_place();
   test_strip_to_buffer();
-  test_split();
+  test_split_to_buffer();
 }
 
 void test_strip_in_place() {
@@ -199,149 +199,220 @@ void test_strip_to_buffer() {
   printf("\t- strip_to_buffer: PASSED\n");
 }
 
-void test_split() {
-  char **str_matrix = NULL;
-  size_t matrix_rows = 0;
+void test_split_to_buffer() {
+  size_t number_of_tokens = 0;
+  size_t char_size = sizeof(char);
   int status_code = -1;
+
+  char **array_of_tokens = NULL;
+  size_t array_of_tokens_capacity = 1;
+  assert(init_array((void **)&array_of_tokens, 1, sizeof(char *)) == ARRAY_OK);
+
+  char *buffer = NULL;
+  size_t buffer_capacity = 1;
+  assert(init_array((void **)&buffer, 1, char_size) == ARRAY_OK);
 
   // subtest 1
   char *test_split[] = {"hola", "amigo", "como", "estas"};
-  status_code =
-      split("hola amigo como estas", 21, ' ', &str_matrix, &matrix_rows);
+  status_code = split_to_buffer("hola amigo como estas", 21, ' ',
+                                &array_of_tokens, &array_of_tokens_capacity,
+                                &number_of_tokens, &buffer, &buffer_capacity);
+
   assert(status_code == 0);
-  assert(matrix_rows == 4);
+  assert(number_of_tokens == 4);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 22);
   for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split[i], str_matrix[i]) == 0);
-  free_matrix((void ***)&str_matrix);
+    assert(strcmp(test_split[i], array_of_tokens[i]) == 0);
 
   // subtest 1.1
-  status_code = split("   hola   amigo   como    estas   ", 34, ' ',
-                      &str_matrix, &matrix_rows);
+  status_code = split_to_buffer("   hola   amigo   como    estas   ", 34, ' ',
+                                &array_of_tokens, &array_of_tokens_capacity,
+                                &number_of_tokens, &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 4);
+  assert(number_of_tokens == 4);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 22);
   for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split[i], str_matrix[i]) == 0);
-  free_matrix((void ***)&str_matrix);
+    assert(strcmp(test_split[i], array_of_tokens[i]) == 0);
 
   // subtest 1.2
-  status_code = split("hola      amigo como      estas   ", 34, ' ',
-                      &str_matrix, &matrix_rows);
+  status_code = split_to_buffer("hola      amigo como      estas   ", 34, ' ',
+                                &array_of_tokens, &array_of_tokens_capacity,
+                                &number_of_tokens, &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 4);
+  assert(number_of_tokens == 4);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 22);
   for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split[i], str_matrix[i]) == 0);
-  free_matrix((void ***)&str_matrix);
+    assert(strcmp(test_split[i], array_of_tokens[i]) == 0);
 
   // subtest 1.3
-  status_code = split("          hola    amigo como estas", 34, ' ',
-                      &str_matrix, &matrix_rows);
+  status_code = split_to_buffer("          hola    amigo como estas", 34, ' ',
+                                &array_of_tokens, &array_of_tokens_capacity,
+                                &number_of_tokens, &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 4);
+  assert(number_of_tokens == 4);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 22);
   for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split[i], str_matrix[i]) == 0);
-  free_matrix((void ***)&str_matrix);
+    assert(strcmp(test_split[i], array_of_tokens[i]) == 0);
 
   // subtest 2
+  assert(resize_array((void **)&buffer, 1, char_size) == ARRAY_OK);
+  buffer_capacity = 1;
+  assert(resize_array((void **)&array_of_tokens, 1, sizeof(char *)) ==
+         ARRAY_OK);
+  array_of_tokens_capacity = 1;
   char *test_split2[] = {"a"};
-  status_code = split("a", 1, ' ', &str_matrix, &matrix_rows);
+  status_code =
+      split_to_buffer("a", 1, ' ', &array_of_tokens, &array_of_tokens_capacity,
+                      &number_of_tokens, &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 1);
-  assert(strcmp(test_split2[0], str_matrix[0]) == 0);
-  free_matrix((void ***)&str_matrix);
+  assert(number_of_tokens == 1);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 2);
+  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
 
   // subtest 2.1
-  status_code = split("   a", 4, ' ', &str_matrix, &matrix_rows);
+  status_code = split_to_buffer("   a", 4, ' ', &array_of_tokens,
+                                &array_of_tokens_capacity, &number_of_tokens,
+                                &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 1);
-  assert(strcmp(test_split2[0], str_matrix[0]) == 0);
-  free_matrix((void ***)&str_matrix);
+  assert(number_of_tokens == 1);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 2);
+  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
 
   // subtest 2.2
-  status_code = split("a   ", 4, ' ', &str_matrix, &matrix_rows);
+  status_code = split_to_buffer("a   ", 4, ' ', &array_of_tokens,
+                                &array_of_tokens_capacity, &number_of_tokens,
+                                &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 1);
-  assert(strcmp(test_split2[0], str_matrix[0]) == 0);
-  free_matrix((void ***)&str_matrix);
+  assert(number_of_tokens == 1);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 2);
+  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
 
   // subtest 2.3
-  status_code = split("  a ", 4, ' ', &str_matrix, &matrix_rows);
+  status_code = split_to_buffer("  a ", 4, ' ', &array_of_tokens,
+                                &array_of_tokens_capacity, &number_of_tokens,
+                                &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 1);
-  assert(strcmp(test_split2[0], str_matrix[0]) == 0);
-  free_matrix((void ***)&str_matrix);
+  assert(number_of_tokens == 1);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 2);
+  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
 
   // subtest 2.4
-  status_code = split("a", 1, ',', &str_matrix, &matrix_rows);
+  status_code =
+      split_to_buffer("a", 1, ',', &array_of_tokens, &array_of_tokens_capacity,
+                      &number_of_tokens, &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 1);
-  assert(strcmp(test_split2[0], str_matrix[0]) == 0);
-  free_matrix((void ***)&str_matrix);
+  assert(number_of_tokens == 1);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 2);
+  assert(strcmp(test_split2[0], array_of_tokens[0]) == 0);
 
   // subtest 3
+  assert(resize_array((void **)&buffer, 1, char_size) == ARRAY_OK);
+  buffer_capacity = 1;
+  assert(resize_array((void **)&array_of_tokens, 1, sizeof(char *)) ==
+         ARRAY_OK);
+  array_of_tokens_capacity = 1;
   char *test_split3[] = {"1", "2", "3", "4"};
-  status_code = split("1,2,3,4", 7, ',', &str_matrix, &matrix_rows);
+  status_code = split_to_buffer("1,2,3,4", 7, ',', &array_of_tokens,
+                                &array_of_tokens_capacity, &number_of_tokens,
+                                &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 4);
+  assert(number_of_tokens == 4);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 8);
   for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split3[i], str_matrix[i]) == 0);
-  free_matrix((void ***)&str_matrix);
+    assert(strcmp(test_split3[i], array_of_tokens[i]) == 0);
 
   // subtest 3.1
-  status_code = split(",,,1,2,3,4,,,", 13, ',', &str_matrix, &matrix_rows);
+  status_code = split_to_buffer(",,,1,2,3,4,,,", 13, ',', &array_of_tokens,
+                                &array_of_tokens_capacity, &number_of_tokens,
+                                &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 4);
+  assert(number_of_tokens == 4);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 8);
   for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split3[i], str_matrix[i]) == 0);
-  free_matrix((void ***)&str_matrix);
+    assert(strcmp(test_split3[i], array_of_tokens[i]) == 0);
 
   // subtest 3.2
-  status_code = split("1-2-3-4", 7, '-', &str_matrix, &matrix_rows);
+  status_code = split_to_buffer("1-2-3-4", 7, '-', &array_of_tokens,
+                                &array_of_tokens_capacity, &number_of_tokens,
+                                &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 4);
+  assert(number_of_tokens == 4);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 8);
   for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split3[i], str_matrix[i]) == 0);
-  free_matrix((void ***)&str_matrix);
+    assert(strcmp(test_split3[i], array_of_tokens[i]) == 0);
 
   // subtest 3.3
-  status_code = split("1\n2\n3\n4", 7, '\n', &str_matrix, &matrix_rows);
+  status_code = split_to_buffer("1\n2\n3\n4", 7, '\n', &array_of_tokens,
+                                &array_of_tokens_capacity, &number_of_tokens,
+                                &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 4);
+  assert(number_of_tokens == 4);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 8);
   for (size_t i = 0; i < 4; i++)
-    assert(strcmp(test_split3[i], str_matrix[i]) == 0);
-  free_matrix((void ***)&str_matrix);
+    assert(strcmp(test_split3[i], array_of_tokens[i]) == 0);
 
   // subtest 4
+  assert(resize_array((void **)&buffer, 1, char_size) == ARRAY_OK);
+  buffer_capacity = 1;
+  assert(resize_array((void **)&array_of_tokens, 1, sizeof(char *)) ==
+         ARRAY_OK);
+  array_of_tokens_capacity = 1;
+
   char *test_split4[] = {"hola_amigo_como_estas"};
-  status_code =
-      split("hola_amigo_como_estas", 21, ',', &str_matrix, &matrix_rows);
+  status_code = split_to_buffer("hola_amigo_como_estas", 21, ',',
+                                &array_of_tokens, &array_of_tokens_capacity,
+                                &number_of_tokens, &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 1);
-  assert(strcmp(test_split4[0], str_matrix[0]) == 0);
-  free_matrix((void ***)&str_matrix);
+  assert(number_of_tokens == 1);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 22);
+  assert(strcmp(test_split4[0], array_of_tokens[0]) == 0);
 
   // subtest 4.1
-  status_code =
-      split("hola_amigo_como_estas", 21, ' ', &str_matrix, &matrix_rows);
+  status_code = split_to_buffer("hola_amigo_como_estas", 21, ' ',
+                                &array_of_tokens, &array_of_tokens_capacity,
+                                &number_of_tokens, &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 1);
-  assert(strcmp(test_split4[0], str_matrix[0]) == 0);
-  free_matrix((void ***)&str_matrix);
+  assert(number_of_tokens == 1);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 22);
+  assert(strcmp(test_split4[0], array_of_tokens[0]) == 0);
 
   // subtest 4.2
-  status_code =
-      split("hola_amigo_como_estas,", 22, ',', &str_matrix, &matrix_rows);
+  status_code = split_to_buffer("hola_amigo_como_estas,", 22, ',',
+                                &array_of_tokens, &array_of_tokens_capacity,
+                                &number_of_tokens, &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 1);
-  assert(strcmp(test_split4[0], str_matrix[0]) == 0);
-  free_matrix((void ***)&str_matrix);
+  assert(number_of_tokens == 1);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 22);
+  assert(strcmp(test_split4[0], array_of_tokens[0]) == 0);
+
 
   // subtest 4.2
-  status_code =
-      split(",hola_amigo_como_estas", 22, ',', &str_matrix, &matrix_rows);
+  status_code = split_to_buffer(",hola_amigo_como_estas", 22, ',',
+                                &array_of_tokens, &array_of_tokens_capacity,
+                                &number_of_tokens, &buffer, &buffer_capacity);
   assert(status_code == 0);
-  assert(matrix_rows == 1);
-  assert(strcmp(test_split4[0], str_matrix[0]) == 0);
-  free_matrix((void ***)&str_matrix);
+  assert(number_of_tokens == 1);
+  assert(number_of_tokens == array_of_tokens_capacity);
+  assert(buffer_capacity == 22);
+  assert(strcmp(test_split4[0], array_of_tokens[0]) == 0);
 
-  printf("\t- split: PASSED\n");
+  free_matrix((void ***)&array_of_tokens);
+
+  printf("\t- split_to_buffer: PASSED\n");
 }
