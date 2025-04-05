@@ -28,7 +28,6 @@ int strip_in_place(char **ptr_to_str, size_t *ptr_to_str_len) {
 
   if (start_i == str_len) {
     // result of stripping is \0
-    resize_array((void **)ptr_to_str, 1, char_size);
     (*ptr_to_str)[0] = '\0';
     *ptr_to_str_len = 0;
     return 0;
@@ -55,7 +54,6 @@ int strip_in_place(char **ptr_to_str, size_t *ptr_to_str_len) {
     (*ptr_to_str)[j++] = (*ptr_to_str)[i];
   (*ptr_to_str)[j] = '\0';
 
-  resize_array((void **)ptr_to_str, new_size + 1, char_size);
   *ptr_to_str_len = new_size;
   return 0;
 }
