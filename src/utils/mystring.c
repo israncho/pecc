@@ -9,8 +9,6 @@ int strip_in_place(char **ptr_to_str, size_t *ptr_to_str_len) {
   if (ptr_to_str_len == NULL)
     return 2;
 
-  size_t char_size = sizeof(char);
-
   size_t str_len = *ptr_to_str_len;
   if (str_len == 0)
     return 0;
