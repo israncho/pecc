@@ -1,11 +1,12 @@
-#include "../../include/test/tsp/test_euclidean.h"
-#include "../../include/tsp/euclidean.h"
-#include "../../include/utils/input_output.h"
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../../include/test/tsp/test_euclidean.h"
+#include "../../include/tsp/euclidean.h"
+#include "../../include/utils/input_output.h"
 
 void test_euclidean() {
   printf("Testing: tsp_euclidean\n");
@@ -19,9 +20,9 @@ void test_init_tsp_euc_instance() {
                    &num_of_lines) == FILE_READ_SUCCESS);
 
   tsp_euc_instance *computed_eil51 = NULL;
-
-  assert(init_tsp_euc_instance(array_of_lines, num_of_lines, &computed_eil51) ==
-         0);
+  int exit_code =
+      init_tsp_euc_instance(array_of_lines, num_of_lines, &computed_eil51);
+  assert(exit_code == 0);
 
   double cities_data[102] = {
       37.0, 52.0, 49.0, 49.0, 52.0, 64.0, 20.0, 26.0, 40.0, 30.0, 21.0, 47.0,
@@ -50,12 +51,26 @@ void test_init_tsp_euc_instance() {
   assert(target.number_of_cities == computed_eil51->number_of_cities);
   assert(strcmp(target.name, computed_eil51->name) == 0);
   assert(strcmp(target.type, computed_eil51->type) == 0);
-  // printf("%s, %s\n", target.comment, computed_eil51->comment);
-  // assert(strcmp(target.comment, computed_eil51->comment) == 0);
+  assert(strcmp(target.comment, computed_eil51->comment) == 0);
   assert(strcmp(target.edge_weight_type, computed_eil51->edge_weight_type) ==
          0);
-  for (size_t i = 0; i < 51; i++)
+  for (size_t i = 0; i < 51; i++) {
     assert(target.cities[i][0] == computed_eil51->cities[i][0]);
+    assert(target.cities[i][1] == computed_eil51->cities[i][1]);
+  }
+
+  for (size_t i = 0; i < 51; i++) {
+    double city_i_x = target.cities[i][0];
+    double city_i_y = target.cities[i][1];
+    for (size_t j = i; j < 51; j++) {
+      double city_j_x = target.cities[j][0];
+      double city_j_y = target.cities[j][1];
+      double euc_distance =
+          sqrt(pow(city_i_x - city_j_x, 2) + pow(city_i_y - city_j_y, 2));
+      assert(euc_distance == computed_eil51->distances[i][j]);
+      assert(euc_distance == computed_eil51->distances[j][i]);
+    }
+  }
 
   free_tsp_euc_instance_content(computed_eil51);
   free(computed_eil51);

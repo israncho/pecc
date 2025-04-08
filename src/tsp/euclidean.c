@@ -66,38 +66,40 @@ double tour_distance(const void *solution, const void *instance_details) {
   return total_distance;
 }
 
-static int set_tsp_euc_members(tsp_euc_instance *instance, const char *member,
-                               const char *value, const size_t value_size) {
+static int set_tsp_euc_members(tsp_euc_instance *instance, char *member,
+                               char *value, size_t value_size) {
+  if (strip_in_place(&value, &value_size) != 0)
+    return 1;
 
-  if (strcmp("DIMENSION:", member) == 0) {
+  if (strcmp("DIMENSION", member) == 0) {
     if (str_to_size_t(value, &(instance->number_of_cities)) != 0)
-      return 1;
+      return 2;
     return 0;
   }
 
   char *str = NULL;
   if (init_array((void **)&str, value_size + 1, sizeof(char)) != 0)
-    return 2;
+    return 3;
   strcpy(str, value);
 
-  if (strcmp("NAME:", member) == 0) {
+  if (strcmp("NAME", member) == 0) {
     instance->name = str;
     return 0;
   }
-  if (strcmp("TYPE:", member) == 0) {
+  if (strcmp("TYPE", member) == 0) {
     instance->type = str;
     return 0;
   }
-  if (strcmp("COMMENT:", member) == 0) {
+  if (strcmp("COMMENT", member) == 0) {
     instance->comment = str;
     return 0;
   }
-  if (strcmp("EDGE_WEIGHT_TYPE:", member) == 0) {
+  if (strcmp("EDGE_WEIGHT_TYPE", member) == 0) {
     instance->edge_weight_type = str;
     return 0;
   }
   free(str);
-  return 3;
+  return 4;
 }
 
 int init_tsp_euc_instance(const file_line *array_of_lines,
@@ -144,9 +146,16 @@ int init_tsp_euc_instance(const file_line *array_of_lines,
     if (strip_to_buffer(array_of_lines[i].content, array_of_lines[i].length,
                         &buffer, &buffer_usage, &buffer_capacity) != 0)
       return 6;
-    if (split_in_place(&buffer, buffer_usage, ' ', &tokens_array,
-                       &tokens_array_capacity, &number_of_tokens) != 0)
-      return 7;
+
+    if (!reading_cities) {
+      if (split_in_place(&buffer, buffer_usage, ':', &tokens_array,
+                         &tokens_array_capacity, &number_of_tokens) != 0)
+        return 7;
+    } else {
+      if (split_in_place(&buffer, buffer_usage, ' ', &tokens_array,
+                         &tokens_array_capacity, &number_of_tokens) != 0)
+        return 7;
+    }
 
     if (!reading_cities) {
       if (strcmp(tokens_array[0], "NODE_COORD_SECTION") == 0) {
