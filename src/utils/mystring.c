@@ -6,8 +6,12 @@
 int strip_in_place(char **ptr_to_str, size_t *ptr_to_str_len) {
   if (ptr_to_str == NULL)
     return 1;
-  if (ptr_to_str_len == NULL)
+  char *str = *ptr_to_str;
+  if (str == NULL)
     return 2;
+
+  if (ptr_to_str_len == NULL)
+    return 3;
 
   size_t str_len = *ptr_to_str_len;
   if (str_len == 0)
@@ -16,7 +20,7 @@ int strip_in_place(char **ptr_to_str, size_t *ptr_to_str_len) {
   size_t start_i = str_len;
   char val = '\0';
   for (size_t i = 0; i < str_len; i++) {
-    val = (*ptr_to_str)[i];
+    val = str[i];
     if (val != ' ' && val != '\n' && val != '\t' && val != '\r' &&
         val != '\v' && val != '\f') {
       start_i = i;
@@ -26,7 +30,7 @@ int strip_in_place(char **ptr_to_str, size_t *ptr_to_str_len) {
 
   if (start_i == str_len) {
     // result of stripping is \0
-    (*ptr_to_str)[0] = '\0';
+    str[0] = '\0';
     *ptr_to_str_len = 0;
     return 0;
   }
@@ -35,12 +39,12 @@ int strip_in_place(char **ptr_to_str, size_t *ptr_to_str_len) {
   // one non whitespace char
 
   size_t end_i = str_len - 1;
-  val = (*ptr_to_str)[end_i];
+  val = str[end_i];
   // from what is stated before we know this will stop before consuming the
   // whole array
   while (val == ' ' || val == '\n' || val == '\t' || val == '\r' ||
          val == '\v' || val == '\f')
-    val = (*ptr_to_str)[--end_i];
+    val = str[--end_i];
 
   size_t new_size = end_i - start_i + 1;
 
@@ -49,8 +53,8 @@ int strip_in_place(char **ptr_to_str, size_t *ptr_to_str_len) {
 
   size_t j = 0;
   for (size_t i = start_i; i <= end_i; i++)
-    (*ptr_to_str)[j++] = (*ptr_to_str)[i];
-  (*ptr_to_str)[j] = '\0';
+    str[j++] = str[i];
+  str[j] = '\0';
 
   *ptr_to_str_len = new_size;
   return 0;

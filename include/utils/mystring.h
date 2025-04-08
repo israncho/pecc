@@ -18,8 +18,8 @@
  *
  * @retval 0 Success
  * @retval 1 Null ptr_to_str or *ptr_to_str
- * @retval 2 Null ptr_to_str_len
- * @retval 3 Empty string (size = 0)
+ * @retval 2 Null str (*ptr_to_str == NULL)
+ * @retval 3 Null ptr_to_str_len
  *
  * @note The function handles these whitespace characters:
  *       - ' ' (space)
