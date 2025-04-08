@@ -11,6 +11,7 @@
 void test_euclidean() {
   printf("Testing: tsp_euclidean\n");
   test_init_tsp_euc_instance();
+  test_euclidean_distance();
 }
 
 void test_init_tsp_euc_instance() {
@@ -77,4 +78,21 @@ void test_init_tsp_euc_instance() {
   free_lines_array_content(array_of_lines, num_of_lines);
   free(array_of_lines);
   printf("\t- init_tsp_euc_instance: PASSED\n");
+}
+
+void test_euclidean_distance() {
+  double p1[2] = {0.0, 0.0};
+  double p2[2] = {0.0, 0.0};
+  for (size_t i = 0; i < 1000; i++) {
+    double distance = i * 1.0;
+    p2[1] = distance;
+    assert(euclidean_distance(p1, p2, 2) == distance);
+  }
+  for (size_t i = 0; i < 1000; i++) {
+    double distance = sqrt(pow(i, 2) * 2);
+    p2[0] = i;
+    p2[1] = i;
+    assert(euclidean_distance(p1, p2, 2) == distance);
+  }
+  printf("\t- euclidean_distance: PASSED\n");
 }

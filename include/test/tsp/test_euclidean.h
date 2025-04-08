@@ -5,4 +5,6 @@ void test_euclidean();
 
 void test_init_tsp_euc_instance();
 
+void test_euclidean_distance();
+
 #endif
