@@ -29,6 +29,6 @@ int init_tsp_euc_instance(const file_line *array_of_lines,
                           const size_t number_of_lines,
                           tsp_euc_instance **ptr_to_tsp_instance);
 
-void free_tsp_euc_instance(tsp_euc_instance **tsp_euc_instance_to_free);
+void free_tsp_euc_instance_content(tsp_euc_instance *tsp_euc_instance_to_free);
 
 #endif

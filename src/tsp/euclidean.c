@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../../include/tsp/euclidean.h"
@@ -18,8 +19,7 @@ double euclidean_distance(const double *array1, const double *array2,
 }
 
 int fill_distance_matrix(const double *const *cities,
-                         const size_t number_of_cities,
-                         const size_t city_size,
+                         const size_t number_of_cities, const size_t city_size,
                          double **distance_matrix) {
   if (cities == NULL)
     return 1;
@@ -66,19 +66,17 @@ double tour_distance(const void *solution, const void *instance_details) {
   return total_distance;
 }
 
-static int set_members(tsp_euc_instance *instance, const char *member,
-                       const char *value, const size_t value_size) {
-  int status_code = 0;
+static int set_tsp_euc_members(tsp_euc_instance *instance, const char *member,
+                               const char *value, const size_t value_size) {
+
   if (strcmp("DIMENSION:", member) == 0) {
-    status_code = str_to_size_t(value, &(instance->number_of_cities));
-    if (status_code != 0)
+    if (str_to_size_t(value, &(instance->number_of_cities)) != 0)
       return 1;
     return 0;
   }
 
   char *str = NULL;
-  status_code = init_array((void **)&str, value_size + 1, sizeof(char));
-  if (status_code != 0)
+  if (init_array((void **)&str, value_size + 1, sizeof(char)) != 0)
     return 2;
   strcpy(str, value);
 
@@ -123,39 +121,86 @@ int init_tsp_euc_instance(const file_line *array_of_lines,
   size_t char_size = sizeof(char);
   size_t double_size = sizeof(double);
 
+  // array of cities, encoded as a bidimensional matrix
   double **cities = NULL;
+  // matrix of distances between cities
+  double **distances = NULL;
 
   tsp_euc_instance *new_instance = malloc(sizeof(tsp_euc_instance));
 
-  for (size_t i = 0; i < number_of_lines; i++) {
-    char *str = NULL;
-    size_t str_size = array_of_lines[i].length;
-    if (!init_array((void **)&str, str_size + 1, char_size))
-      return 2;
-    strcpy(str, array_of_lines[i].content);
-
-    char **array_of_splited_str = NULL;
-    size_t array_of_splited_size = 0;
-    if (!strip(&str, &str_size))
-      return 2;
-
-    if (!split(str, str_size, ' ', &array_of_splited_str,
-               &array_of_splited_size))
-      return 3;
-
-    // to do
-
-    free(str);
-    free_matrix((void ***)&array_of_splited_str);
-  }
-
-  if (init_matrix((void ***)&(new_instance->distances), number_of_cities,
-                  number_of_cities, double_size))
+  size_t buffer_capacity = 50;
+  size_t buffer_usage = 0;
+  char *buffer = NULL;
+  if (init_array((void **)&buffer, buffer_capacity, char_size) != ARRAY_OK)
+    return 5;
+  size_t tokens_array_capacity = 5;
+  size_t number_of_tokens = 0;
+  char **tokens_array = NULL;
+  if (init_array((void **)&tokens_array, tokens_array_capacity,
+                 sizeof(char *)) != ARRAY_OK)
     return 5;
 
-  fill_distance_matrix((const double *const *)new_instance->cities,
-                       number_of_cities, city_size, new_instance->distances);
+  for (size_t i = 0; i < number_of_lines; i++) {
+    if (strip_to_buffer(array_of_lines[i].content, array_of_lines[i].length,
+                        &buffer, &buffer_usage, &buffer_capacity) != 0)
+      return 6;
+    if (split_in_place(&buffer, buffer_usage, ' ', &tokens_array,
+                       &tokens_array_capacity, &number_of_tokens) != 0)
+      return 7;
 
+    if (!reading_cities) {
+      if (strcmp(tokens_array[0], "NODE_COORD_SECTION") == 0) {
+        number_of_cities = new_instance->number_of_cities;
+        reading_cities = true;
+        setup_cities = true;
+        continue;
+      }
+      if (set_tsp_euc_members(new_instance, tokens_array[0], tokens_array[1],
+                              strlen(tokens_array[1])) != 0)
+        return 8;
+      continue;
+    }
+
+    if (strcmp(tokens_array[0], "EOF") == 0)
+      break;
+
+    if (setup_cities) {
+      setup_cities = false;
+      city_size = number_of_tokens - 1;
+      if (init_matrix((void ***)&cities, number_of_cities, city_size,
+                      double_size) != 0)
+        return 5;
+    }
+
+    for (size_t j = 0; j < city_size; j++)
+      if (str_to_double(tokens_array[j + 1], &(cities[city_i][j])) != 0)
+        return 9;
+    city_i++;
+  }
+
+  if (init_matrix((void ***)&distances, number_of_cities, number_of_cities,
+                  double_size))
+    return 5;
+
+  if (fill_distance_matrix((const double *const *)cities, number_of_cities,
+                           city_size, distances) != 0)
+    return 10;
+
+  new_instance->cities = cities;
+  new_instance->distances = distances;
   *ptr_ptr_to_tsp_instance = new_instance;
+  free(buffer);
+  free(tokens_array);
   return 0;
+}
+
+void free_tsp_euc_instance_content(tsp_euc_instance *tsp_euc_instance_to_free) {
+  free_matrix((void ***)&tsp_euc_instance_to_free->cities);
+  free_matrix((void ***)&tsp_euc_instance_to_free->distances);
+  free(tsp_euc_instance_to_free->name);
+  free(tsp_euc_instance_to_free->type);
+  free(tsp_euc_instance_to_free->comment);
+  free(tsp_euc_instance_to_free->edge_weight_type);
+  tsp_euc_instance_to_free->city_size = 0;
+  tsp_euc_instance_to_free->number_of_cities = 0;
 }
