@@ -1,2 +1,2 @@
 # pecc
- Parallel Evolutive Computing in C
+ Parallel Evolutinary Computing in C

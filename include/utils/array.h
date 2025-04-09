@@ -68,4 +68,15 @@ ArrayStatus resize_array(void **ptr_to_array, const size_t new_size,
 ArrayStatus init_array(void **ptr_to_array, const size_t size,
                        const size_t type_size);
 
+int generic_swap(void *array, const size_t array_size,
+                        const size_t type_size, const size_t i, const size_t j);
+
+#define SWAP_T(arr, type, i, j) do { \
+    type *__arr = (arr); \
+    size_t __i = (i), __j = (j); \
+    type __tmp = __arr[__i]; \
+    __arr[__i] = __arr[__j]; \
+    __arr[__j] = __tmp; \
+} while (0)
+
 #endif
