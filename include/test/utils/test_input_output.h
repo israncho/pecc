@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef TEST_INPUT_OUTPUT_H
 #define TEST_INPUT_OUTPUT_H
 

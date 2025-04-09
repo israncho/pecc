@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef EUCLIDEAN_H
 #define EUCLIDEAN_H
 

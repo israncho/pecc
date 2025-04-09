@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef MY_ARRAY_H
 #define MY_ARRAY_H
 

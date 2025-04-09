@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef TEST_EUCLIDEAN_H
 #define TEST_EUCLIDEAN_H
 

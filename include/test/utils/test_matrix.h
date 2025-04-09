@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef TEST_MATRIX_H
 #define TEST_MATRIX_H
 

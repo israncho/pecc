@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef TEST_MYSTRING_H
 #define TEST_MYSTRING_H
 
