@@ -19,7 +19,10 @@ inline static void fill_array_simple(size_t *array, size_t array_size) {
 }
 
 void test_shuffle_array_of_size_t() {
-  const size_t N = 500;
+  xorshiftr128plus_state state;
+  set_up_seed(&state, 0, 0);
+
+  const size_t N = 1000;
   size_t *array = NULL;
   size_t **histogram = NULL;
 
@@ -32,13 +35,11 @@ void test_shuffle_array_of_size_t() {
     for (size_t j = 0; j < N; j++)
       histogram[i][j] = 0;
 
-  const size_t TRIALS = 10000;
-
-  set_up_seed(NULL);
+  const size_t TRIALS = 15000;
 
   for (size_t i = 0; i < TRIALS; i++) {
     fill_array_simple(array, N);
-    shuffle_array_of_size_t(array, N);
+    assert(shuffle_array_of_size_t(array, N, &state) == 0);
 
     for (size_t position = 0; position < N; position++) {
       size_t elem = array[position];
