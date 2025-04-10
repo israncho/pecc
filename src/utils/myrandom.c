@@ -32,14 +32,10 @@ void set_up_seed(xorshiftr128plus_state *state, const uint64_t seed1,
 
 int shuffle_array_of_size_t(size_t *array, const size_t array_size,
                             xorshiftr128plus_state *state) {
-  if (array == NULL)
-    return 1;
-  if (array_size <= 1)
-    return 0;
   size_t n_2 = array_size - 2;
   size_t n_1 = array_size - 1;
   for (size_t i = 0; i < n_2; i++) {
-    size_t interval_size = n_1 - i;
+    size_t interval_size = n_1 - i + 1;
     size_t j = randsize_t(interval_size, state) + i;
     SWAP_T(array, size_t, i, j);
   }

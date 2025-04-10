@@ -26,7 +26,7 @@ static inline uint64_t xorshiftr128plus(xorshiftr128plus_state *state) {
 }
 
 static inline size_t randsize_t(size_t max, xorshiftr128plus_state *state) {
-  return xorshiftr128plus(state) % (max + 1);
+  return xorshiftr128plus(state) % max;
 }
 
 int shuffle_array_of_size_t(size_t *array, const size_t array_size, xorshiftr128plus_state *state);
