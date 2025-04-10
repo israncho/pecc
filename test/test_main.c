@@ -3,6 +3,7 @@
 #include "../include/test/utils/test_input_output.h"
 #include "../include/test/utils/test_matrix.h"
 #include "../include/test/utils/test_mystring.h"
+#include "../include/test/utils/test_myrandom.h"
 #include "../include/test/tsp/test_euclidean.h"
 
 int main() {
@@ -11,6 +12,7 @@ int main() {
   test_matrix();
   test_mystring();
   test_euclidean();
+  test_myrandom();
   printf("\nFinished testing\n");
   return 0;
 }
