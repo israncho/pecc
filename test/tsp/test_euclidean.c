@@ -75,8 +75,10 @@ void test_init_tsp_euc_instance() {
 
   free_tsp_euc_instance_content(computed_eil51);
   free(computed_eil51);
+  computed_eil51 = NULL;
   free_lines_array_content(array_of_lines, num_of_lines);
   free(array_of_lines);
+  array_of_lines = NULL;
   printf("\t- init_tsp_euc_instance: PASSED\n");
 }
 

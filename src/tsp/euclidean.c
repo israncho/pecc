@@ -122,6 +122,7 @@ int init_tsp_euc_instance(const file_line *array_of_lines,
   size_t city_i = 0;
   size_t char_size = sizeof(char);
   size_t double_size = sizeof(double);
+  size_t double_alignment = _Alignof(double);
 
   // array of cities, encoded as a bidimensional matrix
   double **cities = NULL;
@@ -177,7 +178,7 @@ int init_tsp_euc_instance(const file_line *array_of_lines,
       setup_cities = false;
       city_size = number_of_tokens - 1;
       if (init_matrix((void ***)&cities, number_of_cities, city_size,
-                      double_size) != 0)
+                      double_size, double_alignment) != 0)
         return 5;
     }
 
@@ -188,7 +189,7 @@ int init_tsp_euc_instance(const file_line *array_of_lines,
   }
 
   if (init_matrix((void ***)&distances, number_of_cities, number_of_cities,
-                  double_size))
+                  double_size, double_alignment))
     return 5;
 
   if (fill_distance_matrix((const double *const *)cities, number_of_cities,
@@ -204,12 +205,18 @@ int init_tsp_euc_instance(const file_line *array_of_lines,
 }
 
 void free_tsp_euc_instance_content(tsp_euc_instance *tsp_euc_instance_to_free) {
-  free_matrix((void ***)&tsp_euc_instance_to_free->cities);
-  free_matrix((void ***)&tsp_euc_instance_to_free->distances);
+  free(tsp_euc_instance_to_free->cities);
+  tsp_euc_instance_to_free->cities = NULL;
+  free(tsp_euc_instance_to_free->distances);
+  tsp_euc_instance_to_free->distances = NULL;
   free(tsp_euc_instance_to_free->name);
+  tsp_euc_instance_to_free->name = NULL;
   free(tsp_euc_instance_to_free->type);
+  tsp_euc_instance_to_free->type = NULL;
   free(tsp_euc_instance_to_free->comment);
+  tsp_euc_instance_to_free->comment = NULL;
   free(tsp_euc_instance_to_free->edge_weight_type);
+  tsp_euc_instance_to_free->edge_weight_type = NULL;
   tsp_euc_instance_to_free->city_size = 0;
   tsp_euc_instance_to_free->number_of_cities = 0;
 }

@@ -34,20 +34,7 @@
  * - Not thread-safe during initialization.
  */
 int init_matrix(void ***ptr_to_matrix, const size_t rows, const size_t columns,
-                const size_t type_size);
+                const size_t type_size, const size_t alignment);
 
-/**
- * Frees memory allocated by init_matrix.
- *
- * @param ptr_to_matrix   Pointer to the matrix.
- *
- * @note
- * - The content of `ptr_to_matrix` is set to NULL after
- * use.
- * @warning
- * - Calling with NULL is safe (no operation performed).
- * - Accessing matrix after free results in undefined behavior.
- */
-void free_matrix(void ***ptr_to_matrix);
 
 #endif

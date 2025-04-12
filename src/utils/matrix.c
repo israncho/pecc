@@ -6,7 +6,7 @@
 #include "../../include/utils/matrix.h"
 
 int init_matrix(void ***ptr_to_matrix, const size_t rows, const size_t columns,
-                const size_t type_size) {
+                const size_t type_size, const size_t alignment) {
   if (ptr_to_matrix == NULL)
     return 1;
   if (*ptr_to_matrix != NULL)
@@ -17,16 +17,25 @@ int init_matrix(void ***ptr_to_matrix, const size_t rows, const size_t columns,
     return 3; // overflow error.
 
   // memory for the ptrs to each row.
-  void **matrix_rows = malloc(sizeof(void *) * rows);
-  if (!matrix_rows)
+
+  size_t header_size = rows * sizeof(void *);
+  size_t data_size = type_size * rows * columns;
+  size_t total_size = header_size + (alignment - 1) + data_size;
+
+  void *memory_block = malloc(total_size);
+  if (!memory_block)
     return 4;
+  void **matrix_rows = (void **)memory_block;
 
   // memory for all the data in the matrix.
-  void *data_block = malloc(type_size * rows * columns);
-  if (!data_block) {
-    free(matrix_rows);
-    return 4;
-  }
+  void *data_block = memory_block;
+  uintptr_t data_start = (uintptr_t)memory_block + header_size;
+  if (alignment != 0 && (alignment & (alignment - 1)))
+    data_start = (data_start + (alignment - 1)) & ~(alignment - 1);
+  else
+    data_start = data_start + (alignment - data_start % alignment) % alignment;
+
+  data_block = (void *)data_start;
 
   for (size_t i = 0; i < rows; i++)
     // cast to char to allow ptr arithmetic in other compilers
@@ -34,12 +43,4 @@ int init_matrix(void ***ptr_to_matrix, const size_t rows, const size_t columns,
 
   *ptr_to_matrix = matrix_rows;
   return 0;
-}
-
-void free_matrix(void ***ptr_to_matrix) {
-  if (*ptr_to_matrix == NULL)
-    return;
-  free((*ptr_to_matrix)[0]);
-  free(*ptr_to_matrix);
-  *ptr_to_matrix = NULL;
 }

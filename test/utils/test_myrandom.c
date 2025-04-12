@@ -27,9 +27,10 @@ void test_shuffle_array_of_size_t() {
   size_t **histogram = NULL;
 
   size_t size_t_size = sizeof(size_t);
+  size_t size_t_alignment = _Alignof(size_t);
 
   assert(init_array((void **)&array, N, size_t_size) == ARRAY_OK);
-  assert(init_matrix((void ***)&histogram, N, N, size_t_size) == 0);
+  assert(init_matrix((void ***)&histogram, N, N, size_t_size, size_t_alignment) == 0);
 
   for (size_t i = 0; i < N; i++)
     for (size_t j = 0; j < N; j++)
@@ -62,7 +63,9 @@ void test_shuffle_array_of_size_t() {
   }
 
   free(array);
-  free_matrix((void ***)&histogram);
+  array = NULL;
+  free(histogram);
+  histogram = NULL;
 
   double avg_H = total_H / N;
   double tolerance = maximum_H * 0.005;

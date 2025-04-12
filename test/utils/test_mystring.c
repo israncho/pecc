@@ -4,7 +4,6 @@
 #include <string.h>
 #include "../../include/test/utils/test_mystring.h"
 #include "../../include/utils/array.h"
-#include "../../include/utils/matrix.h"
 #include "../../include/utils/mystring.h"
 
 void test_mystring() {
@@ -243,7 +242,8 @@ void test_split_to_buffer() {
                                    ",hola_amigo_como_estas", 22, ',',
                                    &array_of_tokens, 1, 1, &buffer, 5, 22);
 
-  free_matrix((void ***)&array_of_tokens);
+  free(array_of_tokens);
+  free(buffer);
 
   printf("\t- split_to_buffer: PASSED\n");
 }
