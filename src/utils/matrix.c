@@ -13,27 +13,34 @@ int init_matrix(void ***ptr_to_matrix, const size_t rows, const size_t columns,
     return 2;
   if (rows == 0 || columns == 0 || type_size == 0)
     return 0; // empty matrix needs no space
+  if (alignment == 0)
+    return 3;
   if (columns > SIZE_MAX / type_size || rows > SIZE_MAX / (columns * type_size))
-    return 3; // overflow error.
-
-  // memory for the ptrs to each row.
+    return 4; // overflow error.
 
   size_t header_size = rows * sizeof(void *);
   size_t data_size = type_size * rows * columns;
+
+  if (header_size > SIZE_MAX - (alignment - 1) ||
+      header_size + (alignment - 1) > SIZE_MAX - data_size) {
+    return 4; // Overflow
+  }
+
   size_t total_size = header_size + (alignment - 1) + data_size;
 
   void *memory_block = malloc(total_size);
   if (!memory_block)
-    return 4;
+    return 5;
   void **matrix_rows = (void **)memory_block;
 
-  // memory for all the data in the matrix.
   void *data_block = memory_block;
   uintptr_t data_start = (uintptr_t)memory_block + header_size;
-  if (alignment != 0 && (alignment & (alignment - 1)))
+  if (!(alignment & (alignment - 1)))
     data_start = (data_start + (alignment - 1)) & ~(alignment - 1);
-  else
-    data_start = data_start + (alignment - data_start % alignment) % alignment;
+  else {
+    uintptr_t offset = alignment - (data_start % alignment);
+    data_start += (offset == alignment) ? 0 : offset;
+  }
 
   data_block = (void *)data_start;
 
