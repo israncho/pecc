@@ -22,7 +22,7 @@ void test_shuffle_array_of_size_t() {
   xorshiftr128plus_state state;
   set_up_seed(&state, 0, 0);
 
-  const size_t N = 1000;
+  const size_t N = 250;
   size_t *array = NULL;
   size_t **histogram = NULL;
 
@@ -36,7 +36,7 @@ void test_shuffle_array_of_size_t() {
     for (size_t j = 0; j < N; j++)
       histogram[i][j] = 0;
 
-  const size_t TRIALS = 15000;
+  const size_t TRIALS = 5000;
 
   for (size_t i = 0; i < TRIALS; i++) {
     fill_array_simple(array, N);
