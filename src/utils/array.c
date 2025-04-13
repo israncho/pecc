@@ -1,8 +1,10 @@
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../../include/utils/array.h"
 
-ArrayStatus resize_array(void **ptr_to_array, const size_t new_size, const size_t type_size) {
+ArrayStatus resize_array(void **ptr_to_array, const size_t new_size,
+                         const size_t type_size) {
   if (ptr_to_array == NULL)
     return ARRAY_ERR_NULL;
   if (new_size == 0)
@@ -17,7 +19,8 @@ ArrayStatus resize_array(void **ptr_to_array, const size_t new_size, const size_
   return ARRAY_OK;
 }
 
-ArrayStatus init_array(void **ptr_to_array, const size_t size, const size_t type_size) {
+ArrayStatus init_array(void **ptr_to_array, const size_t size,
+                       const size_t type_size) {
   if (ptr_to_array == NULL)
     return ARRAY_ERR_NULL;
   if (*ptr_to_array != NULL)
@@ -25,34 +28,31 @@ ArrayStatus init_array(void **ptr_to_array, const size_t size, const size_t type
   return resize_array(ptr_to_array, size, type_size);
 }
 
-int generic_swap(void *array, const size_t array_size, const size_t type_size,
-                const size_t i, const size_t j) {
-  if (array == NULL)
-    return 1;
-  if (array_size == 0)
-    return 2;
-  if (type_size == 0)
-    return 3;
-  if (i == j)
-    return 0;
-  if (i < 0 || j < 0 || i >= array_size || j >= array_size)
-    return 5;
+ArrayStatus
+setup_array_from_prealloc_mem(void **ptr_to_mem, size_t *ptr_to_mem_capacity,
+                              void **ptr_to_array, const size_t size,
+                              const size_t type_size, const size_t alignment) {
 
-  char *ptr = (char *)array;
-  char *a = ptr + i * type_size;
-  char *b = ptr + j * type_size;
+  const uintptr_t beg_mem = (uintptr_t)*ptr_to_mem;
+  const size_t data_mem_needed = type_size * size;
+  uintptr_t align_addr = beg_mem;
 
-  char tmp_stack_mem[128];
-  void *tmp = (type_size <= 128) ? tmp_stack_mem : malloc(type_size);
-  if (tmp == NULL && type_size > 128)
-    return 6;
+  if (alignment & (alignment - 1))
+    align_addr = (align_addr + (alignment - 1)) & ~(alignment - 1);
+  else {
+    uintptr_t offset = alignment - (align_addr % alignment);
+    align_addr += (offset == alignment) ? 0 : offset;
+  }
 
-  memcpy(tmp, a, type_size);
-  memcpy(a, b, type_size);
-  memcpy(b, tmp, type_size);
+  const size_t padding = align_addr - beg_mem;
+  const size_t total_mem_requiered = data_mem_needed + padding;
 
-  if (tmp != tmp_stack_mem)
-    free(tmp);
+  if (total_mem_requiered > *ptr_to_mem_capacity)
+    return ARRAY_ERR_NO_CAPACITY;
 
-  return 0;
+  (*ptr_to_array) = (void *)align_addr;
+  (*ptr_to_mem) = (char *)beg_mem + total_mem_requiered;
+  (*ptr_to_mem_capacity) -= total_mem_requiered;
+
+  return ARRAY_OK;
 }

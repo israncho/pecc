@@ -17,7 +17,8 @@ typedef enum {
   ARRAY_ERR_ZERO,        ///< Requested size was zero (invalid operation)
   ARRAY_ERR_TYPE_S_ZERO, ///< Requested type size was zero (invalid operation)
   ARRAY_ERR_IN_USE,      ///< Pointer already contains an allocated array
-  ARRAY_ERR_ALLOC        ///< Memory allocation failed (check errno)
+  ARRAY_ERR_ALLOC,       ///< Memory allocation failed (check errno)
+  ARRAY_ERR_NO_CAPACITY ///< Not enough capacity 
 } ArrayStatus;
 
 /**
@@ -70,15 +71,18 @@ ArrayStatus resize_array(void **ptr_to_array, const size_t new_size,
 ArrayStatus init_array(void **ptr_to_array, const size_t size,
                        const size_t type_size);
 
-int generic_swap(void *array, const size_t array_size,
-                        const size_t type_size, const size_t i, const size_t j);
+ArrayStatus
+setup_array_from_prealloc_mem(void **ptr_to_mem, size_t *ptr_to_mem_capacity,
+                              void **ptr_to_array, const size_t size,
+                              const size_t type_size, const size_t alignment);
 
-#define SWAP_T(arr, type, i, j) do { \
-    type *__arr = (arr); \
-    size_t __i = (i), __j = (j); \
-    type __tmp = __arr[__i]; \
-    __arr[__i] = __arr[__j]; \
-    __arr[__j] = __tmp; \
-} while (0)
+#define SWAP_T(arr, type, i, j)                                                \
+  do {                                                                         \
+    type *__arr = (arr);                                                       \
+    size_t __i = (i), __j = (j);                                               \
+    type __tmp = __arr[__i];                                                   \
+    __arr[__i] = __arr[__j];                                                   \
+    __arr[__j] = __tmp;                                                        \
+  } while (0)
 
 #endif
