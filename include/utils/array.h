@@ -71,6 +71,40 @@ ArrayStatus resize_array(void **ptr_to_array, const size_t new_size,
 ArrayStatus init_array(void **ptr_to_array, const size_t size,
                        const size_t type_size);
 
+/**
+ * @brief Sets up an array within a preallocated memory block with proper alignment.
+ *
+ * This function takes a preallocated memory block and carves out a properly aligned
+ * array from it, updating the remaining memory capacity. It handles alignment
+ * requirements and checks if there's sufficient capacity in the preallocated block.
+ *
+ * @param ptr_to_mem [in/out] Pointer to the preallocated memory block. Will be
+ *                 advanced by the amount of memory used (including padding).
+ * @param ptr_to_mem_capacity [in/out] Pointer to the remaining capacity of the
+ *                 preallocated memory block. Will be decremented by the total
+ *                 memory used (including padding).
+ * @param ptr_to_array [out] Pointer where the aligned array address will be stored.
+ * @param size [in] Number of elements requested for the array. Must be > 0.
+ * @param type_size [in] Size in bytes of each array element. Must be > 0.
+ * @param alignment [in] Required memory alignment for the array. Must be a power
+ *                 of 2. If 0, no alignment is performed.
+ *
+ * @return ArrayStatus code:
+ *         - ARRAY_OK: Array was successfully set up
+ *         - ARRAY_ERR_NO_CAPACITY: Not enough space in preallocated memory
+ *                                 (including alignment padding)
+ *
+ * @note The function handles alignment in two ways:
+ *       1. For power-of-2 alignment: uses bitwise operations for efficiency
+ *       2. For other cases: uses modulo arithmetic
+ * @note The total memory consumed includes:
+ *       - The actual array data (size * type_size)
+ *       - Any padding needed for alignment
+ * @note After successful execution:
+ *       - *ptr_to_mem points to the remaining available memory
+ *       - *ptr_to_mem_capacity reflects the remaining bytes
+ *       - *ptr_to_array points to the aligned array start
+ */
 ArrayStatus
 setup_array_from_prealloc_mem(void **ptr_to_mem, size_t *ptr_to_mem_capacity,
                               void **ptr_to_array, const size_t size,

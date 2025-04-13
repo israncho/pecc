@@ -4,6 +4,7 @@
 #include "../include/test/utils/test_matrix.h"
 #include "../include/test/utils/test_mystring.h"
 #include "../include/test/utils/test_myrandom.h"
+#include "../include/test/utils/test_array.h"
 #include "../include/test/tsp/test_euclidean.h"
 
 int main() {
@@ -13,6 +14,7 @@ int main() {
   test_mystring();
   test_euclidean();
   test_myrandom();
+  test_array();
   printf("\nFinished testing\n");
   return 0;
 }
