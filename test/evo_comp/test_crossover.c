@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "../../include/test/evo_comp/test_crossover.h"
 #include "../../include/evo_comp/crossover.h"
 #include "../../include/utils/myrandom.h"
@@ -38,10 +39,12 @@ void test_random_subintervals() {
         size_t curr_i = intervals_array[i];
         size_t curr_j = intervals_array[i + 1];
         assert(prev_j + 1 == curr_i);
+        assert(intervals_array[i + 2] == 0 || intervals_array[i + 2] == 1);
+        bool for_child1 = intervals_array[i + 2];
 
         size_t sum_for_size = curr_j - curr_i + 1;
 
-        if (intervals_array[i + 2])
+        if (for_child1)
           size_for_one += sum_for_size;
         else
           size_for_another += sum_for_size;
