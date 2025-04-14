@@ -35,8 +35,7 @@ int shuffle_array_of_size_t(size_t *array, const size_t array_size,
   size_t n_2 = array_size - 2;
   size_t n_1 = array_size - 1;
   for (size_t i = 0; i < n_2; i++) {
-    size_t interval_size = n_1 - i + 1;
-    size_t j = randsize_t(interval_size, state) + i;
+    size_t j = randsize_t_i(i, n_1, state);
     SWAP_T(array, size_t, i, j);
   }
   return 0;
