@@ -5,6 +5,7 @@
 #include "../include/test/utils/test_mystring.h"
 #include "../include/test/utils/test_myrandom.h"
 #include "../include/test/utils/test_array.h"
+#include "../include/test/evo_comp/test_crossover.h"
 #include "../include/test/tsp/test_euclidean.h"
 
 int main() {
@@ -15,6 +16,7 @@ int main() {
   test_euclidean();
   test_myrandom();
   test_array();
+  test_crossover();
   printf("\nFinished testing\n");
   return 0;
 }

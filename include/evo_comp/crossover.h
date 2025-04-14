@@ -12,4 +12,8 @@ int order_crossover_ox1(const individual *ptr_parent1,
                         ga_workspace *ptr_workspace,
                         xorshiftr128plus_state *ptr_state);
 
+void random_subintervals(size_t *intervals_array, xorshiftr128plus_state *state,
+                         size_t *number_of_intervals, const size_t range,
+                         const size_t overall_size_for_one);
+                        
 #endif
