@@ -1,25 +1,22 @@
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
 #include "../../include/evo_comp/crossover.h"
 #include "../../include/evo_comp/genetic_algorithm.h"
 #include "../../include/utils/array.h"
-#include <stdbool.h>
-#include <stddef.h>
 
 int order_crossover_ox1(const individual *ptr_parent1,
                         const individual *ptr_parent2, individual *ptr_child1,
                         individual *ptr_child2, const size_t chromosome_size,
                         ga_workspace *ptr_workspace,
                         xorshiftr128plus_state *state) {
-  if (ptr_parent1 == NULL || ptr_parent2 == NULL)
-    return 1;
-  if (ptr_parent1->codification == NULL || ptr_parent2->codification == NULL)
-    return 2;
+  if (ptr_parent1 == NULL || ptr_parent2 == NULL) return 1;
+  if (ptr_parent1->codification == NULL || ptr_parent2->codification == NULL) return 2;
+
   size_t *parent1 = ptr_parent1->codification;
   size_t *parent2 = ptr_parent2->codification;
 
-  if (ptr_child1 == NULL)
-    return 3;
-  if (ptr_child1->codification == NULL)
-    return 4;
+  if (ptr_child1 == NULL || ptr_child1->codification == NULL) return 3;
 
   size_t *child1 = ptr_child1->codification, *child2 = NULL;
   bool generate_two_childs = false;
@@ -29,14 +26,12 @@ int order_crossover_ox1(const individual *ptr_parent1,
     generate_two_childs = true;
   }
 
-  if (ptr_workspace == NULL || ptr_workspace->crossover_workspace == NULL)
-    return 5;
+  if (ptr_workspace == NULL || ptr_workspace->crossover_workspace == NULL) return 4;
 
   void *workspace = ptr_workspace->crossover_workspace;
   size_t workspace_capacity = ptr_workspace->crossover_workspace_capacity;
 
-  if (state == NULL)
-    return 6;
+  if (state == NULL) return 5;
 
   const size_t inheritance_p1 = chromosome_size / 2;
   const size_t size_t_size = sizeof(size_t);
@@ -47,6 +42,18 @@ int order_crossover_ox1(const individual *ptr_parent1,
                                 (void **)&intervals_array, 15, size_t_size,
                                 size_t_alignment);
 
+  size_t *missing_indexes_child1 = NULL;
+  size_t missing_ind_c1_i = 0;
+  size_t *missing_indexes_child2 = NULL;
+  size_t missing_ind_c2_i = 0;
+  setup_array_from_prealloc_mem(
+      &workspace, &workspace_capacity, (void **)&missing_indexes_child1,
+      inheritance_p1 + 1, size_t_size, size_t_alignment);
+
+  setup_array_from_prealloc_mem(
+      &workspace, &workspace_capacity, (void **)&missing_indexes_child2,
+      inheritance_p1 + 1, size_t_size, size_t_alignment);
+
   // boolset
   bool *missing_for_child1 = NULL;
   setup_array_from_prealloc_mem(&workspace, &workspace_capacity,
@@ -55,17 +62,6 @@ int order_crossover_ox1(const individual *ptr_parent1,
 
   for (size_t i = 0; i < chromosome_size; i++)
     missing_for_child1[i] = false;
-
-  size_t *missing_indexes_child1 = NULL;
-  size_t missing_ind_c1_i = 0;
-  size_t *missing_indexes_child2 = NULL;
-  size_t missing_ind_c2_i = 0;
-  setup_array_from_prealloc_mem(
-      &workspace, &workspace_capacity, (void **)&missing_indexes_child1,
-      inheritance_p1 + 1, size_t_size, size_t_alignment);
-  setup_array_from_prealloc_mem(
-      &workspace, &workspace_capacity, (void **)&missing_indexes_child2,
-      inheritance_p1 + 1, size_t_size, size_t_alignment);
 
   size_t number_of_intervals = 0;
 
@@ -82,14 +78,13 @@ int order_crossover_ox1(const individual *ptr_parent1,
       size_t gene = parent1[j];
       if (for_child1) {
         child1[j] = gene;
-        missing_indexes_child1[missing_ind_c1_i] = j;
-      } else {
+        missing_indexes_child2[missing_ind_c2_i++] = j;
+      } else if (generate_two_childs) {
         child2[j] = gene;
-        missing_indexes_child2[missing_ind_c2_i] = j;
+        missing_indexes_child1[missing_ind_c1_i++] = j;
         missing_for_child1[gene] = true;
       }
     }
-
   }
 
   missing_ind_c1_i = 0;
@@ -97,9 +92,9 @@ int order_crossover_ox1(const individual *ptr_parent1,
 
   for (size_t i = 0; i < chromosome_size; i++) {
     const size_t gene_from_p2 = parent2[i];
-    if (missing_for_child1[gene_from_p2]) 
+    if (missing_for_child1[gene_from_p2])
       child1[missing_indexes_child1[missing_ind_c1_i++]] = gene_from_p2;
-    else
+    else if (generate_two_childs)
       child2[missing_indexes_child2[missing_ind_c2_i++]] = gene_from_p2;
   }
 
