@@ -5,6 +5,76 @@
 #include "../../include/evo_comp/genetic_algorithm.h"
 #include "../../include/utils/array.h"
 
+static inline void _random_subintervals(size_t *intervals_array,
+                                        xorshiftr128plus_state *state,
+                                        size_t *number_of_intervals,
+                                        const size_t range,
+                                        const size_t overall_size_for_one) {
+  const size_t fst_size = randsize_t_i(1, overall_size_for_one - 1, state);
+  const size_t snd_size = overall_size_for_one - fst_size;
+
+  const size_t fst_i = randsize_t_i(0, (range - fst_size) + 1, state);
+  const size_t fst_j = fst_i + (fst_size - 1);
+
+  size_t snd_i = -1;
+
+  if (snd_size <= fst_i)
+    snd_i = randsize_t_i(0, fst_i - snd_size, state);
+  else
+    snd_i = randsize_t_i(fst_j + 1, (range - snd_size) + 1, state);
+
+  const size_t snd_j = snd_i + (snd_size - 1);
+
+  size_t tmp_arr[4];
+
+  if (fst_i < snd_i) {
+    tmp_arr[0] = fst_i;
+    tmp_arr[1] = fst_j;
+    tmp_arr[2] = snd_i;
+    tmp_arr[3] = snd_j;
+  } else {
+    tmp_arr[0] = snd_i;
+    tmp_arr[1] = snd_j;
+    tmp_arr[2] = fst_i;
+    tmp_arr[3] = fst_j;
+  }
+
+  size_t curr = 0;
+  size_t n_of_intervals = 0;
+  size_t intervals_arr_i = 0;
+  for (size_t i = 0; i < 3; i += 2) {
+    size_t fst = tmp_arr[i];
+    size_t snd = tmp_arr[i + 1];
+    if (curr < fst) {
+      n_of_intervals++;
+      intervals_array[intervals_arr_i++] = curr;
+      intervals_array[intervals_arr_i++] = fst - 1;
+      // indicator to separate genes from one parent or another.
+      intervals_array[intervals_arr_i++] = 0;
+    }
+    n_of_intervals++;
+    intervals_array[intervals_arr_i++] = fst;
+    intervals_array[intervals_arr_i++] = snd;
+    intervals_array[intervals_arr_i++] = 1;
+    curr = snd + 1;
+  }
+
+  if (curr <= range) {
+    n_of_intervals++;
+    intervals_array[intervals_arr_i++] = curr;
+    intervals_array[intervals_arr_i++] = range;
+    intervals_array[intervals_arr_i++] = 0;
+  }
+  *number_of_intervals = n_of_intervals;
+}
+
+void random_subintervals(size_t *intervals_array, xorshiftr128plus_state *state,
+                         size_t *number_of_intervals, const size_t range,
+                         const size_t overall_size_for_one) {
+  _random_subintervals(intervals_array, state, number_of_intervals, range,
+                       overall_size_for_one);
+}
+
 int order_crossover_ox1(const individual *ptr_parent1,
                         const individual *ptr_parent2, individual *ptr_child1,
                         individual *ptr_child2, const size_t chromosome_size,
@@ -65,8 +135,8 @@ int order_crossover_ox1(const individual *ptr_parent1,
 
   size_t number_of_intervals = 0;
 
-  random_subintervals(intervals_array, state, &number_of_intervals,
-                      chromosome_size - 1, inheritance_p1);
+  _random_subintervals(intervals_array, state, &number_of_intervals,
+                       chromosome_size - 1, inheritance_p1);
 
   const size_t intervals_array_size = number_of_intervals * 3;
   for (size_t i = 0; i < intervals_array_size; i += 3) {
@@ -99,65 +169,4 @@ int order_crossover_ox1(const individual *ptr_parent1,
   }
 
   return 0;
-}
-
-void random_subintervals(size_t *intervals_array, xorshiftr128plus_state *state,
-                         size_t *number_of_intervals, const size_t range,
-                         const size_t overall_size_for_one) {
-  const size_t fst_size = randsize_t_i(1, overall_size_for_one - 1, state);
-  const size_t snd_size = overall_size_for_one - fst_size;
-
-  const size_t fst_i = randsize_t_i(0, (range - fst_size) + 1, state);
-  const size_t fst_j = fst_i + (fst_size - 1);
-
-  size_t snd_i = -1;
-
-  if (snd_size <= fst_i)
-    snd_i = randsize_t_i(0, fst_i - snd_size, state);
-  else
-    snd_i = randsize_t_i(fst_j + 1, (range - snd_size) + 1, state);
-
-  const size_t snd_j = snd_i + (snd_size - 1);
-
-  size_t tmp_arr[4];
-
-  if (fst_i < snd_i) {
-    tmp_arr[0] = fst_i;
-    tmp_arr[1] = fst_j;
-    tmp_arr[2] = snd_i;
-    tmp_arr[3] = snd_j;
-  } else {
-    tmp_arr[0] = snd_i;
-    tmp_arr[1] = snd_j;
-    tmp_arr[2] = fst_i;
-    tmp_arr[3] = fst_j;
-  }
-
-  size_t curr = 0;
-  size_t n_of_intervals = 0;
-  size_t intervals_arr_i = 0;
-  for (size_t i = 0; i < 3; i += 2) {
-    size_t fst = tmp_arr[i];
-    size_t snd = tmp_arr[i + 1];
-    if (curr < fst) {
-      n_of_intervals++;
-      intervals_array[intervals_arr_i++] = curr;
-      intervals_array[intervals_arr_i++] = fst - 1;
-      // indicator to separate genes from one parent or another.
-      intervals_array[intervals_arr_i++] = 0;
-    }
-    n_of_intervals++;
-    intervals_array[intervals_arr_i++] = fst;
-    intervals_array[intervals_arr_i++] = snd;
-    intervals_array[intervals_arr_i++] = 1;
-    curr = snd + 1;
-  }
-
-  if (curr <= range) {
-    n_of_intervals++;
-    intervals_array[intervals_arr_i++] = curr;
-    intervals_array[intervals_arr_i++] = range;
-    intervals_array[intervals_arr_i++] = 0;
-  }
-  *number_of_intervals = n_of_intervals;
 }
