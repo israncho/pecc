@@ -140,25 +140,26 @@ void test_order_crossover_ox1() {
   workspace.crossover_workspace_capacity = crossover_workspace_size;
   init_array(&workspace.crossover_workspace, crossover_workspace_size, 1);
 
-  xorshiftr128plus_state state;
-  set_up_seed(&state, 0, 0);
+  set_up_seed(&workspace.state, 0, 0);
 
-  for (size_t _ = 0; _ < 2000; _++) {
+  for (size_t _ = 0; _ < 5000; _++) {
     const size_t codification_size =
-        randsize_t_i(10, max_codification_size, &state);
+        randsize_t_i(10, max_codification_size, &workspace.state);
 
     fill_parents(codification_size, parent1.codification, parent2.codification);
     clean_children(codification_size, child1.codification, child2.codification);
 
-    shuffle_array_of_size_t(parent1.codification, codification_size, &state);
-    shuffle_array_of_size_t(parent2.codification, codification_size, &state);
+    shuffle_array_of_size_t(parent1.codification, codification_size,
+                            &workspace.state);
+    shuffle_array_of_size_t(parent2.codification, codification_size,
+                            &workspace.state);
     assert(
         all_elements_present(boolset, codification_size, parent1.codification));
     assert(
         all_elements_present(boolset, codification_size, parent2.codification));
 
-    order_crossover_ox1(&parent1, &parent2, &child1, &child2, codification_size,
-                        &workspace, &state);
+    assert(order_crossover_ox1(&parent1, &parent2, &child1, &child2,
+                               codification_size, &workspace) == 0);
     assert(
         all_elements_present(boolset, codification_size, child1.codification));
     assert(

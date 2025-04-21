@@ -18,7 +18,6 @@ typedef struct {
   size_t curr_f_execs;
   size_t n_threads;
   individual current_best;
-  xorshiftr128plus_state *random_state;
 } ga_execution;
 
 typedef struct {
@@ -30,6 +29,7 @@ typedef struct {
   size_t selection_workspace_capacity;
   size_t mutation_workspace_capacity;
   size_t replacement_workspace_capacity;
+  xorshiftr128plus_state state;
 } ga_workspace;
 
 int genetic_algorith(individual *array_of_individuals,

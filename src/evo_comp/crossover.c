@@ -78,8 +78,7 @@ void random_subintervals(size_t *intervals_array, xorshiftr128plus_state *state,
 int order_crossover_ox1(const individual *ptr_parent1,
                         const individual *ptr_parent2, individual *ptr_child1,
                         individual *ptr_child2, const size_t chromosome_size,
-                        ga_workspace *ptr_workspace,
-                        xorshiftr128plus_state *state) {
+                        ga_workspace *ptr_workspace) {
   if (ptr_parent1 == NULL || ptr_parent2 == NULL) return 1;
   if (ptr_parent1->codification == NULL || ptr_parent2->codification == NULL) return 2;
 
@@ -101,7 +100,7 @@ int order_crossover_ox1(const individual *ptr_parent1,
   void *workspace = ptr_workspace->crossover_workspace;
   size_t workspace_capacity = ptr_workspace->crossover_workspace_capacity;
 
-  if (state == NULL) return 5;
+  xorshiftr128plus_state *state = &ptr_workspace->state;
 
   const size_t inheritance_p1 = chromosome_size / 2;
   const size_t size_t_size = sizeof(size_t);
