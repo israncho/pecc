@@ -3,6 +3,8 @@
 #ifndef CROSSOVER_H
 #define CROSSOVER_H
 
+#include <stddef.h>
+#include <stdbool.h>
 #include "../../include/utils/myrandom.h"
 #include "genetic_algorithm.h"
 
@@ -14,5 +16,11 @@ int order_crossover_ox1(const individual *ptr_parent1,
 void random_subintervals(size_t *intervals_array, xorshiftr128plus_state *state,
                          size_t *number_of_intervals, const size_t range,
                          const size_t overall_size_for_one);
-                        
+
+static inline size_t ox1_workspace_size(const size_t individuals_size) {
+  return (15 * sizeof(size_t)) + (2 * (individuals_size + 1) * sizeof(size_t)) +
+         (sizeof(bool) * individuals_size) + _Alignof(size_t) * 3 +
+         _Alignof(bool);
+}
+
 #endif

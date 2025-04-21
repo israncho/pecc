@@ -133,10 +133,7 @@ void test_order_crossover_ox1() {
 
   ga_workspace workspace;
   workspace.crossover_workspace = NULL;
-  size_t crossover_workspace_size =
-      (15 * size_t_size) + (2 * (max_codification_size + 1) * size_t_size) +
-      (sizeof(bool) * max_codification_size) + _Alignof(size_t) * 3 +
-      _Alignof(bool);
+  size_t crossover_workspace_size = ox1_workspace_size(max_codification_size);
   workspace.crossover_workspace_capacity = crossover_workspace_size;
   init_array(&workspace.crossover_workspace, crossover_workspace_size, 1);
 
