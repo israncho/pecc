@@ -3,12 +3,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include "../../include/utils/mytime.h"
 #include "../../include/test/utils/test_array.h"
 #include "../../include/utils/array.h"
 
 void test_array() {
   printf("Testing: array\n");
+
+  clock_t start = clock();
   test_setup_array_from_prealloc_mem();
+  printf("\t- setup_array_from_prealloc_mem: PASSED [%.4f secs]\n", MEASURE_TIME(start));
 }
 
 void test_setup_array_from_prealloc_mem() {
@@ -116,5 +121,4 @@ void test_setup_array_from_prealloc_mem() {
     assert(char_array[i] == char_target[i]);
 
   free(mem);
-  printf("\t- setup_array_from_prealloc_mem: PASSED\n");
 }

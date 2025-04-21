@@ -4,14 +4,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include "../../include/utils/mytime.h"
 #include "../../include/test/tsp/test_euclidean.h"
 #include "../../include/tsp/euclidean.h"
 #include "../../include/utils/input_output.h"
 
 void test_euclidean() {
   printf("Testing: tsp_euclidean\n");
+
+  clock_t start = clock();
   test_init_tsp_euc_instance();
+  printf("\t- init_tsp_euc_instance: PASSED [%.4f secs]\n", MEASURE_TIME(start));
+
+  start = clock();
   test_euclidean_distance();
+  printf("\t- euclidean_distance: PASSED [%.4f secs]\n", MEASURE_TIME(start));
 }
 
 void test_init_tsp_euc_instance() {
@@ -79,7 +87,6 @@ void test_init_tsp_euc_instance() {
   free_lines_array_content(array_of_lines, num_of_lines);
   free(array_of_lines);
   array_of_lines = NULL;
-  printf("\t- init_tsp_euc_instance: PASSED\n");
 }
 
 void test_euclidean_distance() {
@@ -96,5 +103,4 @@ void test_euclidean_distance() {
     p2[1] = i;
     assert(euclidean_distance(p1, p2, 2) == distance);
   }
-  printf("\t- euclidean_distance: PASSED\n");
 }

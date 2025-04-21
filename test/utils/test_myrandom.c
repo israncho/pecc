@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include "../../include/utils/mytime.h"
 #include "../../include/test/utils/test_myrandom.h"
 #include "../../include/utils/array.h"
 #include "../../include/utils/matrix.h"
@@ -10,7 +12,10 @@
 
 void test_myrandom() {
   printf("Testing: myrandom\n");
+
+  clock_t start = clock();
   test_shuffle_array_of_size_t();
+  printf("\t- shuffle_array_of_size_t: PASSED [%.4f secs]\n", MEASURE_TIME(start));
 }
 
 inline static void fill_array_simple(size_t *array, size_t array_size) {
@@ -75,6 +80,4 @@ void test_shuffle_array_of_size_t() {
   assert(maximum_H - avg_H <= tolerance);
 
   array = NULL;
-
-  printf("\t- shuffle_array_of_size_t: PASSED\n");
 }

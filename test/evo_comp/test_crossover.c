@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <time.h>
+#include "../../include/utils/mytime.h"
 #include "../../include/test/evo_comp/test_crossover.h"
 #include "../../include/evo_comp/crossover.h"
 #include "../../include/evo_comp/genetic_algorithm.h"
@@ -9,8 +11,14 @@
 
 void test_crossover() {
   printf("Testing: crossover\n");
+
+  clock_t start = clock();
   test_random_subintervals();
+  printf("\t- random_subintervals: PASSED [%.4f secs]\n", MEASURE_TIME(start));
+
+  start = clock();
   test_order_crossover_ox1();
+  printf("\t- order_crossover_ox1: PASSED [%.4f secs]\n", MEASURE_TIME(start));
 }
 
 void test_random_subintervals() {
@@ -59,7 +67,6 @@ void test_random_subintervals() {
   }
 
   free(intervals_array);
-  printf("\t- random_subintervals: PASSED\n");
 }
 
 static inline void fill_parents(const size_t codification_size,
@@ -170,6 +177,4 @@ void test_order_crossover_ox1() {
   free(child2.codification);
   free(workspace.crossover_workspace);
   free(boolset);
-
-  printf("\t- order_crossover_ox1: PASSED\n");
 }
