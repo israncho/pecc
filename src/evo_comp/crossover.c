@@ -86,16 +86,11 @@ int order_crossover_ox1(const individual *ptr_parent1,
   size_t *parent2 = ptr_parent2->codification;
 
   if (ptr_child1 == NULL || ptr_child1->codification == NULL) return 3;
+  if (ptr_child2 == NULL || ptr_child2->codification == NULL) return 4;
 
-  size_t *child1 = ptr_child1->codification, *child2 = NULL;
-  bool generate_two_childs = false;
+  size_t *child1 = ptr_child1->codification, *child2 = ptr_child2->codification;
 
-  if (ptr_child2 != NULL && ptr_child2->codification != NULL) {
-    child2 = ptr_child2->codification;
-    generate_two_childs = true;
-  }
-
-  if (ptr_workspace == NULL || ptr_workspace->crossover_workspace == NULL) return 4;
+  if (ptr_workspace == NULL || ptr_workspace->crossover_workspace == NULL) return 5;
 
   void *workspace = ptr_workspace->crossover_workspace;
   size_t workspace_capacity = ptr_workspace->crossover_workspace_capacity;
@@ -148,7 +143,7 @@ int order_crossover_ox1(const individual *ptr_parent1,
       if (for_child1) {
         child1[j] = gene;
         missing_indexes_child2[missing_ind_c2_i++] = j;
-      } else if (generate_two_childs) {
+      } else {
         child2[j] = gene;
         missing_indexes_child1[missing_ind_c1_i++] = j;
         missing_for_child1[gene] = true;
@@ -163,7 +158,7 @@ int order_crossover_ox1(const individual *ptr_parent1,
     const size_t gene_from_p2 = parent2[i];
     if (missing_for_child1[gene_from_p2])
       child1[missing_indexes_child1[missing_ind_c1_i++]] = gene_from_p2;
-    else if (generate_two_childs)
+    else
       child2[missing_indexes_child2[missing_ind_c2_i++]] = gene_from_p2;
   }
 
