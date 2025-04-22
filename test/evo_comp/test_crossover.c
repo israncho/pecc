@@ -139,9 +139,10 @@ void test_order_crossover_ox1() {
 
   set_up_seed(&workspace.state, 0, 0);
 
-  for (size_t _ = 0; _ < 5000; _++) {
+  for (size_t _ = 0; _ < 10000; _++) {
     const size_t codification_size =
         randsize_t_i(10, max_codification_size, &workspace.state);
+    const bool two_childs = randsize_t_i(0, 1, &workspace.state);
 
     fill_parents(codification_size, parent1.codification, parent2.codification);
     clean_children(codification_size, child1.codification, child2.codification);
@@ -155,18 +156,32 @@ void test_order_crossover_ox1() {
     assert(
         all_elements_present(boolset, codification_size, parent2.codification));
 
-    assert(order_crossover_ox1(&parent1, &parent2, &child1, &child2,
-                               codification_size, &workspace) == 0);
+    if (two_childs)
+      assert(order_crossover_ox1(&parent1, &parent2, &child1, &child2,
+                                 codification_size, &workspace) == 0);
+    else
+      assert(order_crossover_ox1(&parent1, &parent2, &child1, NULL,
+                                 codification_size, &workspace) == 0);
     assert(
         all_elements_present(boolset, codification_size, child1.codification));
-    assert(
-        all_elements_present(boolset, codification_size, child2.codification));
+
+    if (two_childs)
+      assert(all_elements_present(boolset, codification_size,
+                                  child2.codification));
+    size_t c1_p1_matches = 0;
     for (size_t i = 0; i < codification_size; i++) {
       size_t p1_gene_i = ((size_t *)parent1.codification)[i];
       size_t c1_gene_i = ((size_t *)child1.codification)[i];
-      size_t c2_gene_i = ((size_t *)child2.codification)[i];
-      assert(p1_gene_i == c1_gene_i || p1_gene_i == c2_gene_i);
+      size_t c2_gene_i;
+      if (two_childs)
+        c2_gene_i = ((size_t *)child2.codification)[i];
+      if (two_childs)
+        assert(p1_gene_i == c1_gene_i || p1_gene_i == c2_gene_i);
+      else if (p1_gene_i == c1_gene_i)
+        c1_p1_matches++;
     }
+    if (!two_childs)
+      assert(c1_p1_matches >= codification_size / 2);
   }
 
   free(parent1.codification);

@@ -12,6 +12,10 @@ typedef struct {
 } individual;
 
 typedef struct {
+  individual *population;
+  individual *offspring;
+  size_t *selected_parents_indexes;
+  size_t codification_size;
   size_t population_size;
   size_t generations;
   size_t total_f_execs;

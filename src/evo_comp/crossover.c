@@ -1,3 +1,4 @@
+#include <omp.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -79,18 +80,27 @@ int order_crossover_ox1(const individual *ptr_parent1,
                         const individual *ptr_parent2, individual *ptr_child1,
                         individual *ptr_child2, const size_t chromosome_size,
                         ga_workspace *ptr_workspace) {
-  if (ptr_parent1 == NULL || ptr_parent2 == NULL) return 1;
-  if (ptr_parent1->codification == NULL || ptr_parent2->codification == NULL) return 2;
+  if (ptr_parent1 == NULL || ptr_parent2 == NULL)
+    return 1;
+  if (ptr_parent1->codification == NULL || ptr_parent2->codification == NULL)
+    return 2;
 
   size_t *parent1 = ptr_parent1->codification;
   size_t *parent2 = ptr_parent2->codification;
 
-  if (ptr_child1 == NULL || ptr_child1->codification == NULL) return 3;
-  if (ptr_child2 == NULL || ptr_child2->codification == NULL) return 4;
+  if (ptr_child1 == NULL || ptr_child1->codification == NULL)
+    return 3;
 
-  size_t *child1 = ptr_child1->codification, *child2 = ptr_child2->codification;
+  size_t *child1 = ptr_child1->codification, *child2 = NULL;
+  bool two_childs = false;
 
-  if (ptr_workspace == NULL || ptr_workspace->crossover_workspace == NULL) return 5;
+  if (ptr_child2 != NULL && ptr_child2->codification != NULL) {
+    two_childs = true;
+    child2 = ptr_child2->codification;
+  }
+
+  if (ptr_workspace == NULL || ptr_workspace->crossover_workspace == NULL)
+    return 4;
 
   void *workspace = ptr_workspace->crossover_workspace;
   size_t workspace_capacity = ptr_workspace->crossover_workspace_capacity;
@@ -114,9 +124,10 @@ int order_crossover_ox1(const individual *ptr_parent1,
       &workspace, &workspace_capacity, (void **)&missing_indexes_child1,
       inheritance_p1 + 1, size_t_size, size_t_alignment);
 
-  setup_array_from_prealloc_mem(
-      &workspace, &workspace_capacity, (void **)&missing_indexes_child2,
-      inheritance_p1 + 1, size_t_size, size_t_alignment);
+  if (two_childs)
+    setup_array_from_prealloc_mem(
+        &workspace, &workspace_capacity, (void **)&missing_indexes_child2,
+        inheritance_p1 + 1, size_t_size, size_t_alignment);
 
   // boolset
   bool *missing_for_child1 = NULL;
@@ -142,9 +153,11 @@ int order_crossover_ox1(const individual *ptr_parent1,
       size_t gene = parent1[j];
       if (for_child1) {
         child1[j] = gene;
-        missing_indexes_child2[missing_ind_c2_i++] = j;
+        if (two_childs)
+          missing_indexes_child2[missing_ind_c2_i++] = j;
       } else {
-        child2[j] = gene;
+        if (two_childs)
+          child2[j] = gene;
         missing_indexes_child1[missing_ind_c1_i++] = j;
         missing_for_child1[gene] = true;
       }
@@ -158,9 +171,36 @@ int order_crossover_ox1(const individual *ptr_parent1,
     const size_t gene_from_p2 = parent2[i];
     if (missing_for_child1[gene_from_p2])
       child1[missing_indexes_child1[missing_ind_c1_i++]] = gene_from_p2;
-    else
+    else if (two_childs)
       child2[missing_indexes_child2[missing_ind_c2_i++]] = gene_from_p2;
   }
 
+  return 0;
+}
+
+int population_crossover(
+    ga_execution *ptr_exec_data, ga_workspace *workspace_array,
+    int (*crossover)(const individual *, const individual *, individual *,
+                     individual *, const size_t, ga_workspace *)) {
+  size_t num_of_threads = ptr_exec_data->n_threads;
+  size_t population_size = ptr_exec_data->population_size;
+  size_t *selected_parents_indexes = ptr_exec_data->selected_parents_indexes;
+  size_t codification_size = ptr_exec_data->codification_size;
+  individual *population = ptr_exec_data->population;
+  individual *offspring = ptr_exec_data->offspring;
+#pragma omp parallel num_threads(num_of_threads)
+  {
+    size_t id = omp_get_thread_num();
+    for (size_t i = id * 2; i < population_size; i += num_of_threads * 2) {
+      size_t parent1_i = selected_parents_indexes[i];
+      size_t parent2_i = selected_parents_indexes[i + 1];
+      individual parent1 = population[parent1_i];
+      individual parent2 = population[parent2_i];
+      individual child1 = offspring[i];
+      individual child2 = offspring[i + 1];
+      crossover(&parent1, &parent2, &child1, &child2, codification_size,
+                &workspace_array[id]);
+    }
+  }
   return 0;
 }

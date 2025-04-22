@@ -3,8 +3,8 @@
 #ifndef CROSSOVER_H
 #define CROSSOVER_H
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include "../../include/utils/myrandom.h"
 #include "genetic_algorithm.h"
 
@@ -22,5 +22,10 @@ static inline size_t ox1_workspace_size(const size_t individuals_size) {
          (sizeof(bool) * individuals_size) + _Alignof(size_t) * 3 +
          _Alignof(bool);
 }
+
+int population_crossover(
+    ga_execution *ptr_exec_data, ga_workspace *workspace_array,
+    int (*crossover)(const individual *, const individual *, individual *,
+                     individual *, const size_t, ga_workspace *));
 
 #endif
