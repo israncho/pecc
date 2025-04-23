@@ -8,6 +8,7 @@
 #include "../include/test/utils/test_myrandom.h"
 #include "../include/test/utils/test_array.h"
 #include "../include/test/evo_comp/test_crossover.h"
+#include "../include/test/evo_comp/test_population.h"
 #include "../include/test/tsp/test_euclidean.h"
 
 int main() {
@@ -21,6 +22,7 @@ int main() {
   test_myrandom();
   test_array();
   test_crossover();
+  test_population();
 
   double elapsed = MEASURE_TIME(start);
   printf("\nFinished testing in %.3f seconds\n", elapsed);
