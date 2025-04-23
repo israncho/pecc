@@ -37,6 +37,14 @@ static inline bool all_elements_present(bool *boolset, const size_t set_size,
   return true;
 }
 
+static inline bool same_arrays(const size_t arrays_len, const size_t *arr1,
+                               const size_t *arr2) {
+  for (size_t i = 0; i < arrays_len; i++)
+    if (arr1[i] != arr2[i])
+      return false;
+  return true;
+}
+
 void test_fill_and_shuffle_population_of_permutations() {
   xorshiftr128plus_state state;
   set_up_seed(&state, 0, 0);
@@ -68,6 +76,11 @@ void test_fill_and_shuffle_population_of_permutations() {
     for (size_t i = 0; i < population_size; i++)
       assert(all_elements_present(boolset, codification_size,
                                   population[i].codification));
+                        
+    for (size_t i = 0; i < population_size; i++)
+      for (size_t j = i + 1; j < population_size; j++) 
+         assert(!same_arrays(codification_size, population[i].codification, population[j].codification));
+
     free(mem);
   }
 }
