@@ -182,6 +182,10 @@ int population_crossover(
     ga_execution *ptr_exec_data, ga_workspace *workspace_array,
     int (*crossover)(const individual *, const individual *, individual *,
                      individual *, const size_t, ga_workspace *)) {
+  if (ptr_exec_data == NULL) return 1;
+  if (workspace_array == NULL) return 2;
+  if (ptr_exec_data->population == NULL) return 3;
+  if (ptr_exec_data->offspring == NULL) return 4;
   size_t num_of_threads = ptr_exec_data->n_threads;
   size_t population_size = ptr_exec_data->population_size;
   size_t *selected_parents_indexes = ptr_exec_data->selected_parents_indexes;
