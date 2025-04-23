@@ -1,25 +1,110 @@
+#include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
-#include "../../include/utils/mytime.h"
 #include "../../include/test/evo_comp/test_population.h"
+#include "../../include/evo_comp/genetic_algorithm.h"
 #include "../../include/evo_comp/population.h"
+#include "../../include/utils/array.h"
+#include "../../include/utils/myrandom.h"
+#include "../../include/utils/mytime.h"
 
 void test_population() {
   printf("Testing: population\n");
 
   clock_t start = clock();
   test_setup_population_from_prealloc_mem();
-  printf("\t- setup_population_from_prealloc_mem: PASSED [%.4f secs]\n", MEASURE_TIME(start));
+  printf("\t- setup_population_from_prealloc_mem: PASSED [%.4f secs]\n",
+         MEASURE_TIME(start));
 
   start = clock();
   test_fill_and_shuffle_population_of_permutations();
-  printf("\t- fill_and_shuffle_population_of_permutations: PASSED [%.4f secs]\n", MEASURE_TIME(start));
+  printf(
+      "\t- fill_and_shuffle_population_of_permutations: PASSED [%.4f secs]\n",
+      MEASURE_TIME(start));
+}
+
+static inline bool all_elements_present(bool *boolset, const size_t set_size,
+                                        const size_t *test_set) {
+  for (size_t i = 0; i < set_size; i++)
+    boolset[i] = false;
+  for (size_t i = 0; i < set_size; i++)
+    boolset[test_set[i]] = true;
+  for (size_t i = 0; i < set_size; i++)
+    if (!boolset[i])
+      return false;
+  return true;
 }
 
 void test_fill_and_shuffle_population_of_permutations() {
+  xorshiftr128plus_state state;
+  set_up_seed(&state, 0, 0);
 
+  for (size_t _ = 0; _ < 1000; _++) {
+    const size_t population_size = randsize_t_i(50, 150, &state);
+    const size_t codification_size = randsize_t_i(50, 150, &state);
+    const size_t total_memory_needed =
+        population_size *
+            (sizeof(individual) + codification_size * sizeof(size_t)) +
+        _Alignof(individual) + _Alignof(size_t) +
+        sizeof(bool) * codification_size + _Alignof(bool);
+    size_t memory_capacity = total_memory_needed;
+    void *mem = malloc(total_memory_needed);
+    void *mem_ = mem;
+
+    individual *population = NULL;
+
+    setup_population_from_prealloc_mem(&mem_, &memory_capacity, &population,
+                                       population_size, codification_size,
+                                       sizeof(size_t), _Alignof(size_t));
+    bool *boolset = NULL;
+    assert(setup_array_from_prealloc_mem(
+               &mem_, &memory_capacity, (void **)&boolset, codification_size,
+               sizeof(bool), _Alignof(bool)) == ARRAY_OK);
+
+    assert(fill_and_shuffle_population_of_permutations(
+               population, population_size, codification_size, &state) == 0);
+    for (size_t i = 0; i < population_size; i++)
+      assert(all_elements_present(boolset, codification_size,
+                                  population[i].codification));
+    free(mem);
+  }
 }
 
 void test_setup_population_from_prealloc_mem() {
+  xorshiftr128plus_state state;
+  set_up_seed(&state, 0, 0);
 
+  for (size_t _ = 0; _ < 1000; _++) {
+    const size_t population_size = randsize_t_i(150, 250, &state);
+    const size_t codification_size = randsize_t_i(150, 250, &state);
+    const size_t total_memory_needed =
+        population_size *
+            (sizeof(individual) + codification_size * sizeof(size_t)) +
+        _Alignof(individual) + _Alignof(size_t);
+    size_t memory_capacity = total_memory_needed;
+    void *mem = malloc(total_memory_needed);
+    void *mem_ = mem;
+
+    individual *population = NULL;
+
+    assert(setup_population_from_prealloc_mem(
+               &mem_, &memory_capacity, &population, population_size,
+               codification_size, sizeof(size_t), _Alignof(size_t)) == 0);
+    for (size_t i = 0; i < population_size; i++) {
+      size_t *codification = population[i].codification;
+      for (size_t j = 0; j < codification_size; j++)
+        codification[j] = j;
+    }
+
+    for (size_t i = 0; i < population_size; i++) {
+      size_t test = 0;
+      for (size_t j = 0; j < codification_size; j++) {
+        size_t *codification = population[i].codification;
+        assert(codification[j] == test && j == test++);
+      }
+    }
+    free(mem);
+  }
 }
