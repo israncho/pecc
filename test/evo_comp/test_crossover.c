@@ -1,13 +1,14 @@
+#include "../../include/test/evo_comp/test_crossover.h"
+#include "../../include/evo_comp/crossover.h"
+#include "../../include/evo_comp/genetic_algorithm.h"
+#include "../../include/evo_comp/population.h"
+#include "../../include/utils/array.h"
+#include "../../include/utils/myrandom.h"
+#include "../../include/utils/mytime.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
-#include "../../include/utils/mytime.h"
-#include "../../include/test/evo_comp/test_crossover.h"
-#include "../../include/evo_comp/crossover.h"
-#include "../../include/evo_comp/genetic_algorithm.h"
-#include "../../include/utils/array.h"
-#include "../../include/utils/myrandom.h"
 
 void test_crossover() {
   printf("Testing: crossover\n");
@@ -19,6 +20,27 @@ void test_crossover() {
   start = clock();
   test_order_crossover_ox1();
   printf("\t- order_crossover_ox1: PASSED [%.4f secs]\n", MEASURE_TIME(start));
+
+  start = clock();
+  test_population_crossover_8_thread();
+  printf("\t- test_population_crossover_8_thread: PASSED [%.4f secs]\n",
+         MEASURE_TIME(start));
+
+  start = clock();
+  test_population_crossover_4_thread();
+  printf("\t- test_population_crossover_4_thread: PASSED [%.4f secs]\n",
+         MEASURE_TIME(start));
+
+  start = clock();
+  test_population_crossover_2_thread();
+  printf("\t- test_population_crossover_2_thread: PASSED [%.4f secs]\n",
+         MEASURE_TIME(start));
+
+  start = clock();
+  test_population_crossover_1_thread();
+  printf("\t- test_population_crossover_1_thread: PASSED [%.4f secs]\n",
+         MEASURE_TIME(start));
+
 }
 
 void test_random_subintervals() {
@@ -190,4 +212,93 @@ void test_order_crossover_ox1() {
   free(child2.codification);
   free(workspace.crossover_workspace);
   free(boolset);
+}
+
+static inline void test_threaded_population_crossover(const size_t n_threads) {
+  xorshiftr128plus_state state;
+  set_up_seed(&state, 0, 0);
+
+  ga_execution exec;
+  exec.n_threads = n_threads;
+  exec.population = NULL;
+  exec.offspring = NULL;
+  exec.selected_parents_indexes = NULL;
+  exec.population_size = randsize_t_i(99, 100, &state);
+  exec.codification_size = randsize_t_i(99, 100, &state);
+  exec.generations = 400;
+
+  const size_t selected_parents_i_size =
+      exec.population_size + exec.population_size % 2;
+
+  size_t total_memory_needed = 
+      (exec.population_size *
+           (sizeof(individual) + exec.codification_size * sizeof(size_t)) +
+       _Alignof(individual) + _Alignof(size_t)) *
+      2;
+  
+  total_memory_needed +=
+      n_threads * sizeof(ga_workspace) + _Alignof(ga_workspace);
+  total_memory_needed +=
+      n_threads * ox1_workspace_size(exec.codification_size) + _Alignof(size_t);
+  total_memory_needed +=
+      selected_parents_i_size * sizeof(size_t) + _Alignof(size_t);
+
+  size_t memory_capacity = total_memory_needed;
+  void *mem = malloc(total_memory_needed);
+  void *mem_ = mem;
+
+  assert(setup_population_from_prealloc_mem(
+             &mem_, &memory_capacity, &exec.population, exec.population_size,
+             exec.codification_size, sizeof(size_t), _Alignof(size_t)) == 0);
+
+  assert(setup_population_from_prealloc_mem(
+             &mem_, &memory_capacity, &exec.offspring, exec.population_size,
+             exec.codification_size, sizeof(size_t), _Alignof(size_t)) == 0);
+
+  assert(setup_array_from_prealloc_mem(&mem_, &memory_capacity,
+                                       (void **)&exec.selected_parents_indexes,
+                                       selected_parents_i_size, sizeof(size_t),
+                                       _Alignof(size_t)) == ARRAY_OK);
+
+  ga_workspace *workspace = NULL;
+
+  assert(setup_array_from_prealloc_mem(
+             &mem_, &memory_capacity, (void **)&workspace, n_threads,
+             sizeof(ga_workspace), _Alignof(ga_workspace)) == ARRAY_OK);
+
+  for (size_t i = 0; i < n_threads; i++) {
+    set_up_seed(&(workspace[i].state), 0, 0);
+    workspace[i].crossover_workspace_capacity =
+        ox1_workspace_size(exec.codification_size);
+    assert(setup_array_from_prealloc_mem(
+               &mem_, &memory_capacity, &workspace[i].crossover_workspace,
+               ox1_workspace_size(exec.codification_size), 1,
+               _Alignof(size_t)) == ARRAY_OK);
+  }
+
+  fill_and_shuffle_population_of_permutations(
+      exec.population, exec.population_size, exec.codification_size, &state);
+
+  for (size_t j = 0; j < selected_parents_i_size; j++)
+    exec.selected_parents_indexes[j] =
+        randsize_t_i(0, exec.population_size - 1, &state);
+  population_crossover(&exec, workspace, order_crossover_ox1);
+
+  free(mem);
+}
+
+void test_population_crossover_1_thread() {
+  test_threaded_population_crossover(1);
+}
+
+void test_population_crossover_2_thread() {
+  test_threaded_population_crossover(2);
+}
+
+void test_population_crossover_4_thread() {
+  test_threaded_population_crossover(4);
+}
+
+void test_population_crossover_8_thread() {
+  test_threaded_population_crossover(8);
 }
