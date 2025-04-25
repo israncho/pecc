@@ -1,0 +1,6 @@
+{
+   ignore_libomp_leaks
+   Memcheck:Leak
+   fun:*alloc*
+   obj:/usr/lib/llvm-18/lib/libomp.so.5
+}
