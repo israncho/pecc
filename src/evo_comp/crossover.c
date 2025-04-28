@@ -1,4 +1,3 @@
-#include <omp.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -181,32 +180,32 @@ int order_crossover_ox1(const individual *ptr_parent1,
 int population_crossover(
     ga_execution *ptr_exec_data, ga_workspace *workspace_array,
     int (*crossover)(const individual *, const individual *, individual *,
-                     individual *, const size_t, ga_workspace *)) {
-  if (ptr_exec_data == NULL) return 1;
-  if (workspace_array == NULL) return 2;
-  if (ptr_exec_data->population == NULL) return 3;
-  if (ptr_exec_data->offspring == NULL) return 4;
-  size_t num_of_threads = ptr_exec_data->n_threads;
+                     individual *, const size_t, ga_workspace *),
+    const size_t thread_id, const size_t num_of_threads) {
+  if (ptr_exec_data == NULL)
+    return 1;
+  if (workspace_array == NULL)
+    return 2;
+  if (ptr_exec_data->population == NULL)
+    return 3;
+  if (ptr_exec_data->offspring == NULL)
+    return 4;
   size_t population_size = ptr_exec_data->population_size;
   size_t *selected_parents_indexes = ptr_exec_data->selected_parents_indexes;
   size_t codification_size = ptr_exec_data->codification_size;
   individual *population = ptr_exec_data->population;
   individual *offspring = ptr_exec_data->offspring;
-#pragma omp parallel num_threads(num_of_threads)
-  {
-    size_t id = omp_get_thread_num();
-    for (size_t i = id * 2; i < population_size; i += num_of_threads * 2) {
-      size_t parent1_i = selected_parents_indexes[i];
-      size_t parent2_i = selected_parents_indexes[i + 1];
-      individual parent1 = population[parent1_i];
-      individual parent2 = population[parent2_i];
-      individual *child1 = &offspring[i];
-      individual *child2 = NULL;
-      if (i + 1 < population_size)
-        child2 = &offspring[i + 1];
-      crossover(&parent1, &parent2, child1, child2, codification_size,
-                &workspace_array[id]);
-    }
+  for (size_t i = thread_id * 2; i < population_size; i += num_of_threads * 2) {
+    size_t parent1_i = selected_parents_indexes[i];
+    size_t parent2_i = selected_parents_indexes[i + 1];
+    individual parent1 = population[parent1_i];
+    individual parent2 = population[parent2_i];
+    individual *child1 = &offspring[i];
+    individual *child2 = NULL;
+    if (i + 1 < population_size)
+      child2 = &offspring[i + 1];
+    crossover(&parent1, &parent2, child1, child2, codification_size,
+              &workspace_array[thread_id]);
   }
   return 0;
 }

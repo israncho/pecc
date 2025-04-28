@@ -6,6 +6,7 @@
 #include "../../include/utils/myrandom.h"
 #include "../../include/utils/mytime.h"
 #include <assert.h>
+#include <omp.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
@@ -40,7 +41,6 @@ void test_crossover() {
   test_population_crossover_1_thread();
   printf("\t- test_population_crossover_1_thread: PASSED [%.4f secs]\n",
          MEASURE_TIME(start));
-
 }
 
 void test_random_subintervals() {
@@ -223,25 +223,31 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
   exec.population = NULL;
   exec.offspring = NULL;
   exec.selected_parents_indexes = NULL;
-  exec.population_size = randsize_t_i(99, 100, &state);
-  exec.codification_size = randsize_t_i(99, 100, &state);
+  exec.population_size = randsize_t_i(199, 200, &state);
+  exec.codification_size = randsize_t_i(199, 200, &state);
   exec.generations = 400;
 
   const size_t selected_parents_i_size =
       exec.population_size + exec.population_size % 2;
 
-  size_t total_memory_needed = 
-      (exec.population_size *
-           (sizeof(individual) + exec.codification_size * sizeof(size_t)) +
-       _Alignof(individual) + _Alignof(size_t)) *
-      2;
-  
+  size_t total_memory_needed =
+      exec.population_size * sizeof(individual) +
+      _Alignof(individual); // bytes for array of individuals
   total_memory_needed +=
-      n_threads * sizeof(ga_workspace) + _Alignof(ga_workspace);
+      exec.population_size * exec.codification_size * sizeof(size_t) +
+      _Alignof(size_t);     // bytes for codifications of each individual
+  total_memory_needed *= 2; // for population and offspring
+
   total_memory_needed +=
-      n_threads * ox1_workspace_size(exec.codification_size) + _Alignof(size_t);
+      n_threads * sizeof(ga_workspace) +
+      _Alignof(ga_workspace); // memory for array of workspaces
   total_memory_needed +=
-      selected_parents_i_size * sizeof(size_t) + _Alignof(size_t);
+      n_threads * ox1_workspace_size(exec.codification_size) +
+      _Alignof(size_t); // memory for each crossover workspace
+  total_memory_needed +=
+      selected_parents_i_size * sizeof(size_t) +
+      _Alignof(size_t); // memory array of selected individuals
+  total_memory_needed += exec.codification_size * sizeof(bool) + _Alignof(bool);
 
   size_t memory_capacity = total_memory_needed;
   void *mem = malloc(total_memory_needed);
@@ -266,6 +272,12 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
              &mem_, &memory_capacity, (void **)&workspace, n_threads,
              sizeof(ga_workspace), _Alignof(ga_workspace)) == ARRAY_OK);
 
+  bool *boolset = NULL;
+
+  assert(setup_array_from_prealloc_mem(
+             &mem_, &memory_capacity, (void **)&boolset, exec.codification_size,
+             sizeof(bool), _Alignof(bool)) == ARRAY_OK);
+
   for (size_t i = 0; i < n_threads; i++) {
     set_up_seed(&(workspace[i].state), 0, 0);
     workspace[i].crossover_workspace_capacity =
@@ -282,7 +294,18 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
   for (size_t j = 0; j < selected_parents_i_size; j++)
     exec.selected_parents_indexes[j] =
         randsize_t_i(0, exec.population_size - 1, &state);
-  population_crossover(&exec, workspace, order_crossover_ox1);
+
+#pragma omp parallel num_threads(n_threads)
+  {
+    for (size_t _ = 0; _ < 50; _++) {
+    population_crossover(&exec, workspace, order_crossover_ox1,
+                         omp_get_thread_num(), n_threads);
+    #pragma omp barrier
+    }
+  }
+  for (size_t i = 0; i < exec.population_size; i++)
+    assert(all_elements_present(boolset, exec.codification_size,
+                                exec.offspring[i].codification));
 
   free(mem);
 }

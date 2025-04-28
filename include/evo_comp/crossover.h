@@ -26,6 +26,7 @@ static inline size_t ox1_workspace_size(const size_t individuals_size) {
 int population_crossover(
     ga_execution *ptr_exec_data, ga_workspace *workspace_array,
     int (*crossover)(const individual *, const individual *, individual *,
-                     individual *, const size_t, ga_workspace *));
+                     individual *, const size_t, ga_workspace *),
+    const size_t thread_id, const size_t num_of_threads);
 
 #endif
