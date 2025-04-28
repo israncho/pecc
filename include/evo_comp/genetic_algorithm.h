@@ -4,6 +4,7 @@
 #define GENETIC_ALGORITHM_H
 
 #include <stddef.h>
+#include <stdalign.h>
 #include "../../include/utils/myrandom.h"
 
 typedef struct {
@@ -47,7 +48,7 @@ memory_needed_for_ga_execution(const ga_execution *exec,
   const size_t population_size = exec->population_size;
   // bytes for array of individuals
   size_t memory_needed =
-      sizeof(individual) * population_size + _Alignof(individual);
+      sizeof(individual) * population_size + alignof(individual);
   // bytes for codification of each individual
   memory_needed +=
       codification_entry_size * exec->codification_size * population_size +
@@ -56,7 +57,7 @@ memory_needed_for_ga_execution(const ga_execution *exec,
   memory_needed *= 2;
   // bytes for array of indexes of selected parents
   memory_needed += sizeof(size_t) * (population_size + (population_size % 2)) +
-                   _Alignof(size_t);
+                   alignof(size_t);
   return memory_needed;
 }
 

@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdalign.h>
 #include "../../include/evo_comp/genetic_algorithm.h"
 #include "../../include/evo_comp/population.h"
 #include "../../include/utils/array.h"
@@ -24,7 +25,7 @@ int setup_from_prealloc_mem_arrays_for_ga_execution(
 
   status_code = setup_array_from_prealloc_mem(
       ptr_to_mem, ptr_to_mem_capacity, (void **)&exec->selected_parents_indexes,
-      population_size + (population_size % 2), sizeof(size_t), _Alignof(size_t));
+      population_size + (population_size % 2), sizeof(size_t), alignof(size_t));
   if (status_code != 0)
     return 3;
 

@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdalign.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,7 +34,7 @@ void test_setup_array_from_prealloc_mem() {
   int target[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   assert(setup_array_from_prealloc_mem(&free_memory, &mem_capacity,
                                        (void **)&int_array, int_array_size,
-                                       int_size, _Alignof(int)) == ARRAY_OK);
+                                       int_size, alignof(int)) == ARRAY_OK);
   size_t expected_remainging = size_in_bytes - int_array_size * int_size;
   assert(mem_capacity <= expected_remainging);
 
@@ -50,7 +51,7 @@ void test_setup_array_from_prealloc_mem() {
   };
   assert(setup_array_from_prealloc_mem(
              &free_memory, &mem_capacity, (void **)&double_array,
-             double_array_size, double_size, _Alignof(int)) == ARRAY_OK);
+             double_array_size, double_size, alignof(int)) == ARRAY_OK);
   expected_remainging -= double_array_size * double_size;
   assert(mem_capacity <= expected_remainging);
   memcpy(double_array, double_target, double_array_size * double_size);
@@ -67,7 +68,7 @@ void test_setup_array_from_prealloc_mem() {
 
   const size_t struct_size = sizeof(TestStruct);
   //printf("struct_size: %zu\n", struct_size);
-  //printf("struct_align: %zu\n", _Alignof(TestStruct));
+  //printf("struct_align: %zu\n", alignof(TestStruct));
   const size_t struct_array_size = 5;
   TestStruct *struct_array = NULL;
   TestStruct struct_target[5] = {{1, 1.1, "item1"},
@@ -77,7 +78,7 @@ void test_setup_array_from_prealloc_mem() {
                                  {5, 5.5, "item5"}};
   assert(setup_array_from_prealloc_mem(
              &free_memory, &mem_capacity, (void **)&struct_array,
-             struct_array_size, struct_size, _Alignof(TestStruct)) == ARRAY_OK);
+             struct_array_size, struct_size, alignof(TestStruct)) == ARRAY_OK);
   expected_remainging -= struct_size * struct_array_size;
   assert(mem_capacity <= expected_remainging);
   memcpy(struct_array, struct_target, struct_size * struct_array_size);
@@ -95,7 +96,7 @@ void test_setup_array_from_prealloc_mem() {
   char char_target[10] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', '\0'};
   assert(setup_array_from_prealloc_mem(
              &free_memory, &mem_capacity, (void **)&char_array,
-             char_array_size, char_size, _Alignof(char)) == ARRAY_OK);
+             char_array_size, char_size, alignof(char)) == ARRAY_OK);
   expected_remainging -= char_size * char_array_size;
   assert(mem_capacity <= expected_remainging);
   memcpy(char_array, char_target, char_size * char_array_size);

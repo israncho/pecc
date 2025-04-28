@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdalign.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,8 +56,8 @@ void test_fill_and_shuffle_population_of_permutations() {
     const size_t total_memory_needed =
         population_size *
             (sizeof(individual) + codification_size * sizeof(size_t)) +
-        _Alignof(individual) + _Alignof(size_t) +
-        sizeof(bool) * codification_size + _Alignof(bool);
+        alignof(individual) + alignof(size_t) +
+        sizeof(bool) * codification_size + alignof(bool);
     size_t memory_capacity = total_memory_needed;
     void *mem = malloc(total_memory_needed);
     void *mem_ = mem;
@@ -65,11 +66,11 @@ void test_fill_and_shuffle_population_of_permutations() {
 
     setup_population_from_prealloc_mem(&mem_, &memory_capacity, &population,
                                        population_size, codification_size,
-                                       sizeof(size_t), _Alignof(size_t));
+                                       sizeof(size_t), alignof(size_t));
     bool *boolset = NULL;
     assert(setup_array_from_prealloc_mem(
                &mem_, &memory_capacity, (void **)&boolset, codification_size,
-               sizeof(bool), _Alignof(bool)) == ARRAY_OK);
+               sizeof(bool), alignof(bool)) == ARRAY_OK);
 
     assert(fill_and_shuffle_population_of_permutations(
                population, population_size, codification_size, &state) == 0);
@@ -95,7 +96,7 @@ void test_setup_population_from_prealloc_mem() {
     const size_t total_memory_needed =
         population_size *
             (sizeof(individual) + codification_size * sizeof(size_t)) +
-        _Alignof(individual) + _Alignof(size_t);
+        alignof(individual) + alignof(size_t);
     size_t memory_capacity = total_memory_needed;
     void *mem = malloc(total_memory_needed);
     void *mem_ = mem;
@@ -104,7 +105,7 @@ void test_setup_population_from_prealloc_mem() {
 
     assert(setup_population_from_prealloc_mem(
                &mem_, &memory_capacity, &population, population_size,
-               codification_size, sizeof(size_t), _Alignof(size_t)) == 0);
+               codification_size, sizeof(size_t), alignof(size_t)) == 0);
     for (size_t i = 0; i < population_size; i++) {
       size_t *codification = population[i].codification;
       for (size_t j = 0; j < codification_size; j++)

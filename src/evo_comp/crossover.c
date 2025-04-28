@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdalign.h>
 #include "../../include/evo_comp/crossover.h"
 #include "../../include/evo_comp/genetic_algorithm.h"
 #include "../../include/utils/array.h"
@@ -108,7 +109,7 @@ int order_crossover_ox1(const individual *ptr_parent1,
 
   const size_t inheritance_p1 = chromosome_size / 2;
   const size_t size_t_size = sizeof(size_t);
-  const size_t size_t_alignment = _Alignof(size_t);
+  const size_t size_t_alignment = alignof(size_t);
 
   size_t *intervals_array = NULL;
   setup_array_from_prealloc_mem(&workspace, &workspace_capacity,
@@ -132,7 +133,7 @@ int order_crossover_ox1(const individual *ptr_parent1,
   bool *missing_for_child1 = NULL;
   setup_array_from_prealloc_mem(&workspace, &workspace_capacity,
                                 (void **)&missing_for_child1, chromosome_size,
-                                sizeof(bool), _Alignof(bool));
+                                sizeof(bool), alignof(bool));
 
   for (size_t i = 0; i < chromosome_size; i++)
     missing_for_child1[i] = false;

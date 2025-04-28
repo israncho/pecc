@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdalign.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -122,7 +123,7 @@ int init_tsp_euc_instance(const file_line *array_of_lines,
   size_t city_i = 0;
   size_t char_size = sizeof(char);
   size_t double_size = sizeof(double);
-  size_t double_alignment = _Alignof(double);
+  size_t double_alignment = alignof(double);
 
   // array of cities, encoded as a bidimensional matrix
   double **cities = NULL;

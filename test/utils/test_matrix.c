@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdalign.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +10,7 @@
 void test_init_and_free_matrix() {
   float **matrix = NULL;
   size_t float_size = sizeof(float);
-  size_t float_alignment = _Alignof(float);
+  size_t float_alignment = alignof(float);
   int init_status_code = -1;
 
   init_status_code = init_matrix((void ***)&matrix, 0, 5, float_size, float_alignment);
@@ -53,7 +54,7 @@ void test_init_and_free_matrix() {
   matrix = NULL;
 
   int **int_matrix = NULL;
-  init_status_code = init_matrix((void ***)&int_matrix, 4, 4, sizeof(int), _Alignof(int));
+  init_status_code = init_matrix((void ***)&int_matrix, 4, 4, sizeof(int), alignof(int));
   assert(init_status_code == 0);
   assert(int_matrix != NULL);
 
@@ -77,7 +78,7 @@ void test_huge_matrix() {
   size_t huge = 1 << 20; // 1 mill elems.
   float **matrix = NULL;
   size_t float_size = sizeof(float);
-  size_t float_alignment = _Alignof(float);
+  size_t float_alignment = alignof(float);
   int init_status_code = -1;
 
   init_status_code = init_matrix((void ***)&matrix, huge, 1, float_size, float_alignment);
@@ -116,7 +117,7 @@ void test_complex_type() {
   int init_status_code = -1;
   WeirdType **matrix = NULL;
 
-  init_status_code = init_matrix((void ***)&matrix, 2, 2, sizeof(WeirdType), _Alignof(WeirdType));
+  init_status_code = init_matrix((void ***)&matrix, 2, 2, sizeof(WeirdType), alignof(WeirdType));
   assert(matrix != NULL);
   assert(init_status_code == 0);
   matrix[1][1] = (WeirdType){3.14, 'X'};
@@ -131,7 +132,7 @@ void test_complex_type() {
   } Student;
 
   Student **student_matrix = NULL;
-  init_status_code = init_matrix((void ***)&student_matrix, 2, 2, sizeof(Student), _Alignof(Student));
+  init_status_code = init_matrix((void ***)&student_matrix, 2, 2, sizeof(Student), alignof(Student));
   assert(student_matrix != NULL);
   assert(init_status_code == 0);
 
@@ -150,7 +151,7 @@ void test_complex_type() {
 void test_free_safety() {
   float **matrix = NULL;
   size_t float_size = sizeof(float);
-  size_t float_alignment = _Alignof(float);
+  size_t float_alignment = alignof(float);
   int init_status_code = -1;
 
   init_status_code = init_matrix((void ***)&matrix, 5, 5, float_size, float_alignment);
@@ -172,7 +173,7 @@ void test_free_safety() {
 void test_memory_integrity() {
   float **matrix = NULL;
   size_t float_size = sizeof(float);
-  size_t float_alignment = _Alignof(float);
+  size_t float_alignment = alignof(float);
   int init_status_code = -1;
 
   init_status_code = init_matrix((void ***)&matrix, 3, 3, float_size, float_alignment);
@@ -193,7 +194,7 @@ void test_double_init() {
   int **matrix = NULL;
   int **tmp_ptr = NULL;
   size_t int_size = sizeof(int);
-  size_t int_alignment = _Alignof(int);
+  size_t int_alignment = alignof(int);
   int status = init_matrix((void ***)&matrix, 3, 3, int_size, int_alignment);
   assert(matrix != NULL);
   assert(status == 0);
@@ -222,7 +223,7 @@ void test_double_init() {
 void test_minimal_matrix() {
   float **matrix = NULL;
   size_t float_size = sizeof(float);
-  size_t float_alignment = _Alignof(float);
+  size_t float_alignment = alignof(float);
   int status = init_matrix((void ***)&matrix, 1, 1, float_size, float_alignment);
   assert(matrix != NULL);
   assert(status == 0);

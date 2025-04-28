@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdalign.h>
 #include "../../include/evo_comp/population.h"
 #include "../../include/evo_comp/genetic_algorithm.h"
 #include "../../include/utils/array.h"
@@ -31,7 +32,7 @@ int setup_population_from_prealloc_mem(
   if (setup_array_from_prealloc_mem(ptr_to_mem, ptr_to_mem_capacity,
                                     (void **)ptr_to_population, population_size,
                                     sizeof(individual),
-                                    _Alignof(individual)) != ARRAY_OK)
+                                    alignof(individual)) != ARRAY_OK)
     return 1;
 
   individual *population = *ptr_to_population;

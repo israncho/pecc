@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdalign.h>
 #include "../../include/utils/myrandom.h"
 #include "genetic_algorithm.h"
 
@@ -19,8 +20,8 @@ void random_subintervals(size_t *intervals_array, xorshiftr128plus_state *state,
 
 static inline size_t ox1_workspace_size(const size_t individuals_size) {
   return (15 * sizeof(size_t)) + (2 * (individuals_size + 1) * sizeof(size_t)) +
-         (sizeof(bool) * individuals_size) + _Alignof(size_t) * 3 +
-         _Alignof(bool);
+         (sizeof(bool) * individuals_size) + alignof(size_t) * 3 +
+         alignof(bool);
 }
 
 int population_crossover(
