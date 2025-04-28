@@ -1,3 +1,8 @@
+#include <assert.h>
+#include <omp.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <time.h>
 #include "../../include/test/evo_comp/test_crossover.h"
 #include "../../include/evo_comp/crossover.h"
 #include "../../include/evo_comp/genetic_algorithm.h"
@@ -5,11 +10,6 @@
 #include "../../include/utils/array.h"
 #include "../../include/utils/myrandom.h"
 #include "../../include/utils/mytime.h"
-#include <assert.h>
-#include <omp.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <time.h>
 
 void test_crossover() {
   printf("Testing: crossover\n");
@@ -231,12 +231,7 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
       exec.population_size + exec.population_size % 2;
 
   size_t total_memory_needed =
-      exec.population_size * sizeof(individual) +
-      _Alignof(individual); // bytes for array of individuals
-  total_memory_needed +=
-      exec.population_size * exec.codification_size * sizeof(size_t) +
-      _Alignof(size_t);     // bytes for codifications of each individual
-  total_memory_needed *= 2; // for population and offspring
+      memory_needed_for_ga_execution(&exec, sizeof(size_t), _Alignof(size_t));
 
   total_memory_needed +=
       n_threads * sizeof(ga_workspace) +
@@ -244,27 +239,15 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
   total_memory_needed +=
       n_threads * ox1_workspace_size(exec.codification_size) +
       _Alignof(size_t); // memory for each crossover workspace
-  total_memory_needed +=
-      selected_parents_i_size * sizeof(size_t) +
-      _Alignof(size_t); // memory array of selected individuals
   total_memory_needed += exec.codification_size * sizeof(bool) + _Alignof(bool);
 
   size_t memory_capacity = total_memory_needed;
   void *mem = malloc(total_memory_needed);
   void *mem_ = mem;
 
-  assert(setup_population_from_prealloc_mem(
-             &mem_, &memory_capacity, &exec.population, exec.population_size,
-             exec.codification_size, sizeof(size_t), _Alignof(size_t)) == 0);
-
-  assert(setup_population_from_prealloc_mem(
-             &mem_, &memory_capacity, &exec.offspring, exec.population_size,
-             exec.codification_size, sizeof(size_t), _Alignof(size_t)) == 0);
-
-  assert(setup_array_from_prealloc_mem(&mem_, &memory_capacity,
-                                       (void **)&exec.selected_parents_indexes,
-                                       selected_parents_i_size, sizeof(size_t),
-                                       _Alignof(size_t)) == ARRAY_OK);
+  assert(setup_from_prealloc_mem_arrays_for_ga_execution(
+             &mem_, &memory_capacity, &exec, sizeof(size_t),
+             _Alignof(size_t)) == 0);
 
   ga_workspace *workspace = NULL;
 
@@ -298,9 +281,9 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
 #pragma omp parallel num_threads(n_threads)
   {
     for (size_t _ = 0; _ < 50; _++) {
-    population_crossover(&exec, workspace, order_crossover_ox1,
-                         omp_get_thread_num(), n_threads);
-    #pragma omp barrier
+      population_crossover(&exec, workspace, order_crossover_ox1,
+                           omp_get_thread_num(), n_threads);
+      #pragma omp barrier
     }
   }
   for (size_t i = 0; i < exec.population_size; i++)

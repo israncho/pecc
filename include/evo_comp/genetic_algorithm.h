@@ -40,4 +40,29 @@ int genetic_algorith(individual *array_of_individuals,
                      individual *array_for_offpring,
                      ga_execution *execution_data);
 
+static inline size_t
+memory_needed_for_ga_execution(const ga_execution *exec,
+                               const size_t codification_entry_size,
+                               const size_t codification_entry_alignment) {
+  const size_t population_size = exec->population_size;
+  // bytes for array of individuals
+  size_t memory_needed =
+      sizeof(individual) * population_size + _Alignof(individual);
+  // bytes for codification of each individual
+  memory_needed +=
+      codification_entry_size * exec->codification_size * population_size +
+      codification_entry_alignment;
+  // bytes for population and offspring
+  memory_needed *= 2;
+  // bytes for array of indexes of selected parents
+  memory_needed += sizeof(size_t) * (population_size + (population_size % 2)) +
+                   _Alignof(size_t);
+  return memory_needed;
+}
+
+int setup_from_prealloc_mem_arrays_for_ga_execution(
+    void **ptr_to_mem, size_t *ptr_to_mem_capacity, ga_execution *exec,
+    const size_t codification_entry_size,
+    const size_t codification_entry_alignment);
+
 #endif
