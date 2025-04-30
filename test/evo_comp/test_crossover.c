@@ -156,7 +156,8 @@ void test_order_crossover_ox1() {
 
   ga_workspace workspace;
   workspace.crossover_workspace = NULL;
-  size_t crossover_workspace_size = ox1_workspace_size(max_codification_size);
+  size_t crossover_workspace_size =
+      ox1_workspace_size(max_codification_size, 1, 2);
   workspace.crossover_workspace_capacity = crossover_workspace_size;
   init_array(&workspace.crossover_workspace, crossover_workspace_size, 1);
 
@@ -230,6 +231,8 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
 
   const size_t selected_parents_i_size =
       exec.population_size + exec.population_size % 2;
+  const size_t mem_for_ox1 = ox1_workspace_size(
+      exec.codification_size, n_threads, exec.population_size);
 
   size_t total_memory_needed =
       memory_needed_for_ga_execution(&exec, sizeof(size_t), alignof(size_t));
@@ -238,8 +241,7 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
       n_threads * sizeof(ga_workspace) +
       alignof(ga_workspace); // memory for array of workspaces
   total_memory_needed +=
-      n_threads * ox1_workspace_size(exec.codification_size) +
-      alignof(size_t); // memory for each crossover workspace
+      n_threads * mem_for_ox1; // memory for each crossover workspace
   total_memory_needed += exec.codification_size * sizeof(bool) + alignof(bool);
 
   size_t memory_capacity = total_memory_needed;
@@ -264,12 +266,10 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
 
   for (size_t i = 0; i < n_threads; i++) {
     set_up_seed(&(workspace[i].state), 0, 0);
-    workspace[i].crossover_workspace_capacity =
-        ox1_workspace_size(exec.codification_size);
+    workspace[i].crossover_workspace_capacity = mem_for_ox1;
     assert(setup_array_from_prealloc_mem(
                &mem_, &memory_capacity, &workspace[i].crossover_workspace,
-               ox1_workspace_size(exec.codification_size), 1,
-               alignof(size_t)) == ARRAY_OK);
+               mem_for_ox1, 1, alignof(size_t)) == ARRAY_OK);
   }
 
   fill_and_shuffle_population_of_permutations(
