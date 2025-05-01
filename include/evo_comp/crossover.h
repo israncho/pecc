@@ -18,17 +18,11 @@ void random_subintervals(size_t *intervals_array, xorshiftr128plus_state *state,
                          size_t *number_of_intervals, const size_t range,
                          const size_t overall_size_for_one);
 
-static inline size_t ox1_workspace_size(const size_t codification_size,
-                                        const size_t n_threads,
-                                        const size_t population_size) {
-  const size_t mem_needed_to_perform_ox1 =
-      (15 * sizeof(size_t)) + (2 * (codification_size + 1) * sizeof(size_t)) +
-      (sizeof(bool) * codification_size) + alignof(size_t) * 3 + alignof(bool);
-  if (n_threads == 1)
-    return mem_needed_to_perform_ox1;
-  const size_t childs_per_thread = population_size / n_threads + 1;
-  return codification_size * sizeof(size_t) * childs_per_thread +
-         mem_needed_to_perform_ox1 + alignof(size_t);
+static inline size_t ox1_workspace_size(const size_t codification_size) {
+  return (15 * sizeof(size_t)) +
+         (2 * (codification_size + 1) * sizeof(size_t)) +
+         (sizeof(bool) * codification_size) + alignof(size_t) * 3 +
+         alignof(bool);
 }
 
 int population_crossover(
