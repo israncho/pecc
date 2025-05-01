@@ -3,6 +3,7 @@
 #include <stdalign.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include "../../include/test/evo_comp/test_crossover.h"
 #include "../../include/evo_comp/crossover.h"
@@ -227,55 +228,30 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
   exec.population_size = randsize_t_i(199, 200, &state);
   exec.codification_size = randsize_t_i(199, 200, &state);
   exec.generations = 400;
-
-  const size_t selected_parents_i_size =
-      exec.population_size + exec.population_size % 2;
-  const size_t mem_for_ox1 = ox1_workspace_size(exec.codification_size);
-
-  size_t total_memory_needed =
-      memory_needed_for_ga_execution(&exec, sizeof(size_t), alignof(size_t));
-
-  total_memory_needed +=
-      n_threads * sizeof(ga_workspace) +
-      alignof(ga_workspace); // memory for array of workspaces
-  total_memory_needed +=
-      n_threads * mem_for_ox1; // memory for each crossover workspace
-  total_memory_needed += exec.codification_size * sizeof(bool) + alignof(bool);
-
-  size_t memory_capacity = total_memory_needed;
-  void *mem = malloc(total_memory_needed);
-  void *mem_ = mem;
-
-  assert(setup_from_prealloc_mem_arrays_for_ga_execution(
-             &mem_, &memory_capacity, &exec, sizeof(size_t), alignof(size_t)) ==
-         0);
-
+  exec.mem = NULL;
+  assert(setup_dynamic_mem_for_ga_execution(&exec, sizeof(size_t),
+                                            alignof(size_t)) == 0);
   ga_workspace *workspace_array = NULL;
+  assert(setup_dynamic_mem_for_ga_workspace(
+             &workspace_array, &exec, n_threads,
+             ox1_workspace_size(exec.codification_size), 0, 0, 0,
+             sizeof(size_t), alignof(size_t)) == 0);
 
-  assert(setup_array_from_prealloc_mem(
-             &mem_, &memory_capacity, (void **)&workspace_array, n_threads,
-             sizeof(ga_workspace), alignof(ga_workspace)) == ARRAY_OK);
-
-  bool *boolset = NULL;
-
-  assert(setup_array_from_prealloc_mem(
-             &mem_, &memory_capacity, (void **)&boolset, exec.codification_size,
-             sizeof(bool), alignof(bool)) == ARRAY_OK);
-
-  for (size_t i = 0; i < n_threads; i++) {
-    set_up_seed(&(workspace_array[i].state), 0, 0);
-    workspace_array[i].crossover_workspace_capacity = mem_for_ox1;
-    assert(setup_array_from_prealloc_mem(
-               &mem_, &memory_capacity, &workspace_array[i].crossover_workspace,
-               mem_for_ox1, 1, alignof(size_t)) == ARRAY_OK);
-  }
+  for (size_t i = 0; i < n_threads; i++)
+    set_up_seed(&workspace_array[i].state, 0, 0);
 
   fill_and_shuffle_population_of_permutations(
       exec.population, exec.population_size, exec.codification_size, &state);
 
+  const size_t selected_parents_i_size =
+      exec.population_size + exec.population_size % 2;
   for (size_t j = 0; j < selected_parents_i_size; j++)
     exec.selected_parents_indexes[j] =
         randsize_t_i(0, exec.population_size - 1, &state);
+
+  bool *boolset = NULL;
+  assert(init_array((void **)&boolset, exec.codification_size, sizeof(bool)) ==
+         ARRAY_OK);
 
 #pragma omp parallel num_threads(n_threads)
   {
@@ -289,7 +265,12 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
     assert(all_elements_present(boolset, exec.codification_size,
                                 exec.offspring[i].codification));
 
-  free(mem);
+  for (size_t i = 0; i < n_threads; i++)
+    free(workspace_array[i].mem);
+
+  free(workspace_array);
+  free(boolset);
+  free(exec.mem);
 }
 
 void test_population_crossover_1_thread() {

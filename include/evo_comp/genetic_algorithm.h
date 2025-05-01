@@ -3,8 +3,8 @@
 #ifndef GENETIC_ALGORITHM_H
 #define GENETIC_ALGORITHM_H
 
-#include <stddef.h>
 #include <stdalign.h>
+#include <stddef.h>
 #include "../../include/utils/myrandom.h"
 
 typedef struct {
@@ -13,6 +13,7 @@ typedef struct {
 } individual;
 
 typedef struct {
+  void *mem;
   individual *population;
   individual *offspring;
   size_t *selected_parents_indexes;
@@ -26,6 +27,7 @@ typedef struct {
 } ga_execution;
 
 typedef struct {
+  void *mem;
   void *crossover_workspace;
   void *selection_workspace;
   void *mutation_workspace;
@@ -34,6 +36,9 @@ typedef struct {
   size_t selection_workspace_capacity;
   size_t mutation_workspace_capacity;
   size_t replacement_workspace_capacity;
+  size_t curr_offspring_size;
+  size_t max_offspring_size;
+  individual *thread_offspring;
   xorshiftr128plus_state state;
 } ga_workspace;
 
@@ -60,6 +65,18 @@ memory_needed_for_ga_execution(const ga_execution *exec,
                    alignof(size_t);
   return memory_needed;
 }
+
+int setup_dynamic_mem_for_ga_workspace(
+    ga_workspace **ptr_to_workspace_array, const ga_execution *exec,
+    const size_t n_threads, const size_t crossover_workspace_size,
+    const size_t selection_workspace_size, const size_t mutation_workspace_size,
+    const size_t replacement_workspace_size,
+    const size_t codification_entry_size,
+    const size_t codification_entry_alignment);
+
+int setup_dynamic_mem_for_ga_execution(
+    ga_execution *exec, const size_t codification_entry_size,
+    const size_t codification_entry_alignment);
 
 int setup_from_prealloc_mem_arrays_for_ga_execution(
     void **ptr_to_mem, size_t *ptr_to_mem_capacity, ga_execution *exec,
