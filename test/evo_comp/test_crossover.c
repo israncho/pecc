@@ -252,10 +252,10 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
              &mem_, &memory_capacity, &exec, sizeof(size_t), alignof(size_t)) ==
          0);
 
-  ga_workspace *workspace = NULL;
+  ga_workspace *workspace_array = NULL;
 
   assert(setup_array_from_prealloc_mem(
-             &mem_, &memory_capacity, (void **)&workspace, n_threads,
+             &mem_, &memory_capacity, (void **)&workspace_array, n_threads,
              sizeof(ga_workspace), alignof(ga_workspace)) == ARRAY_OK);
 
   bool *boolset = NULL;
@@ -265,10 +265,10 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
              sizeof(bool), alignof(bool)) == ARRAY_OK);
 
   for (size_t i = 0; i < n_threads; i++) {
-    set_up_seed(&(workspace[i].state), 0, 0);
-    workspace[i].crossover_workspace_capacity = mem_for_ox1;
+    set_up_seed(&(workspace_array[i].state), 0, 0);
+    workspace_array[i].crossover_workspace_capacity = mem_for_ox1;
     assert(setup_array_from_prealloc_mem(
-               &mem_, &memory_capacity, &workspace[i].crossover_workspace,
+               &mem_, &memory_capacity, &workspace_array[i].crossover_workspace,
                mem_for_ox1, 1, alignof(size_t)) == ARRAY_OK);
   }
 
@@ -282,7 +282,7 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
 #pragma omp parallel num_threads(n_threads)
   {
     for (size_t _ = 0; _ < 50; _++) {
-      population_crossover(&exec, workspace, order_crossover_ox1,
+      population_crossover(&exec, workspace_array, order_crossover_ox1,
                            omp_get_thread_num(), n_threads);
 #pragma omp barrier
     }
