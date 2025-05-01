@@ -37,7 +37,7 @@ setup_array_from_prealloc_mem(void **ptr_to_mem, size_t *ptr_to_mem_capacity,
   const size_t data_mem_needed = type_size * size;
   uintptr_t align_addr = beg_mem;
 
-  if (alignment & (alignment - 1))
+  if ((alignment & (alignment - 1)) == 0)
     align_addr = (align_addr + (alignment - 1)) & ~(alignment - 1);
   else {
     uintptr_t offset = alignment - (align_addr % alignment);
