@@ -259,11 +259,11 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
       population_crossover(&exec, workspace_array, order_crossover_ox1,
                            omp_get_thread_num(), n_threads);
       #pragma omp barrier
-    }
-    if (omp_get_thread_num() == 0)
-      for (size_t i = 0; i < exec.population_size; i++)
-        assert(all_elements_present(boolset, exec.codification_size,
+      if (omp_get_thread_num() == 0)
+        for (size_t i = 0; i < exec.population_size; i++)
+          assert(all_elements_present(boolset, exec.codification_size,
                                     exec.offspring[i].codification));
+    }
   }
 
   for (size_t i = 0; i < n_threads; i++)
