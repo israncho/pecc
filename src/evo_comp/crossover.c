@@ -1,7 +1,7 @@
+#include <stdalign.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <stdalign.h>
 #include "../../include/evo_comp/crossover.h"
 #include "../../include/evo_comp/genetic_algorithm.h"
 #include "../../include/utils/array.h"
@@ -182,7 +182,7 @@ int population_crossover(
     ga_execution *ptr_exec_data, ga_workspace *workspace_array,
     int (*crossover)(const individual *, const individual *, individual *,
                      individual *, const size_t, ga_workspace *),
-    const size_t thread_id, const size_t num_of_threads) {
+    const size_t thread_id) {
   if (ptr_exec_data == NULL)
     return 1;
   if (workspace_array == NULL)
@@ -191,22 +191,23 @@ int population_crossover(
     return 3;
   if (ptr_exec_data->offspring == NULL)
     return 4;
-  size_t population_size = ptr_exec_data->population_size;
+  ga_workspace *workspace = &workspace_array[thread_id];
   size_t *selected_parents_indexes = ptr_exec_data->selected_parents_indexes;
-  size_t codification_size = ptr_exec_data->codification_size;
   individual *population = ptr_exec_data->population;
   individual *offspring = ptr_exec_data->offspring;
-  for (size_t i = thread_id * 2; i < population_size; i += num_of_threads * 2) {
+  const size_t beginning = workspace->offspring_size_of_previous_threads;
+  const size_t end = workspace->thread_offspring_size;
+  for (size_t i = beginning; i < end; i += 2) {
     size_t parent1_i = selected_parents_indexes[i];
     size_t parent2_i = selected_parents_indexes[i + 1];
     individual parent1 = population[parent1_i];
     individual parent2 = population[parent2_i];
     individual *child1 = &offspring[i];
     individual *child2 = NULL;
-    if (i + 1 < population_size)
+    if (i + 1 < end)
       child2 = &offspring[i + 1];
-    crossover(&parent1, &parent2, child1, child2, codification_size,
-              &workspace_array[thread_id]);
+    crossover(&parent1, &parent2, child1, child2,
+              ptr_exec_data->codification_size, workspace);
   }
   return 0;
 }

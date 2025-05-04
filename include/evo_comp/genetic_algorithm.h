@@ -36,8 +36,8 @@ typedef struct {
   size_t selection_workspace_capacity;
   size_t mutation_workspace_capacity;
   size_t replacement_workspace_capacity;
-  size_t curr_offspring_size;
-  size_t max_offspring_size;
+  size_t offspring_size_of_previous_threads;
+  size_t thread_offspring_size;
   individual *thread_offspring;
   xorshiftr128plus_state state;
 } ga_workspace;
