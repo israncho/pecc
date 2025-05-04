@@ -99,7 +99,7 @@ int setup_dynamic_mem_for_ga_workspace(
     if (replacement_workspace_size > 0)
       if (setup_array_from_prealloc_mem(
               &mem_, &mem_capacity, &workspace_array[i].replacement_workspace,
-              replacement_workspace_size, 1, 1) != 0)
+              replacement_workspace_size, 1, 1) != ARRAY_OK)
         return 6;
 
     if (setup_array_from_prealloc_mem(

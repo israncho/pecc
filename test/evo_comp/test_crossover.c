@@ -261,6 +261,7 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
                            thread_id) == 0);
       #pragma omp barrier
       if (thread_id == 0) {
+        copy_thread_offspring_to_ga_exec_size_t(&exec, workspace_array);
         for (size_t i = 0; i < exec.population_size; i++)
           assert(all_elements_present(boolset, exec.codification_size,
                                     exec.offspring[i].codification));
