@@ -83,4 +83,6 @@ int setup_from_prealloc_mem_arrays_for_ga_execution(
     const size_t codification_entry_size,
     const size_t codification_entry_alignment);
 
+int copy_thread_offspring_to_ga_exec_size_t(ga_execution *exec, const ga_workspace *workspace_array);
+
 #endif

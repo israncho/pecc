@@ -152,3 +152,21 @@ int setup_from_prealloc_mem_arrays_for_ga_execution(
 
   return 0;
 }
+
+int copy_thread_offspring_to_ga_exec_size_t(ga_execution *exec, const ga_workspace *workspace_array) {
+  const size_t n_threads = exec->n_threads;
+  const size_t codification_size = exec->codification_size;
+  size_t curr_i = 0;
+  for (size_t thread_i = 0; thread_i < n_threads; thread_i++) {
+    const ga_workspace workspace = workspace_array[thread_i];
+    const size_t thread_offspring_size = workspace.thread_offspring_size;
+    const individual *thread_offspring = workspace.thread_offspring;
+    for (size_t child_i = 0; child_i < thread_offspring_size; child_i++) {
+      size_t *src = thread_offspring[child_i].codification;
+      size_t *dest = exec->offspring[curr_i++].codification;
+      for (size_t i = 0; i < codification_size; i++)
+        dest[i] = src[i];
+    }
+  }
+  return 0;
+}
