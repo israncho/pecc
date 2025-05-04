@@ -263,6 +263,7 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
         for (size_t i = 0; i < exec.population_size; i++)
           assert(all_elements_present(boolset, exec.codification_size,
                                     exec.offspring[i].codification));
+      #pragma omp barrier
     }
   }
 
