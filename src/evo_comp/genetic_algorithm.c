@@ -37,18 +37,35 @@ int setup_dynamic_mem_for_ga_workspace(
     return 1;
 
   const size_t codification_size = exec->codification_size;
-  const size_t max_offspring_per_thead = exec->population_size / n_threads + 1;
+  const size_t population_size = exec->population_size;
+  const size_t size_needed_per_individual =
+      sizeof(individual) + codification_entry_size * codification_size;
+  const size_t pop_per_thread = population_size / n_threads;
+  // only even numbers 
+  const size_t min_offspring_per_thread = pop_per_thread - (pop_per_thread % 2);
+  // always holds: remainder <= 2 * n_threads - 1
+  size_t remainder = (population_size % n_threads) + ((pop_per_thread % 2) * n_threads); 
 
-  size_t mem_needed =
-      sizeof(individual) * max_offspring_per_thead + alignof(individual);
-  mem_needed +=
-      codification_entry_size * codification_size * max_offspring_per_thead +
-      codification_entry_alignment;
-  mem_needed += crossover_workspace_size + selection_workspace_size +
-                mutation_workspace_size + replacement_workspace_size;
+  const size_t general_mem_needed_per_thread =
+      size_needed_per_individual * min_offspring_per_thread +
+      alignof(individual) + codification_entry_alignment +
+      crossover_workspace_size + selection_workspace_size +
+      mutation_workspace_size + replacement_workspace_size;
 
   ga_workspace *workspace_array = *ptr_to_workspace_array;
+  size_t offspring_size_of_previous_threads = 0;
   for (size_t i = 0; i < n_threads; i++) {
+    size_t mem_needed = general_mem_needed_per_thread;
+    size_t thread_offspring_size = min_offspring_per_thread;
+    if (remainder >= 2) {
+      remainder -= 2;
+      thread_offspring_size += 2;
+      mem_needed += size_needed_per_individual * 2;
+    } else if (remainder == 1 && i + 1 == n_threads) {
+      remainder -= 1;
+      thread_offspring_size++;
+      mem_needed += size_needed_per_individual;
+    }
 
     workspace_array[i].mem = NULL;
     size_t mem_capacity = mem_needed;
@@ -87,13 +104,12 @@ int setup_dynamic_mem_for_ga_workspace(
 
     if (setup_array_from_prealloc_mem(
             &mem_, &mem_capacity, (void **)&workspace_array[i].thread_offspring,
-            max_offspring_per_thead, sizeof(individual),
+            thread_offspring_size, sizeof(individual),
             alignof(individual)) != ARRAY_OK)
       return 7;
 
-    workspace_array[i].max_offspring_size = max_offspring_per_thead;
-    workspace_array[i].curr_offspring_size = 0;
-    for (size_t j = 0; j < max_offspring_per_thead; j++) {
+    workspace_array[i].thread_offspring_size = thread_offspring_size;
+    for (size_t j = 0; j < thread_offspring_size; j++) {
       if (setup_array_from_prealloc_mem(
               &mem_, &mem_capacity,
               &workspace_array[i].thread_offspring[j].codification,
@@ -101,7 +117,11 @@ int setup_dynamic_mem_for_ga_workspace(
               codification_entry_alignment) != ARRAY_OK)
         return 8;
     }
+    workspace_array[i].offspring_size_of_previous_threads = offspring_size_of_previous_threads;
+    offspring_size_of_previous_threads += thread_offspring_size;
   }
+  if (offspring_size_of_previous_threads != population_size)
+    return 9;
   return 0;
 }
 
