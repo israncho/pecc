@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdalign.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -194,9 +195,9 @@ int population_crossover(
   ga_workspace *workspace = &workspace_array[thread_id];
   size_t *selected_parents_indexes = ptr_exec_data->selected_parents_indexes;
   individual *population = ptr_exec_data->population;
-  individual *offspring = ptr_exec_data->offspring;
+  individual *offspring = workspace->thread_offspring;
   const size_t beginning = workspace->offspring_size_of_previous_threads;
-  const size_t end = workspace->thread_offspring_size;
+  const size_t end = workspace->thread_offspring_size + beginning;
   for (size_t i = beginning; i < end; i += 2) {
     size_t parent1_i = selected_parents_indexes[i];
     size_t parent2_i = selected_parents_indexes[i + 1];
@@ -206,8 +207,9 @@ int population_crossover(
     individual *child2 = NULL;
     if (i + 1 < end)
       child2 = &offspring[i + 1];
-    crossover(&parent1, &parent2, child1, child2,
-              ptr_exec_data->codification_size, workspace);
+    if (crossover(&parent1, &parent2, child1, child2,
+                  ptr_exec_data->codification_size, workspace) != 0)
+      return 5;
   }
   return 0;
 }
