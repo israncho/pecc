@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include "../../include/utils/mytime.h"
 #include "../../include/test/utils/test_array.h"
 #include "../../include/utils/array.h"
@@ -12,9 +11,10 @@
 void test_array() {
   printf("Testing: array\n");
 
-  clock_t start = clock();
+  double start = get_wall_time();
   test_setup_array_from_prealloc_mem();
-  printf("\t- setup_array_from_prealloc_mem: PASSED [%.4f secs]\n", MEASURE_TIME(start));
+  double elapsed_time = get_wall_time() - start;
+  printf("\t- setup_array_from_prealloc_mem: PASSED [%.6f secs]\n", elapsed_time);
 }
 
 void test_setup_array_from_prealloc_mem() {

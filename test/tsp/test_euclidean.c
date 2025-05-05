@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include "../../include/utils/mytime.h"
 #include "../../include/test/tsp/test_euclidean.h"
 #include "../../include/tsp/euclidean.h"
@@ -13,13 +12,15 @@
 void test_euclidean() {
   printf("Testing: tsp_euclidean\n");
 
-  clock_t start = clock();
+  double start = get_wall_time();
   test_init_tsp_euc_instance();
-  printf("\t- init_tsp_euc_instance: PASSED [%.4f secs]\n", MEASURE_TIME(start));
+  double elapsed_time = get_wall_time() - start;
+  printf("\t- init_tsp_euc_instance: PASSED [%.6f secs]\n", elapsed_time);
 
-  start = clock();
+  start = get_wall_time();
   test_euclidean_distance();
-  printf("\t- euclidean_distance: PASSED [%.4f secs]\n", MEASURE_TIME(start));
+  elapsed_time = get_wall_time() - start;
+  printf("\t- euclidean_distance: PASSED [%.6f secs]\n", elapsed_time);
 }
 
 void test_init_tsp_euc_instance() {

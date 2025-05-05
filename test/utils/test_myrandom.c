@@ -4,7 +4,6 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include "../../include/utils/mytime.h"
 #include "../../include/test/utils/test_myrandom.h"
 #include "../../include/utils/array.h"
@@ -14,9 +13,10 @@
 void test_myrandom() {
   printf("Testing: myrandom\n");
 
-  clock_t start = clock();
+  double start = get_wall_time();
   test_shuffle_array_of_size_t();
-  printf("\t- shuffle_array_of_size_t: PASSED [%.4f secs]\n", MEASURE_TIME(start));
+  double elapsed_time = get_wall_time() - start;
+  printf("\t- shuffle_array_of_size_t: PASSED [%.6f secs]\n", elapsed_time);
 }
 
 inline static void fill_array_simple(size_t *array, size_t array_size) {

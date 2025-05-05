@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include "../../include/test/evo_comp/test_population.h"
 #include "../../include/evo_comp/genetic_algorithm.h"
 #include "../../include/evo_comp/population.h"
@@ -14,16 +13,18 @@
 void test_population() {
   printf("Testing: population\n");
 
-  clock_t start = clock();
+  double start = get_wall_time();
   test_setup_population_from_prealloc_mem();
-  printf("\t- setup_population_from_prealloc_mem: PASSED [%.4f secs]\n",
-         MEASURE_TIME(start));
+  double elapsed_time = get_wall_time() - start;
+  printf("\t- setup_population_from_prealloc_mem: PASSED [%.6f secs]\n",
+         elapsed_time);
 
-  start = clock();
+  start = get_wall_time();
   test_fill_and_shuffle_population_of_permutations();
+  elapsed_time = get_wall_time() - start;
   printf(
-      "\t- fill_and_shuffle_population_of_permutations: PASSED [%.4f secs]\n",
-      MEASURE_TIME(start));
+      "\t- fill_and_shuffle_population_of_permutations: PASSED [%.6f secs]\n",
+      elapsed_time);
 }
 
 static inline bool all_elements_present(bool *boolset, const size_t set_size,

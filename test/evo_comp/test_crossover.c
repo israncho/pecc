@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include "../../include/test/evo_comp/test_crossover.h"
 #include "../../include/evo_comp/crossover.h"
 #include "../../include/evo_comp/genetic_algorithm.h"
@@ -16,33 +15,39 @@
 void test_crossover() {
   printf("Testing: crossover\n");
 
-  clock_t start = clock();
+  double start = get_wall_time();
   test_random_subintervals();
-  printf("\t- random_subintervals: PASSED [%.4f secs]\n", MEASURE_TIME(start));
+  double elapsed_time = get_wall_time() - start;
+  printf("\t- random_subintervals: PASSED [%.6f secs]\n", elapsed_time);
 
-  start = clock();
+  start = get_wall_time();
   test_order_crossover_ox1();
-  printf("\t- order_crossover_ox1: PASSED [%.4f secs]\n", MEASURE_TIME(start));
+  elapsed_time = get_wall_time() - start;
+  printf("\t- order_crossover_ox1: PASSED [%.6f secs]\n", elapsed_time);
 
-  start = clock();
+  start = get_wall_time();
   test_population_crossover_8_thread();
-  printf("\t- test_population_crossover_8_thread: PASSED [%.4f secs]\n",
-         MEASURE_TIME(start));
+  elapsed_time = get_wall_time() - start;
+  printf("\t- test_population_crossover_8_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
 
-  start = clock();
+  start = get_wall_time();
   test_population_crossover_4_thread();
-  printf("\t- test_population_crossover_4_thread: PASSED [%.4f secs]\n",
-         MEASURE_TIME(start));
+  elapsed_time = get_wall_time() - start;
+  printf("\t- test_population_crossover_4_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
 
-  start = clock();
+  start = get_wall_time();
   test_population_crossover_2_thread();
-  printf("\t- test_population_crossover_2_thread: PASSED [%.4f secs]\n",
-         MEASURE_TIME(start));
+  elapsed_time = get_wall_time() - start;
+  printf("\t- test_population_crossover_2_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
 
-  start = clock();
+  start = get_wall_time();
   test_population_crossover_1_thread();
-  printf("\t- test_population_crossover_1_thread: PASSED [%.4f secs]\n",
-         MEASURE_TIME(start));
+  elapsed_time = get_wall_time() - start;
+  printf("\t- test_population_crossover_1_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
 }
 
 void test_random_subintervals() {
@@ -225,8 +230,8 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
   exec.population = NULL;
   exec.offspring = NULL;
   exec.selected_parents_indexes = NULL;
-  exec.population_size = randsize_t_i(223, 227, &state);
-  exec.codification_size = randsize_t_i(223, 227, &state);
+  exec.population_size = randsize_t_i(1223, 1227, &state);
+  exec.codification_size = randsize_t_i(1223, 1227, &state);
   exec.generations = 400;
   exec.mem = NULL;
   assert(setup_dynamic_mem_for_ga_execution(&exec, sizeof(size_t),
@@ -258,13 +263,13 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
     const size_t thread_id = omp_get_thread_num();
     for (size_t _ = 0; _ < 50; _++) {
       assert(population_crossover(&exec, workspace_array, order_crossover_ox1,
-                           thread_id) == 0);
+                                  thread_id) == 0);
       #pragma omp barrier
       if (thread_id == 0) {
         copy_thread_offspring_to_ga_exec_size_t(&exec, workspace_array);
         for (size_t i = 0; i < exec.population_size; i++)
           assert(all_elements_present(boolset, exec.codification_size,
-                                    exec.offspring[i].codification));
+                                      exec.offspring[i].codification));
       }
       #pragma omp barrier
     }

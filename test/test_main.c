@@ -1,6 +1,5 @@
 #include <stddef.h>
 #include <stdio.h>
-#include <time.h>
 #include "../include/utils/mytime.h"
 #include "../include/test/utils/test_input_output.h"
 #include "../include/test/utils/test_matrix.h"
@@ -12,7 +11,7 @@
 #include "../include/test/tsp/test_euclidean.h"
 
 int main() {
-  clock_t start = clock();
+  double start = get_wall_time();
   printf("Starting tests\n\n");
 
   test_input_output();
@@ -24,7 +23,7 @@ int main() {
   test_crossover();
   test_population();
 
-  double elapsed = MEASURE_TIME(start);
-  printf("\nFinished testing in %.3f seconds\n", elapsed);
+  double elapsed = get_wall_time() - start;
+  printf("\nFinished testing in %.6f seconds\n", elapsed);
   return 0;
 }

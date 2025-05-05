@@ -5,6 +5,10 @@
 
 #include <time.h>
 
-#define MEASURE_TIME(start) (((double)(clock() - (start))) / CLOCKS_PER_SEC)
+static inline double get_wall_time() {
+    struct timespec ts;  // struct to store secs and nanosecs 
+    clock_gettime(CLOCK_MONOTONIC, &ts);  // get current time 
+    return (double)ts.tv_sec + (double)ts.tv_nsec / 1000000000.0;
+}
 
 #endif
