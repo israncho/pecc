@@ -21,6 +21,17 @@ int setup_dynamic_mem_for_ga_execution(
           codification_entry_alignment) != 0)
     return 2;
 
+  if (setup_array_from_prealloc_mem(
+          &mem_, &memory_capacity, (void **)&exec->current_best, 1,
+          sizeof(individual), alignof(individual)) != ARRAY_OK)
+    return 3;
+
+  if (setup_array_from_prealloc_mem(
+          &mem_, &memory_capacity, &exec->current_best->codification,
+          exec->codification_size, codification_entry_size,
+          codification_entry_alignment) != ARRAY_OK)
+    return 4;
+
   return 0;
 }
 

@@ -51,15 +51,15 @@ memory_needed_for_ga_execution(const ga_execution *exec,
                                const size_t codification_entry_size,
                                const size_t codification_entry_alignment) {
   const size_t population_size = exec->population_size;
+  // considering both population, offspring and current_best
+  const size_t total_num_of_individuals = population_size * 2 + 1;
   // bytes for array of individuals
   size_t memory_needed =
-      sizeof(individual) * population_size + alignof(individual);
+      sizeof(individual) * total_num_of_individuals + alignof(individual);
   // bytes for codification of each individual
   memory_needed +=
-      codification_entry_size * exec->codification_size * population_size +
+      codification_entry_size * exec->codification_size * total_num_of_individuals +
       codification_entry_alignment;
-  // bytes for population and offspring
-  memory_needed *= 2;
   // bytes for array of indexes of selected parents
   memory_needed += sizeof(size_t) * (population_size + (population_size % 2)) +
                    alignof(size_t);
