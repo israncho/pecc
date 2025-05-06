@@ -26,7 +26,7 @@ inline static void fill_array_simple(size_t *array, size_t array_size) {
 
 void test_shuffle_array_of_size_t() {
   xorshiftr128plus_state state;
-  set_up_seed(&state, 0, 0);
+  set_up_seed(&state, 0, 0, 0);
 
   const size_t N = 250;
   size_t *array = NULL;

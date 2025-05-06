@@ -54,7 +54,7 @@ void test_random_subintervals() {
   size_t *intervals_array = malloc(sizeof(size_t) * 15);
   size_t number_of_intervals = 0;
   xorshiftr128plus_state state;
-  set_up_seed(&state, 0, 0);
+  set_up_seed(&state, 0, 0, 0);
 
   for (size_t _ = 0; _ < 1000; _++) {
     const size_t range = randsize_t_i(15, 30, &state);
@@ -166,7 +166,7 @@ void test_order_crossover_ox1() {
   workspace.crossover_workspace_capacity = crossover_workspace_size;
   init_array(&workspace.crossover_workspace, crossover_workspace_size, 1);
 
-  set_up_seed(&workspace.state, 0, 0);
+  set_up_seed(&workspace.state, 0, 0, 0);
 
   for (size_t _ = 0; _ < 10000; _++) {
     const size_t codification_size =
@@ -223,7 +223,7 @@ void test_order_crossover_ox1() {
 
 static inline void test_threaded_population_crossover(const size_t n_threads) {
   xorshiftr128plus_state state;
-  set_up_seed(&state, 0, 0);
+  set_up_seed(&state, 0, 0, 0);
 
   ga_execution exec;
   exec.n_threads = n_threads;
@@ -245,7 +245,7 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
              sizeof(size_t), alignof(size_t)) == 0);
 
   for (size_t i = 0; i < n_threads; i++)
-    set_up_seed(&workspace_array[i].state, 0, 0);
+    set_up_seed(&workspace_array[i].state, 0, 0, i);
 
   fill_and_shuffle_population_of_permutations(
       exec.population, exec.population_size, exec.codification_size, &state);

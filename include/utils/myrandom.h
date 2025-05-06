@@ -12,7 +12,7 @@ typedef struct {
 } xorshiftr128plus_state;
 
 void set_up_seed(xorshiftr128plus_state *state, const uint64_t seed1,
-                const uint64_t seed2);
+                const uint64_t seed2, const uint64_t thread_id);
 
 static inline uint64_t xorshiftr128plus(xorshiftr128plus_state *state) {
   uint64_t x = state->s[0];

@@ -5,25 +5,28 @@
 #include "../../include/utils/array.h"
 
 void set_up_seed(xorshiftr128plus_state *state, const uint64_t seed1,
-                 const uint64_t seed2) {
+                 const uint64_t seed2, const uint64_t thread_id) {
   if (state == NULL)
     return;
+
+  const size_t mersenne_prime = 2147483647;
+  const size_t mersenne_prime2 = 524287;
 
   if (seed1 == 0 && seed2 == 0) {
     // entropy sources
     uint64_t t = (uint64_t)time(NULL);
     uint64_t clock_val = (uint64_t)clock();
 
-    state->s[0] = t ^ (clock_val << 16) ^ ((uintptr_t)state);
-    state->s[1] = clock_val ^ (t >> 32) ^ ((uintptr_t)state >> 16);
+    state->s[0] = t ^ (clock_val << 16) ^ ((uintptr_t)state) ^ (thread_id * mersenne_prime);
+    state->s[1] = clock_val ^ (t >> 32) ^ ((uintptr_t)state >> 16) ^ ((thread_id * mersenne_prime2) << 8);
 
     if (state->s[0] == 0 && state->s[1] == 0) {
       state->s[0] = 1;
       state->s[1] = 0x6C078967;
     }
   } else {
-    state->s[0] = seed1 ? seed1 : 1;
-    state->s[1] = seed2 ? seed2 : 0x6C078967;
+    state->s[0] = (seed1 ? seed1 : 1) ^ (thread_id * mersenne_prime);
+    state->s[1] = (seed2 ? seed2 : 0x6C078967) ^ ((thread_id * mersenne_prime2) << 8);
   }
 
   for (int i = 0; i < 10; i++)

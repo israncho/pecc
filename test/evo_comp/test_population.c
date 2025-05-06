@@ -49,7 +49,7 @@ static inline bool same_arrays(const size_t arrays_len, const size_t *arr1,
 
 void test_fill_and_shuffle_population_of_permutations() {
   xorshiftr128plus_state state;
-  set_up_seed(&state, 0, 0);
+  set_up_seed(&state, 0, 0, 0);
 
   for (size_t _ = 0; _ < 1000; _++) {
     const size_t population_size = randsize_t_i(50, 150, &state);
@@ -89,7 +89,7 @@ void test_fill_and_shuffle_population_of_permutations() {
 
 void test_setup_population_from_prealloc_mem() {
   xorshiftr128plus_state state;
-  set_up_seed(&state, 0, 0);
+  set_up_seed(&state, 0, 0, 0);
 
   for (size_t _ = 0; _ < 1000; _++) {
     const size_t population_size = randsize_t_i(150, 250, &state);
