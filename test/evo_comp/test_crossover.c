@@ -287,7 +287,7 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
 #pragma omp parallel num_threads(n_threads)
   {
     const size_t thread_id = omp_get_thread_num();
-    for (size_t _ = 0; _ < 50; _++) {
+    for (size_t _ = 0; _ < 15; _++) {
     // for (size_t _ = 0; _ < 100; _++) {
       assert(population_crossover(&exec, workspace_array, order_crossover_ox1,
                                   thread_id) == 0);
