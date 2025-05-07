@@ -32,9 +32,33 @@ void test_crossover() {
          elapsed_time);
 
   start = get_wall_time();
+  test_population_crossover_7_thread();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- test_population_crossover_7_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
+
+  start = get_wall_time();
+  test_population_crossover_6_thread();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- test_population_crossover_6_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
+
+  start = get_wall_time();
+  test_population_crossover_5_thread();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- test_population_crossover_5_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
+
+  start = get_wall_time();
   test_population_crossover_4_thread();
   elapsed_time = get_wall_time() - start;
   printf("\t- test_population_crossover_4_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
+
+  start = get_wall_time();
+  test_population_crossover_3_thread();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- test_population_crossover_3_thread: PASSED [%.6f secs]\n",
          elapsed_time);
 
   start = get_wall_time();
@@ -292,8 +316,24 @@ void test_population_crossover_2_thread() {
   test_threaded_population_crossover(2);
 }
 
+void test_population_crossover_3_thread() {
+  test_threaded_population_crossover(3);
+}
+
 void test_population_crossover_4_thread() {
   test_threaded_population_crossover(4);
+}
+
+void test_population_crossover_5_thread() {
+  test_threaded_population_crossover(5);
+}
+
+void test_population_crossover_6_thread() {
+  test_threaded_population_crossover(6);
+}
+
+void test_population_crossover_7_thread() {
+  test_threaded_population_crossover(7);
 }
 
 void test_population_crossover_8_thread() {
