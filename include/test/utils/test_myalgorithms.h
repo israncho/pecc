@@ -7,4 +7,5 @@ void test_myalgorithms();
 
 void test_bisect_left();
 
+void test_index_of_the_max_val();
 #endif

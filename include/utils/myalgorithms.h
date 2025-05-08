@@ -11,6 +11,11 @@ size_t bisect_left(const void *array,
                    const void *x,
                    int (*compare)(const void *, const void *));
 
+size_t index_of_the_max_val(const void *array,
+                            const size_t array_len,
+                            const size_t array_entry_byte_size,
+                            int (*compare)(const void *, const void *));
+
 static inline int compare_float(const void *a, const void *b) {
     const float a_as_float = *(float *)a;
     const float b_as_float = *(float *)b;
