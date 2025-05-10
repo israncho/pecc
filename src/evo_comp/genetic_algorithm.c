@@ -3,6 +3,7 @@
 #include "../../include/evo_comp/genetic_algorithm.h"
 #include "../../include/evo_comp/population.h"
 #include "../../include/utils/array.h"
+#include "../../include/utils/myalgorithms.h"
 
 int setup_dynamic_mem_for_ga_execution(
     ga_execution *exec, const size_t codification_entry_size,
@@ -59,10 +60,13 @@ int setup_dynamic_mem_for_ga_workspace(
   size_t remainder =
       (population_size % n_threads) + ((pop_per_thread % 2) * n_threads);
 
+  const size_t all_sizes[4] = {
+      crossover_workspace_size, selection_workspace_size,
+      mutation_workspace_size, replacement_workspace_size};
+  const size_t mem_for_workspace = all_sizes[index_of_the_max_val(
+      all_sizes, 4, sizeof(size_t), compare_size_t)];
   const size_t mem_needed_per_thread =
-      size_needed_per_individual + crossover_workspace_size +
-      selection_workspace_size + mutation_workspace_size +
-      replacement_workspace_size;
+      size_needed_per_individual + mem_for_workspace;
 
   ga_workspace *workspace_array = *ptr_to_workspace_array;
   size_t offspring_size_of_previous_threads = 0;
@@ -91,48 +95,26 @@ int setup_dynamic_mem_for_ga_workspace(
 
     size_t mem_capacity = mem_needed_per_thread;
 
-    workspace_array[i].crossover_workspace_capacity = crossover_workspace_size;
+    workspace_array[i].scratch_space_capacity = mem_for_workspace;
     if (crossover_workspace_size > 0)
       if (setup_array_from_prealloc_mem(
-              &mem_, &mem_capacity, &workspace_array[i].crossover_workspace,
+              &mem_, &mem_capacity, &workspace_array[i].scratch_space,
               crossover_workspace_size, 1, 1) != ARRAY_OK)
         return 3;
-
-    workspace_array[i].selection_workspace_capacity = selection_workspace_size;
-    if (selection_workspace_size > 0)
-      if (setup_array_from_prealloc_mem(
-              &mem_, &mem_capacity, &workspace_array[i].selection_workspace,
-              selection_workspace_size, 1, 1) != ARRAY_OK)
-        return 4;
-
-    workspace_array[i].mutation_workspace_capacity = mutation_workspace_size;
-    if (mutation_workspace_size > 0)
-      if (setup_array_from_prealloc_mem(
-              &mem_, &mem_capacity, &workspace_array[i].mutation_workspace,
-              mutation_workspace_size, 1, 1) != ARRAY_OK)
-        return 5;
-
-    workspace_array[i].replacement_workspace_capacity =
-        replacement_workspace_size;
-    if (replacement_workspace_size > 0)
-      if (setup_array_from_prealloc_mem(
-              &mem_, &mem_capacity, &workspace_array[i].replacement_workspace,
-              replacement_workspace_size, 1, 1) != ARRAY_OK)
-        return 6;
 
     if (setup_array_from_prealloc_mem(
             &mem_, &mem_capacity, (void **)&workspace_array[i].thread_best, 1,
             sizeof(individual), alignof(individual)) != ARRAY_OK)
-      return 7;
+      return 4;
 
     if (setup_array_from_prealloc_mem(
             &mem_, &mem_capacity, &workspace_array[i].thread_best->codification,
             codification_size, codification_entry_size,
             codification_entry_alignment) != ARRAY_OK)
-      return 8;
+      return 5;
   }
   if (offspring_size_of_previous_threads != population_size)
-    return 9;
+    return 6;
   return 0;
 }
 

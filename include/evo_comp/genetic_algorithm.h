@@ -28,15 +28,9 @@ typedef struct {
 
 typedef struct {
   void *mem;
-  void *crossover_workspace;
-  void *selection_workspace;
-  void *mutation_workspace;
-  void *replacement_workspace;
+  void *scratch_space;
   individual *thread_best;
-  size_t crossover_workspace_capacity;
-  size_t selection_workspace_capacity;
-  size_t mutation_workspace_capacity;
-  size_t replacement_workspace_capacity;
+  size_t scratch_space_capacity;
   size_t offspring_size_of_previous_threads;
   size_t thread_offspring_size;
   xorshiftr128plus_state state;

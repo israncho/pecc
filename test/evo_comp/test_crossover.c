@@ -185,10 +185,10 @@ void test_order_crossover_ox1() {
          ARRAY_OK);
 
   ga_workspace workspace;
-  workspace.crossover_workspace = NULL;
-  size_t crossover_workspace_size = ox1_workspace_size(max_codification_size);
-  workspace.crossover_workspace_capacity = crossover_workspace_size;
-  init_array(&workspace.crossover_workspace, crossover_workspace_size, 1);
+  workspace.scratch_space = NULL;
+  const size_t crossover_workspace_size = ox1_workspace_size(max_codification_size);
+  workspace.scratch_space_capacity = crossover_workspace_size;
+  init_array(&workspace.scratch_space, crossover_workspace_size, 1);
 
   set_up_seed(&workspace.state, 0, 0, 0);
 
@@ -241,7 +241,7 @@ void test_order_crossover_ox1() {
   free(parent2.codification);
   free(child1.codification);
   free(child2.codification);
-  free(workspace.crossover_workspace);
+  free(workspace.scratch_space);
   free(boolset);
 }
 

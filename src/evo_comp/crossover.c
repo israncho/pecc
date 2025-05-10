@@ -99,11 +99,11 @@ int order_crossover_ox1(const individual *ptr_parent1,
     child2 = ptr_child2->codification;
   }
 
-  if (ptr_workspace == NULL || ptr_workspace->crossover_workspace == NULL)
+  if (ptr_workspace == NULL || ptr_workspace->scratch_space == NULL)
     return 4;
 
-  void *workspace = ptr_workspace->crossover_workspace;
-  size_t workspace_capacity = ptr_workspace->crossover_workspace_capacity;
+  void *crossover_workspace = ptr_workspace->scratch_space;
+  size_t crossover_workspace_capacity = ptr_workspace->scratch_space_capacity;
 
   xorshiftr128plus_state *state = &ptr_workspace->state;
 
@@ -112,7 +112,7 @@ int order_crossover_ox1(const individual *ptr_parent1,
   const size_t size_t_alignment = alignof(size_t);
 
   size_t *intervals_array = NULL;
-  setup_array_from_prealloc_mem(&workspace, &workspace_capacity,
+  setup_array_from_prealloc_mem(&crossover_workspace, &crossover_workspace_capacity,
                                 (void **)&intervals_array, 15, size_t_size,
                                 size_t_alignment);
 
@@ -121,17 +121,17 @@ int order_crossover_ox1(const individual *ptr_parent1,
   size_t *missing_indexes_child2 = NULL;
   size_t missing_ind_c2_i = 0;
   setup_array_from_prealloc_mem(
-      &workspace, &workspace_capacity, (void **)&missing_indexes_child1,
+      &crossover_workspace, &crossover_workspace_capacity, (void **)&missing_indexes_child1,
       inheritance_p1 + 1, size_t_size, size_t_alignment);
 
   if (two_childs)
     setup_array_from_prealloc_mem(
-        &workspace, &workspace_capacity, (void **)&missing_indexes_child2,
+        &crossover_workspace, &crossover_workspace_capacity, (void **)&missing_indexes_child2,
         inheritance_p1 + 1, size_t_size, size_t_alignment);
 
   // boolset
   bool *missing_for_child1 = NULL;
-  setup_array_from_prealloc_mem(&workspace, &workspace_capacity,
+  setup_array_from_prealloc_mem(&crossover_workspace, &crossover_workspace_capacity,
                                 (void **)&missing_for_child1, chromosome_size,
                                 sizeof(bool), alignof(bool));
 
