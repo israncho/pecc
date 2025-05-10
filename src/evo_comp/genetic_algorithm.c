@@ -55,10 +55,10 @@ int setup_dynamic_mem_for_ga_workspace(
       codification_entry_size * codification_size;
   const size_t pop_per_thread = population_size / n_threads;
   // only even numbers
-  const size_t min_offspring_per_thread = pop_per_thread - (pop_per_thread % 2);
+  const size_t min_offspring_per_thread = pop_per_thread - (pop_per_thread & 1);
   // always holds: remainder <= 2 * n_threads - 1
   size_t remainder =
-      (population_size % n_threads) + ((pop_per_thread % 2) * n_threads);
+      (population_size % n_threads) + ((pop_per_thread & 1) * n_threads);
 
   const size_t all_sizes[4] = {
       crossover_workspace_size, selection_workspace_size,
@@ -139,7 +139,7 @@ int setup_from_prealloc_mem_arrays_for_ga_execution(
 
   status_code = setup_array_from_prealloc_mem(
       ptr_to_mem, ptr_to_mem_capacity, (void **)&exec->selected_parents_indexes,
-      population_size + (population_size % 2), sizeof(size_t), alignof(size_t));
+      population_size + (population_size & 1), sizeof(size_t), alignof(size_t));
   if (status_code != 0)
     return 3;
 

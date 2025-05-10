@@ -55,7 +55,7 @@ memory_needed_for_ga_execution(const ga_execution *exec,
       codification_entry_size * exec->codification_size * total_num_of_individuals +
       codification_entry_alignment;
   // bytes for array of indexes of selected parents
-  memory_needed += sizeof(size_t) * (population_size + (population_size % 2)) +
+  memory_needed += sizeof(size_t) * (population_size + (population_size & 1)) +
                    alignof(size_t);
   return memory_needed;
 }

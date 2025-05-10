@@ -275,7 +275,7 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
       exec.population, exec.population_size, exec.codification_size, &state);
 
   const size_t selected_parents_i_size =
-      exec.population_size + exec.population_size % 2;
+      exec.population_size + (exec.population_size & 1);
   for (size_t j = 0; j < selected_parents_i_size; j++)
     exec.selected_parents_indexes[j] =
         randsize_t_i(0, exec.population_size - 1, &state);
