@@ -36,6 +36,11 @@ static inline size_t randsize_t_i(size_t min, size_t max, xorshiftr128plus_state
   return (((__uint128_t)x * (__uint128_t)interval_size) >> 64) + min;
 }
 
+static inline double random_double(xorshiftr128plus_state *state) {
+  uint64_t x = xorshiftr128plus(state);
+  return (x >> 11) * 0x1.0p-53;
+}
+
 int shuffle_array_of_size_t(size_t *array, const size_t array_size, xorshiftr128plus_state *state);
 
 #endif
