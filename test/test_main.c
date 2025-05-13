@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include "../include/test/evo_comp/test_crossover.h"
+#include "../include/test/evo_comp/test_mutation.h"
 #include "../include/test/evo_comp/test_population.h"
 #include "../include/test/evo_comp/test_selection.h"
 #include "../include/test/tsp/test_euclidean.h"
@@ -23,9 +24,10 @@ int main() {
   test_myrandom();
   test_array();
   test_myalgorithms();
-  test_crossover();
   test_population();
   test_selection();
+  test_crossover();
+  test_mutation();
 
   double elapsed = get_wall_time() - start;
   printf("\nFinished testing in %.6f seconds\n", elapsed);

@@ -24,6 +24,7 @@ typedef struct {
   size_t total_f_execs;
   size_t curr_f_execs;
   size_t n_threads;
+  double mutation_rate;
 } ga_execution;
 
 typedef struct {
