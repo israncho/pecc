@@ -9,4 +9,6 @@ void test_init_tsp_euc_instance();
 
 void test_euclidean_distance();
 
+void test_tour_distance();
+
 #endif

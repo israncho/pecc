@@ -1,13 +1,17 @@
 #include <assert.h>
 #include <math.h>
+#include <stdalign.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../../include/utils/mytime.h"
 #include "../../include/test/tsp/test_euclidean.h"
 #include "../../include/tsp/euclidean.h"
+#include "../../include/utils/array.h"
 #include "../../include/utils/input_output.h"
+#include "../../include/utils/matrix.h"
+#include "../../include/utils/myrandom.h"
+#include "../../include/utils/mytime.h"
 
 void test_euclidean() {
   printf("Testing: tsp_euclidean\n");
@@ -21,6 +25,11 @@ void test_euclidean() {
   test_euclidean_distance();
   elapsed_time = get_wall_time() - start;
   printf("\t- euclidean_distance: PASSED [%.6f secs]\n", elapsed_time);
+
+  start = get_wall_time();
+  test_tour_distance();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- tour_distance: PASSED [%.6f secs]\n", elapsed_time);
 }
 
 void test_init_tsp_euc_instance() {
@@ -104,4 +113,60 @@ void test_euclidean_distance() {
     p2[1] = i;
     assert(euclidean_distance(p1, p2, 2) == distance);
   }
+}
+
+void test_tour_distance() {
+  const size_t max_n_of_cities = 1500;
+  const size_t max_codification_size = max_n_of_cities - 1;
+  const size_t min_n_of_cities = 1450;
+
+  tsp_euc_instance instance;
+  instance.cities = NULL;
+  instance.distances = NULL;
+  xorshiftr128plus_state state;
+  set_up_seed(&state, 0, 0, 0);
+  assert(init_matrix((void ***)&instance.cities, max_n_of_cities, 2,
+                     sizeof(double), alignof(double)) == 0);
+  assert(init_matrix((void ***)&instance.distances, max_n_of_cities,
+                     max_n_of_cities, sizeof(double), alignof(double)) == 0);
+
+  size_t *solution = NULL;
+  assert(init_array((void **)&solution, max_codification_size,
+                    sizeof(size_t)) == ARRAY_OK);
+
+  for (size_t i = 0; i < max_codification_size; i++)
+    solution[i] = i;
+
+  for (size_t _ = 0; _ < 250; _++) {
+    const size_t rnd_n = randsize_t_i(min_n_of_cities, max_n_of_cities, &state);
+    const size_t curr_n_of_cities = rnd_n + (rnd_n & 1);
+    instance.number_of_cities = curr_n_of_cities;
+
+    const size_t half = curr_n_of_cities / 2;
+    double curr = 0.0;
+
+    for (size_t i = 0; i < half; i++) {
+      instance.cities[i][0] = curr;
+      instance.cities[i][1] = 0.0;
+      curr += randsize_t_i(5, 50, &state) * 1.0;
+    }
+
+    const double base_size = instance.cities[half - 1][0];
+
+    const double height = randsize_t_i(25, 50, &state) * 1.0;
+
+    size_t aux = half - 1;
+    for (size_t i = half; i < curr_n_of_cities; i++) {
+      instance.cities[i][0] = instance.cities[aux--][0];
+      instance.cities[i][1] = height;
+    }
+    fill_distance_matrix((const double *const *)instance.cities,
+                         curr_n_of_cities, 2, instance.distances);
+    const double simple_tour_distance = base_size * 2 + height * 2;
+    const double computed_tour_distance = tour_distance(solution, &instance);
+    assert(simple_tour_distance == computed_tour_distance);
+  }
+  free(instance.cities);
+  free(instance.distances);
+  free(solution);
 }
