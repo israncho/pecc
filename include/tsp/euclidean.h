@@ -25,7 +25,7 @@ int fill_distance_matrix(const double *const *cities,
                          const size_t city_size,
                          double **distance_matrix);
 
-double tour_distance(const void *solution, const void *instance_details);
+double tour_distance(void *solution, void *instance_details);
 
 int init_tsp_euc_instance(const file_line *array_of_lines,
                           const size_t number_of_lines,

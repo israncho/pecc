@@ -37,7 +37,7 @@ int fill_distance_matrix(const double *const *cities,
   return 0;
 }
 
-inline double tour_distance(const void *solution, const void *instance_details) {
+inline double tour_distance(void *solution, void *instance_details) {
   const tsp_euc_instance *instance = (tsp_euc_instance *)instance_details;
   const size_t *permutation = (size_t *)solution;
   const size_t n = instance->number_of_cities;
