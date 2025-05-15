@@ -37,7 +37,9 @@ int fill_distance_matrix(const double *const *cities,
   return 0;
 }
 
-inline double tour_distance(void *solution, void *instance_details) {
+inline double tour_distance(void *solution, void *instance_details, ga_workspace *_) {
+  // just silencing compiler warning for not using the last argument
+  (void)_;
   const tsp_euc_instance *instance = (tsp_euc_instance *)instance_details;
   const size_t *permutation = (size_t *)solution;
   const size_t n = instance->number_of_cities;

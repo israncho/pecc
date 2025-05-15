@@ -4,6 +4,7 @@
 #define EUCLIDEAN_H
 
 #include <stddef.h>
+#include "../../include/evo_comp/genetic_algorithm.h"
 #include "../../include/utils/input_output.h"
 
 typedef struct {
@@ -25,7 +26,7 @@ int fill_distance_matrix(const double *const *cities,
                          const size_t city_size,
                          double **distance_matrix);
 
-double tour_distance(void *solution, void *instance_details);
+double tour_distance(void *solution, void *instance_details, ga_workspace *_);
 
 int init_tsp_euc_instance(const file_line *array_of_lines,
                           const size_t number_of_lines,

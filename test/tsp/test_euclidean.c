@@ -163,7 +163,7 @@ void test_tour_distance() {
     fill_distance_matrix((const double *const *)instance.cities,
                          curr_n_of_cities, 2, instance.distances);
     const double simple_tour_distance = base_size * 2 + height * 2;
-    const double computed_tour_distance = tour_distance(solution, &instance);
+    const double computed_tour_distance = tour_distance(solution, &instance, NULL);
     assert(simple_tour_distance == computed_tour_distance);
   }
   free(instance.cities);
