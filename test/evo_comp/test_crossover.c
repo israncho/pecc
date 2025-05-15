@@ -186,7 +186,8 @@ void test_order_crossover_ox1() {
 
   ga_workspace workspace;
   workspace.scratch_space = NULL;
-  const size_t crossover_workspace_size = ox1_workspace_size(max_codification_size);
+  const size_t crossover_workspace_size =
+      ox1_workspace_size(max_codification_size);
   workspace.scratch_space_capacity = crossover_workspace_size;
   init_array(&workspace.scratch_space, crossover_workspace_size, 1);
 
@@ -265,7 +266,7 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
   ga_workspace *workspace_array = NULL;
   assert(setup_dynamic_mem_for_ga_workspace(
              &workspace_array, &exec, n_threads,
-             ox1_workspace_size(exec.codification_size), 0, 0, 0,
+             ox1_workspace_size(exec.codification_size), 0, 0, 0, 0,
              sizeof(size_t), alignof(size_t)) == 0);
 
   for (size_t i = 0; i < n_threads; i++)
@@ -284,12 +285,13 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
   assert(init_array((void **)&boolset, exec.codification_size, sizeof(bool)) ==
          ARRAY_OK);
 
-#pragma omp parallel num_threads(n_threads)
+  #pragma omp parallel num_threads(n_threads)
   {
     const size_t thread_id = omp_get_thread_num();
     for (size_t _ = 0; _ < 15; _++) {
-    // for (size_t _ = 0; _ < 100; _++) {
-      assert(population_crossover(&exec, &workspace_array[thread_id], order_crossover_ox1) == 0);
+      // for (size_t _ = 0; _ < 100; _++) {
+      assert(population_crossover(&exec, &workspace_array[thread_id],
+                                  order_crossover_ox1) == 0);
       #pragma omp barrier
       if (thread_id == 0)
         for (size_t i = 0; i < exec.population_size; i++)

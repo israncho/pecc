@@ -39,8 +39,11 @@ int setup_dynamic_mem_for_ga_execution(
 
 int setup_dynamic_mem_for_ga_workspace(
     ga_workspace **ptr_to_workspace_array, const ga_execution *exec,
-    const size_t n_threads, const size_t crossover_workspace_size,
-    const size_t selection_workspace_size, const size_t mutation_workspace_size,
+    const size_t n_threads,
+    const size_t crossover_workspace_size,
+    const size_t selection_workspace_size,
+    const size_t mutation_workspace_size,
+    const size_t target_f_workspace_size,
     const size_t replacement_workspace_size,
     const size_t codification_entry_size,
     const size_t codification_entry_alignment) {
@@ -61,11 +64,12 @@ int setup_dynamic_mem_for_ga_workspace(
   size_t remainder =
       (population_size % n_threads) + ((pop_per_thread & 1) * n_threads);
 
-  const size_t all_sizes[4] = {
+  const size_t all_sizes[5] = {
       crossover_workspace_size, selection_workspace_size,
-      mutation_workspace_size, replacement_workspace_size};
+      mutation_workspace_size, target_f_workspace_size,
+      replacement_workspace_size};
   const size_t mem_for_workspace = all_sizes[index_of_the_max_val(
-      all_sizes, 4, sizeof(size_t), compare_size_t)];
+      all_sizes, 5, sizeof(size_t), compare_size_t)];
   const size_t mem_needed_per_thread =
       size_needed_per_individual + mem_for_workspace;
 
