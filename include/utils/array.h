@@ -18,7 +18,7 @@ typedef enum {
   ARRAY_ERR_TYPE_S_ZERO, ///< Requested type size was zero (invalid operation)
   ARRAY_ERR_IN_USE,      ///< Pointer already contains an allocated array
   ARRAY_ERR_ALLOC,       ///< Memory allocation failed (check errno)
-  ARRAY_ERR_NO_CAPACITY ///< Not enough capacity 
+  ARRAY_ERR_NO_CAPACITY  ///< Not enough capacity
 } ArrayStatus;
 
 /**
@@ -118,5 +118,16 @@ setup_array_from_prealloc_mem(void **ptr_to_mem, size_t *ptr_to_mem_capacity,
     __arr[__i] = __arr[__j];                                                   \
     __arr[__j] = __tmp;                                                        \
   } while (0)
+
+static inline void reverse_segment_size_t_arr(size_t *array, const size_t start,
+                                              const size_t end) {
+  size_t i = start;
+  size_t j = end;
+  while (i < j) {
+    SWAP_T(array, size_t, i, j);
+    i++;
+    j--;
+  }
+}
 
 #endif

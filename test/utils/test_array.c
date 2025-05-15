@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdalign.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +16,11 @@ void test_array() {
   test_setup_array_from_prealloc_mem();
   double elapsed_time = get_wall_time() - start;
   printf("\t- setup_array_from_prealloc_mem: PASSED [%.6f secs]\n", elapsed_time);
+
+  start = get_wall_time();
+  test_reverse_segment_size_t_arr();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- reverse_segment_size_t_arr: PASSED [%.6f secs]\n", elapsed_time);
 }
 
 void test_setup_array_from_prealloc_mem() {
@@ -122,4 +128,41 @@ void test_setup_array_from_prealloc_mem() {
     assert(char_array[i] == char_target[i]);
 
   free(mem);
+}
+
+static inline void fill_array_as_simple_seq(size_t *array,
+                                            const size_t array_len) {
+  for (size_t i = 0; i < array_len; i++)
+    array[i] = i;
+}
+
+static inline bool same_arrays(size_t *array1, size_t *array2,
+                               const size_t array_len) {
+  for (size_t i = 0; i < array_len; i++)
+    if (array1[i] != array2[i])
+      return false;
+  return true;
+}
+
+void test_reverse_segment_size_t_arr() {
+  const size_t array_len = 1000;
+  size_t unchanged[array_len];
+  fill_array_as_simple_seq(unchanged, array_len);
+  size_t arr[array_len];
+  fill_array_as_simple_seq(arr, array_len);
+
+  for (size_t i = 0; i < array_len; i++) {
+    for (size_t j = i + 1; j < array_len; j++) { 
+      reverse_segment_size_t_arr(arr, i, j);
+      size_t tmp_i = i;
+      size_t tmp_j = j;
+      while (tmp_i < tmp_j) {
+        assert(unchanged[tmp_i] == arr[tmp_j]);
+        tmp_i++;
+        tmp_j--;
+      }
+      reverse_segment_size_t_arr(arr, i, j);
+      assert(same_arrays(arr, unchanged, array_len));
+    }
+  }
 }
