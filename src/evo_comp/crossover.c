@@ -179,19 +179,17 @@ int order_crossover_ox1(const individual *ptr_parent1,
 }
 
 int population_crossover(
-    ga_execution *ptr_exec_data, ga_workspace *workspace_array,
+    ga_execution *ptr_exec_data, ga_workspace *workspace,
     int (*crossover)(const individual *, const individual *, individual *,
-                     individual *, const size_t, ga_workspace *),
-    const size_t thread_id) {
+                     individual *, const size_t, ga_workspace *)) {
   if (ptr_exec_data == NULL)
     return 1;
-  if (workspace_array == NULL)
+  if (workspace == NULL)
     return 2;
   if (ptr_exec_data->population == NULL)
     return 3;
   if (ptr_exec_data->offspring == NULL)
     return 4;
-  ga_workspace *workspace = &workspace_array[thread_id];
   size_t *selected_parents_indexes = ptr_exec_data->selected_parents_indexes;
   individual *population = ptr_exec_data->population;
   individual *offspring = ptr_exec_data->offspring;
