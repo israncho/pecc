@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include "../include/test/evo_comp/test_crossover.h"
+#include "../include/test/evo_comp/test_genetic_algorithm.h"
 #include "../include/test/evo_comp/test_mutation.h"
 #include "../include/test/evo_comp/test_population.h"
 #include "../include/test/evo_comp/test_selection.h"
@@ -24,6 +25,7 @@ int main() {
   test_myrandom();
   test_array();
   test_myalgorithms();
+  test_genetic_algorithm();
   test_population();
   test_selection();
   test_crossover();
