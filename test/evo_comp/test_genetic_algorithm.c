@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <omp.h>
 #include <stddef.h>
 #include <stdio.h>
 #include "../../include/test/evo_comp/test_genetic_algorithm.h"
@@ -6,6 +7,7 @@
 #include "../../include/evo_comp/population.h"
 #include "../../include/tsp/euclidean.h"
 #include "../../include/utils/input_output.h"
+#include "../../include/utils/myrandom.h"
 #include "../../include/utils/mytime.h"
 
 void test_genetic_algorithm() {
@@ -78,7 +80,7 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
   exec.population = NULL;
   exec.offspring = NULL;
   exec.selected_parents_indexes = NULL;
-  exec.population_size = randsize_t_i(1223, 1227, &state);
+  exec.population_size = randsize_t_i(5569, 5573, &state);
   exec.codification_size = pr152_instance->number_of_cities - 1;
   exec.generations = 400;
   exec.mem = NULL;
@@ -95,7 +97,34 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
   fill_and_shuffle_population_of_permutations(
       exec.offspring, exec.population_size, exec.codification_size, &state);
 
-  // To do
+  #pragma omp parallel num_threads(n_threads)
+  {
+    const size_t thread_id = omp_get_thread_num();
+    ga_workspace *thread_workspace = &workspace_array[thread_id];
+
+    const size_t beginning =
+        thread_workspace->offspring_size_of_previous_threads;
+    const size_t end = thread_workspace->thread_offspring_size + beginning;
+
+    for (size_t _ = 0; _ < 50; _++) {
+
+      for (size_t i = beginning; i < end; i++) {
+        shuffle_array_of_size_t(exec.offspring[i].codification,
+                                exec.codification_size,
+                                &thread_workspace->state);
+        exec.offspring[i].fitness = random_double(&thread_workspace->state) * 100000.0;
+      }
+
+      assert(population_fitness_computing(&exec, thread_workspace,
+                                          pr152_instance, tour_distance) == 0);
+        
+      for (size_t i = beginning; i < end; i++) {
+        individual *curr_individual = &exec.offspring[i];
+        assert(curr_individual->fitness == tour_distance(curr_individual->codification, pr152_instance, NULL));
+      }
+      #pragma omp barrier
+    }
+  }
 
   for (size_t i = 0; i < n_threads; i++)
     free(workspace_array[i].mem);
