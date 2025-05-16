@@ -83,4 +83,8 @@ int setup_from_prealloc_mem_arrays_for_ga_execution(
 
 int copy_thread_offspring_to_ga_exec_size_t(ga_execution *exec, const ga_workspace *workspace_array);
 
+int population_fitness_computing(ga_execution *exec, ga_workspace *thread_workspace,
+                                 void *instance_details,
+                                 double (*fitness_f)(void *, void *, ga_workspace *));
+
 #endif

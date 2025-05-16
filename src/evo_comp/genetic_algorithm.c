@@ -151,23 +151,24 @@ int setup_from_prealloc_mem_arrays_for_ga_execution(
   return 0;
 }
 
-int population_fitness_computing(ga_execution *exec, ga_workspace *workspace,
+int population_fitness_computing(ga_execution *exec, ga_workspace *thread_workspace,
                                  void *instance_details,
-                                 int (*fitness_f)(void *, void *)) {
-  if (!exec || !workspace || !instance_details)
-    return !exec ? 1 : (!workspace ? 2 : 3);
+                                 double (*fitness_f)(void *, void *, ga_workspace *)) {
+  if (!exec || !thread_workspace || !instance_details)
+    return !exec ? 1 : (!thread_workspace ? 2 : 3);
 
-  const size_t beginning = workspace->offspring_size_of_previous_threads;
-  const size_t end = workspace->thread_offspring_size + beginning;
+  const size_t beginning = thread_workspace->offspring_size_of_previous_threads;
+  const size_t end = thread_workspace->thread_offspring_size + beginning;
 
   individual *offspring = exec->offspring;
-  individual *thread_best = workspace->thread_best;
+  individual *thread_best = thread_workspace->thread_best;
 
   thread_best->codification = NULL;
   thread_best->fitness = DBL_MAX;
   for (size_t i = beginning; i < end; i++) {
     individual *current = &offspring[i];
-    current->fitness = fitness_f(current->codification, instance_details);
+    current->fitness =
+        fitness_f(current->codification, instance_details, thread_workspace);
     if (current->fitness < thread_best->fitness) {
       thread_best->codification = current->codification;
       thread_best->fitness = current->fitness;

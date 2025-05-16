@@ -179,12 +179,12 @@ int order_crossover_ox1(const individual *ptr_parent1,
 }
 
 int population_crossover(
-    ga_execution *ptr_exec_data, ga_workspace *workspace,
+    ga_execution *ptr_exec_data, ga_workspace *thread_workspace,
     int (*crossover)(const individual *, const individual *, individual *,
                      individual *, const size_t, ga_workspace *)) {
   if (ptr_exec_data == NULL)
     return 1;
-  if (workspace == NULL)
+  if (thread_workspace == NULL)
     return 2;
   if (ptr_exec_data->population == NULL)
     return 3;
@@ -195,8 +195,8 @@ int population_crossover(
   individual *offspring = ptr_exec_data->offspring;
   const size_t population_size = ptr_exec_data->population_size; 
   const size_t codification_size = ptr_exec_data->codification_size; 
-  const size_t beginning = workspace->offspring_size_of_previous_threads;
-  const size_t end = workspace->thread_offspring_size + beginning;
+  const size_t beginning = thread_workspace->offspring_size_of_previous_threads;
+  const size_t end = thread_workspace->thread_offspring_size + beginning;
   for (size_t i = beginning; i < end; i += 2) {
     size_t parent1_i = selected_parents_indexes[i];
     size_t parent2_i = selected_parents_indexes[i + 1];
@@ -207,7 +207,7 @@ int population_crossover(
     if (i + 1 < population_size)
       child2 = &offspring[i + 1];
     if (crossover(&parent1, &parent2, child1, child2,
-                  codification_size, workspace) != 0)
+                  codification_size, thread_workspace) != 0)
       return 5;
   }
   return 0;
