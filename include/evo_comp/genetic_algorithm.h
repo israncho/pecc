@@ -34,6 +34,7 @@ typedef struct {
   size_t scratch_space_capacity;
   size_t offspring_size_of_previous_threads;
   size_t thread_offspring_size;
+  size_t local_search_iterations;
   xorshiftr128plus_state state;
 } ga_workspace;
 

@@ -69,6 +69,29 @@ inline double tour_distance(void *solution, void *instance_details, ga_workspace
   return total_distance;
 }
 
+double lsearch_2opt_tour_distance(void *solution, void *instance_details,
+                                  ga_workspace *thread_workspace) {
+  const size_t local_serach_iterations =
+      thread_workspace->local_search_iterations;
+  const tsp_euc_instance *instance = (tsp_euc_instance *)instance_details;
+  const size_t permutation_size = instance->number_of_cities - 1;
+  double best_f_x = tour_distance(solution, instance_details, NULL);
+
+  for (size_t _ = 0; _ < local_serach_iterations; _++) {
+    for (size_t i = 1; i < permutation_size; i++)
+      for (size_t j = i + 1; j < permutation_size; j++) {
+        reverse_segment_size_t_arr(solution, i, j);
+        const double f_neighbor_x =
+            tour_distance(solution, instance_details, NULL);
+        if (f_neighbor_x < best_f_x)
+          best_f_x = f_neighbor_x;
+        else
+          reverse_segment_size_t_arr(solution, i, j);
+      }
+  }
+  return best_f_x;
+}
+
 static int set_tsp_euc_members(tsp_euc_instance *instance, char *member,
                                char *value, size_t value_size) {
   if (strip_in_place(&value, &value_size) != 0)
