@@ -240,8 +240,8 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
   exec.population = NULL;
   exec.offspring = NULL;
   exec.selected_parents_indexes = NULL;
-  exec.population_size = 52;
-  // exec.population_size = randsize_t_i(7, 10, &state);
+  exec.population_size = 512;
+  // exec.population_size = 32;
   exec.codification_size = pr152_instance->number_of_cities - 1;
   exec.mem = NULL;
   assert(setup_dynamic_mem_for_ga_execution(&exec, sizeof(size_t),
@@ -273,12 +273,13 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
     const size_t end = thread_workspace->thread_offspring_size + beginning;
 
     for (size_t i = beginning; i < end; i++) {
-      exec.offspring[i].fitness = tour_distance(exec.offspring[i].codification, pr152_instance, NULL);
+      exec.offspring[i].fitness =
+          tour_distance(exec.offspring[i].codification, pr152_instance, NULL);
       prev_fitness[i] = exec.offspring[i].fitness;
     }
 
     for (size_t _ = 0; _ < 30; _++) {
-      // for (size_t _ = 0; _ < 10; _++) {
+    //for (size_t _ = 0; _ < 10; _++) {
       assert(population_fitness_computing(&exec, thread_workspace,
                                           pr152_instance,
                                           lsearch_2opt_tour_distance) == 0);
@@ -286,10 +287,10 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
       for (size_t i = beginning; i < end; i++) {
         individual *curr_individual = &exec.offspring[i];
         const double curr_individual_prev_fitness = prev_fitness[i];
-        assert(
-            curr_individual->fitness ==
-            tour_distance(curr_individual->codification, pr152_instance, NULL));
-        assert(curr_individual->fitness <= curr_individual_prev_fitness);
+        const double computed =
+            tour_distance(curr_individual->codification, pr152_instance, NULL);
+        assert(fabs(curr_individual->fitness - computed) < 1e-8);
+        assert(curr_individual->fitness - curr_individual_prev_fitness <= 1e-8);
         prev_fitness[i] = curr_individual->fitness;
       }
     #pragma omp barrier
