@@ -74,12 +74,13 @@ double lsearch_2opt_tour_distance(void *solution, void *instance_details,
   const size_t local_serach_iterations =
       thread_workspace->local_search_iterations;
   const tsp_euc_instance *instance = (tsp_euc_instance *)instance_details;
-  const size_t permutation_size = instance->number_of_cities - 1;
+  const size_t n = instance->number_of_cities - 1;
+  const size_t n_1 = n - 1;
   double best_f_x = tour_distance(solution, instance_details, NULL);
 
   for (size_t _ = 0; _ < local_serach_iterations; _++) {
-    for (size_t i = 1; i < permutation_size; i++)
-      for (size_t j = i + 1; j < permutation_size; j++) {
+    for (size_t i = 0; i < n_1; i++)
+      for (size_t j = i + 1; j < n; j++) {
         reverse_segment_size_t_arr(solution, i, j);
         const double f_neighbor_x =
             tour_distance(solution, instance_details, NULL);

@@ -82,7 +82,6 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
   exec.selected_parents_indexes = NULL;
   exec.population_size = randsize_t_i(5569, 5573, &state);
   exec.codification_size = pr152_instance->number_of_cities - 1;
-  exec.generations = 400;
   exec.mem = NULL;
   assert(setup_dynamic_mem_for_ga_execution(&exec, sizeof(size_t),
                                             alignof(size_t)) == 0);

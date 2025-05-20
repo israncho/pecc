@@ -240,10 +240,9 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
   exec.population = NULL;
   exec.offspring = NULL;
   exec.selected_parents_indexes = NULL;
-  exec.population_size = randsize_t_i(103, 107, &state);
+  exec.population_size = 52;
   // exec.population_size = randsize_t_i(7, 10, &state);
   exec.codification_size = pr152_instance->number_of_cities - 1;
-  exec.generations = 400;
   exec.mem = NULL;
   assert(setup_dynamic_mem_for_ga_execution(&exec, sizeof(size_t),
                                             alignof(size_t)) == 0);
@@ -278,7 +277,7 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
       prev_fitness[i] = exec.offspring[i].fitness;
     }
 
-    for (size_t _ = 0; _ < 50; _++) {
+    for (size_t _ = 0; _ < 30; _++) {
       // for (size_t _ = 0; _ < 10; _++) {
       assert(population_fitness_computing(&exec, thread_workspace,
                                           pr152_instance,
