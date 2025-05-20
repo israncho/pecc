@@ -1,11 +1,14 @@
 #include <assert.h>
 #include <math.h>
+#include <omp.h>
 #include <stdalign.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../../include/test/tsp/test_euclidean.h"
+#include "../../include/evo_comp/genetic_algorithm.h"
+#include "../../include/evo_comp/population.h"
 #include "../../include/tsp/euclidean.h"
 #include "../../include/utils/array.h"
 #include "../../include/utils/input_output.h"
@@ -30,6 +33,54 @@ void test_euclidean() {
   test_tour_distance();
   elapsed_time = get_wall_time() - start;
   printf("\t- tour_distance: PASSED [%.6f secs]\n", elapsed_time);
+
+  start = get_wall_time();
+  test_lsearch_2opt_tour_distance_1_thread();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- lsearch_2opt_tour_distance_1_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
+
+  start = get_wall_time();
+  test_lsearch_2opt_tour_distance_2_thread();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- lsearch_2opt_tour_distance_2_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
+
+  start = get_wall_time();
+  test_lsearch_2opt_tour_distance_3_thread();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- lsearch_2opt_tour_distance_3_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
+
+  start = get_wall_time();
+  test_lsearch_2opt_tour_distance_4_thread();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- lsearch_2opt_tour_distance_4_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
+
+  start = get_wall_time();
+  test_lsearch_2opt_tour_distance_5_thread();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- lsearch_2opt_tour_distance_5_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
+
+  start = get_wall_time();
+  test_lsearch_2opt_tour_distance_6_thread();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- lsearch_2opt_tour_distance_6_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
+
+  start = get_wall_time();
+  test_lsearch_2opt_tour_distance_7_thread();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- lsearch_2opt_tour_distance_7_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
+
+  start = get_wall_time();
+  test_lsearch_2opt_tour_distance_8_thread();
+  elapsed_time = get_wall_time() - start;
+  printf("\t- lsearch_2opt_tour_distance_8_thread: PASSED [%.6f secs]\n",
+         elapsed_time);
 }
 
 void test_init_tsp_euc_instance() {
@@ -169,4 +220,125 @@ void test_tour_distance() {
   free(instance.cities);
   free(instance.distances);
   free(solution);
+}
+
+static inline void
+test_threaded_population_fitness_computing(const size_t n_threads) {
+  file_line *array_of_lines = NULL;
+  size_t num_of_lines = 0;
+  assert(read_file("instances/euc_TSP/pr152.tsp", &array_of_lines,
+                   &num_of_lines) == FILE_READ_SUCCESS);
+  tsp_euc_instance *pr152_instance = NULL;
+  assert(init_tsp_euc_instance(array_of_lines, num_of_lines, &pr152_instance) ==
+         0);
+
+  xorshiftr128plus_state state;
+  set_up_seed(&state, 0, 0, 0);
+
+  ga_execution exec;
+  exec.n_threads = n_threads;
+  exec.population = NULL;
+  exec.offspring = NULL;
+  exec.selected_parents_indexes = NULL;
+  exec.population_size = randsize_t_i(103, 107, &state);
+  // exec.population_size = randsize_t_i(7, 10, &state);
+  exec.codification_size = pr152_instance->number_of_cities - 1;
+  exec.generations = 400;
+  exec.mem = NULL;
+  assert(setup_dynamic_mem_for_ga_execution(&exec, sizeof(size_t),
+                                            alignof(size_t)) == 0);
+  ga_workspace *workspace_array = NULL;
+  assert(setup_dynamic_mem_for_ga_workspace(&workspace_array, &exec, n_threads,
+                                            0, 0, 0, 0, 0, sizeof(size_t),
+                                            alignof(size_t)) == 0);
+
+  for (size_t i = 0; i < n_threads; i++) {
+    set_up_seed(&workspace_array[i].state, 0, 0, i);
+    workspace_array[i].local_search_iterations = 1;
+  }
+
+  fill_and_shuffle_population_of_permutations(
+      exec.offspring, exec.population_size, exec.codification_size, &state);
+
+  double *prev_fitness = NULL;
+  assert(init_array((void **)&prev_fitness, exec.population_size,
+                    sizeof(double)) == ARRAY_OK);
+
+  #pragma omp parallel num_threads(n_threads)
+  {
+    const size_t thread_id = omp_get_thread_num();
+    ga_workspace *thread_workspace = &workspace_array[thread_id];
+
+    const size_t beginning =
+        thread_workspace->offspring_size_of_previous_threads;
+    const size_t end = thread_workspace->thread_offspring_size + beginning;
+
+    for (size_t i = beginning; i < end; i++) {
+      exec.offspring[i].fitness = tour_distance(exec.offspring[i].codification, pr152_instance, NULL);
+      prev_fitness[i] = exec.offspring[i].fitness;
+    }
+
+    for (size_t _ = 0; _ < 50; _++) {
+      // for (size_t _ = 0; _ < 10; _++) {
+      assert(population_fitness_computing(&exec, thread_workspace,
+                                          pr152_instance,
+                                          lsearch_2opt_tour_distance) == 0);
+
+      for (size_t i = beginning; i < end; i++) {
+        individual *curr_individual = &exec.offspring[i];
+        const double curr_individual_prev_fitness = prev_fitness[i];
+        assert(
+            curr_individual->fitness ==
+            tour_distance(curr_individual->codification, pr152_instance, NULL));
+        assert(curr_individual->fitness <= curr_individual_prev_fitness);
+        prev_fitness[i] = curr_individual->fitness;
+      }
+    #pragma omp barrier
+    }
+  }
+
+  for (size_t i = 0; i < n_threads; i++)
+    free(workspace_array[i].mem);
+
+  free(workspace_array);
+  free(exec.mem);
+
+  free_tsp_euc_instance_content(pr152_instance);
+  free(pr152_instance);
+
+  free_lines_array_content(array_of_lines, num_of_lines);
+  free(array_of_lines);
+  free(prev_fitness);
+}
+
+void test_lsearch_2opt_tour_distance_1_thread() {
+  test_threaded_population_fitness_computing(1);
+}
+
+void test_lsearch_2opt_tour_distance_2_thread() {
+  test_threaded_population_fitness_computing(2);
+}
+
+void test_lsearch_2opt_tour_distance_3_thread() {
+  test_threaded_population_fitness_computing(3);
+}
+
+void test_lsearch_2opt_tour_distance_4_thread() {
+  test_threaded_population_fitness_computing(4);
+}
+
+void test_lsearch_2opt_tour_distance_5_thread() {
+  test_threaded_population_fitness_computing(5);
+}
+
+void test_lsearch_2opt_tour_distance_6_thread() {
+  test_threaded_population_fitness_computing(6);
+}
+
+void test_lsearch_2opt_tour_distance_7_thread() {
+  test_threaded_population_fitness_computing(7);
+}
+
+void test_lsearch_2opt_tour_distance_8_thread() {
+  test_threaded_population_fitness_computing(8);
 }
