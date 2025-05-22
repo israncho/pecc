@@ -19,6 +19,8 @@ typedef struct {
   individual *current_best;
   size_t *selected_parents_indexes;
   size_t codification_size;
+  size_t codification_entry_size;
+  size_t codification_entry_alignment;
   size_t population_size;
   size_t generations;
   size_t total_f_execs;
@@ -43,9 +45,9 @@ int genetic_algorith(individual *array_of_individuals,
                      ga_execution *execution_data);
 
 static inline size_t
-memory_needed_for_ga_execution(const ga_execution *exec,
-                               const size_t codification_entry_size,
-                               const size_t codification_entry_alignment) {
+memory_needed_for_ga_execution(const ga_execution *exec) {
+  const size_t codification_entry_size = exec->codification_entry_size;
+  const size_t codification_entry_alignment = exec->codification_entry_alignment;
   const size_t population_size = exec->population_size;
   // considering both population, offspring and current_best
   const size_t total_num_of_individuals = population_size * 2 + 1;
@@ -69,20 +71,12 @@ int setup_dynamic_mem_for_ga_workspace(
     const size_t selection_workspace_size,
     const size_t mutation_workspace_size,
     const size_t target_f_workspace_size,
-    const size_t replacement_workspace_size,
-    const size_t codification_entry_size,
-    const size_t codification_entry_alignment);
+    const size_t replacement_workspace_size);
 
-int setup_dynamic_mem_for_ga_execution(
-    ga_execution *exec, const size_t codification_entry_size,
-    const size_t codification_entry_alignment);
+int setup_dynamic_mem_for_ga_execution(ga_execution *exec);
 
 int setup_from_prealloc_mem_arrays_for_ga_execution(
-    void **ptr_to_mem, size_t *ptr_to_mem_capacity, ga_execution *exec,
-    const size_t codification_entry_size,
-    const size_t codification_entry_alignment);
-
-int copy_thread_offspring_to_ga_exec_size_t(ga_execution *exec, const ga_workspace *workspace_array);
+    void **ptr_to_mem, size_t *ptr_to_mem_capacity, ga_execution *exec);
 
 int population_fitness_computing(ga_execution *exec, ga_workspace *thread_workspace,
                                  void *instance_details,

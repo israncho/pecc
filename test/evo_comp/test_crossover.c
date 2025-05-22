@@ -251,6 +251,8 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
   set_up_seed(&state, 0, 0, 0);
 
   ga_execution exec;
+  exec.codification_entry_size = sizeof(size_t);
+  exec.codification_entry_alignment = alignof(size_t);
   exec.n_threads = n_threads;
   exec.population = NULL;
   exec.offspring = NULL;
@@ -261,13 +263,11 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
   // exec.codification_size = randsize_t_i(2011, 2017, &state);
   exec.generations = 400;
   exec.mem = NULL;
-  assert(setup_dynamic_mem_for_ga_execution(&exec, sizeof(size_t),
-                                            alignof(size_t)) == 0);
+  assert(setup_dynamic_mem_for_ga_execution(&exec) == 0);
   ga_workspace *workspace_array = NULL;
   assert(setup_dynamic_mem_for_ga_workspace(
              &workspace_array, &exec, n_threads,
-             ox1_workspace_size(exec.codification_size), 0, 0, 0, 0,
-             sizeof(size_t), alignof(size_t)) == 0);
+             ox1_workspace_size(exec.codification_size), 0, 0, 0, 0) == 0);
 
   for (size_t i = 0; i < n_threads; i++)
     set_up_seed(&workspace_array[i].state, 0, 0, i);

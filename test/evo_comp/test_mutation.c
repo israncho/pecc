@@ -80,6 +80,8 @@ void test_swap_mutation_size_t() {
 
 void test_population_mutation() {
   ga_execution exec_data;
+  exec_data.codification_entry_size = sizeof(size_t);
+  exec_data.codification_entry_alignment = alignof(size_t);
   exec_data.population_size = 50000;
   exec_data.codification_size = 25;
   exec_data.population = NULL;
@@ -87,8 +89,7 @@ void test_population_mutation() {
   exec_data.selected_parents_indexes = NULL;
   exec_data.mem = NULL;
 
-  assert(setup_dynamic_mem_for_ga_execution(&exec_data, sizeof(size_t),
-                                            alignof(size_t)) == 0);
+  assert(setup_dynamic_mem_for_ga_execution(&exec_data) == 0);
   ga_workspace workspace;
   set_up_seed(&workspace.state, 0, 0, 0);
 

@@ -6,21 +6,19 @@
 #include "../../include/utils/array.h"
 #include "../../include/utils/myalgorithms.h"
 
-int setup_dynamic_mem_for_ga_execution(
-    ga_execution *exec, const size_t codification_entry_size,
-    const size_t codification_entry_alignment) {
-
-  const size_t total_memory_needed = memory_needed_for_ga_execution(
-      exec, codification_entry_size, codification_entry_alignment);
+int setup_dynamic_mem_for_ga_execution(ga_execution *exec) {
+  const size_t codification_entry_size = exec->codification_entry_size;
+  const size_t codification_entry_alignment =
+      exec->codification_entry_alignment;
+  const size_t total_memory_needed = memory_needed_for_ga_execution(exec);
   exec->mem = NULL;
   if (init_array(&exec->mem, total_memory_needed, 1) != ARRAY_OK)
     return 1;
   size_t memory_capacity = total_memory_needed;
   void *mem_ = exec->mem;
 
-  if (setup_from_prealloc_mem_arrays_for_ga_execution(
-          &mem_, &memory_capacity, exec, codification_entry_size,
-          codification_entry_alignment) != 0)
+  if (setup_from_prealloc_mem_arrays_for_ga_execution(&mem_, &memory_capacity,
+                                                      exec) != 0)
     return 2;
 
   if (setup_array_from_prealloc_mem(
@@ -44,9 +42,11 @@ int setup_dynamic_mem_for_ga_workspace(
     const size_t selection_workspace_size,
     const size_t mutation_workspace_size,
     const size_t target_f_workspace_size,
-    const size_t replacement_workspace_size,
-    const size_t codification_entry_size,
-    const size_t codification_entry_alignment) {
+    const size_t replacement_workspace_size) {
+
+  const size_t codification_entry_size = exec->codification_entry_size;
+  const size_t codification_entry_alignment =
+      exec->codification_entry_alignment;
 
   if (init_array((void **)ptr_to_workspace_array, n_threads,
                  sizeof(ga_workspace)) != 0)
@@ -64,10 +64,10 @@ int setup_dynamic_mem_for_ga_workspace(
   size_t remainder =
       (population_size % n_threads) + ((pop_per_thread & 1) * n_threads);
 
-  const size_t all_sizes[5] = {
-      crossover_workspace_size, selection_workspace_size,
-      mutation_workspace_size, target_f_workspace_size,
-      replacement_workspace_size};
+  const size_t all_sizes[5] = {crossover_workspace_size,
+                               selection_workspace_size,
+                               mutation_workspace_size, target_f_workspace_size,
+                               replacement_workspace_size};
   const size_t mem_for_workspace = all_sizes[index_of_the_max_val(
       all_sizes, 5, sizeof(size_t), compare_size_t)];
   const size_t mem_needed_per_thread =
@@ -123,10 +123,12 @@ int setup_dynamic_mem_for_ga_workspace(
   return 0;
 }
 
-int setup_from_prealloc_mem_arrays_for_ga_execution(
-    void **ptr_to_mem, size_t *ptr_to_mem_capacity, ga_execution *exec,
-    const size_t codification_entry_size,
-    const size_t codification_entry_alignment) {
+int setup_from_prealloc_mem_arrays_for_ga_execution(void **ptr_to_mem,
+                                                    size_t *ptr_to_mem_capacity,
+                                                    ga_execution *exec) {
+  const size_t codification_entry_size = exec->codification_entry_size;
+  const size_t codification_entry_alignment =
+      exec->codification_entry_alignment;
   const size_t population_size = exec->population_size;
   const size_t codification_size = exec->codification_size;
 
@@ -151,9 +153,9 @@ int setup_from_prealloc_mem_arrays_for_ga_execution(
   return 0;
 }
 
-int population_fitness_computing(ga_execution *exec, ga_workspace *thread_workspace,
-                                 void *instance_details,
-                                 double (*fitness_f)(void *, void *, ga_workspace *)) {
+int population_fitness_computing(
+    ga_execution *exec, ga_workspace *thread_workspace, void *instance_details,
+    double (*fitness_f)(void *, void *, ga_workspace *)) {
   if (!exec || !thread_workspace || !instance_details)
     return !exec ? 1 : (!thread_workspace ? 2 : 3);
 
