@@ -78,6 +78,7 @@ int setup_dynamic_mem_for_ga_workspace(
     }
 
     workspace_array[i].mem = NULL;
+    workspace_array[i].thread_id = i;
 
     workspace_array[i].offspring_size_of_previous_threads =
         offspring_size_of_previous_threads;
