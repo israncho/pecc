@@ -32,7 +32,7 @@ typedef struct {
 typedef struct {
   void *mem;
   void *scratch_space;
-  individual *thread_best;
+  individual *ptr_to_thread_best;
   size_t scratch_space_capacity;
   size_t offspring_size_of_previous_threads;
   size_t thread_offspring_size;

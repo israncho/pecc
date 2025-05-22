@@ -117,10 +117,16 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
       assert(population_fitness_computing(&exec, thread_workspace,
                                           pr152_instance, tour_distance) == 0);
         
+      individual *thread_best = thread_workspace->ptr_to_thread_best;
+      size_t same = 0;
       for (size_t i = beginning; i < end; i++) {
         individual *curr_individual = &exec.offspring[i];
-        assert(curr_individual->fitness == tour_distance(curr_individual->codification, pr152_instance, NULL));
+        const double curr_individual_fitness = curr_individual->fitness;
+        assert(curr_individual_fitness == tour_distance(curr_individual->codification, pr152_instance, NULL));
+        assert(thread_best->fitness <= curr_individual_fitness);
+        same += (thread_best == curr_individual) ? 1 : 0;
       }
+      assert(same == 1);
       #pragma omp barrier
     }
   }

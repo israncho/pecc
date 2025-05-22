@@ -284,15 +284,21 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
                                           pr152_instance,
                                           lsearch_2opt_tour_distance) == 0);
 
+      individual *thread_best = thread_workspace->ptr_to_thread_best;
+      size_t same = 0;
       for (size_t i = beginning; i < end; i++) {
         individual *curr_individual = &exec.offspring[i];
         const double curr_individual_prev_fitness = prev_fitness[i];
+        const double curr_individual_fitness = curr_individual->fitness;
         const double computed =
             tour_distance(curr_individual->codification, pr152_instance, NULL);
-        assert(fabs(curr_individual->fitness - computed) < 1e-8);
-        assert(curr_individual->fitness - curr_individual_prev_fitness <= 1e-8);
-        prev_fitness[i] = curr_individual->fitness;
+        assert(fabs(curr_individual_fitness - computed) < 1e-8);
+        assert(curr_individual_fitness - curr_individual_prev_fitness <= 1e-8);
+        assert(thread_best->fitness <= curr_individual_fitness);
+        prev_fitness[i] = curr_individual_fitness;
+        same += (thread_best == curr_individual) ? 1 : 0;
       }
+      assert(same == 1);
     #pragma omp barrier
     }
   }

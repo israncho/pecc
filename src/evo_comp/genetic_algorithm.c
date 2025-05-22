@@ -44,19 +44,11 @@ int setup_dynamic_mem_for_ga_workspace(
     const size_t target_f_workspace_size,
     const size_t replacement_workspace_size) {
 
-  const size_t codification_entry_size = exec->codification_entry_size;
-  const size_t codification_entry_alignment =
-      exec->codification_entry_alignment;
-
   if (init_array((void **)ptr_to_workspace_array, n_threads,
                  sizeof(ga_workspace)) != 0)
     return 1;
 
-  const size_t codification_size = exec->codification_size;
   const size_t population_size = exec->population_size;
-  const size_t size_needed_per_individual =
-      alignof(individual) + sizeof(individual) + codification_entry_alignment +
-      codification_entry_size * codification_size;
   const size_t pop_per_thread = population_size / n_threads;
   // only even numbers
   const size_t min_offspring_per_thread = pop_per_thread - (pop_per_thread & 1);
@@ -66,12 +58,11 @@ int setup_dynamic_mem_for_ga_workspace(
 
   const size_t all_sizes[5] = {crossover_workspace_size,
                                selection_workspace_size,
-                               mutation_workspace_size, target_f_workspace_size,
+                               mutation_workspace_size, 
+                               target_f_workspace_size,
                                replacement_workspace_size};
   const size_t mem_for_workspace = all_sizes[index_of_the_max_val(
       all_sizes, 5, sizeof(size_t), compare_size_t)];
-  const size_t mem_needed_per_thread =
-      size_needed_per_individual + mem_for_workspace;
 
   ga_workspace *workspace_array = *ptr_to_workspace_array;
   size_t offspring_size_of_previous_threads = 0;
@@ -93,30 +84,19 @@ int setup_dynamic_mem_for_ga_workspace(
     workspace_array[i].thread_offspring_size = thread_offspring_size;
     offspring_size_of_previous_threads += thread_offspring_size;
 
-    if (init_array(&workspace_array[i].mem, mem_needed_per_thread, 1) !=
-        ARRAY_OK)
-      return 2;
+    if (mem_for_workspace > 0)
+      if (init_array(&workspace_array[i].mem, mem_for_workspace, 1) != ARRAY_OK)
+        return 2;
     void *mem_ = workspace_array[i].mem;
 
-    size_t mem_capacity = mem_needed_per_thread;
+    size_t mem_capacity = mem_for_workspace;
 
     workspace_array[i].scratch_space_capacity = mem_for_workspace;
-    if (crossover_workspace_size > 0)
-      if (setup_array_from_prealloc_mem(
-              &mem_, &mem_capacity, &workspace_array[i].scratch_space,
-              crossover_workspace_size, 1, 1) != ARRAY_OK)
+    if (mem_for_workspace > 0)
+      if (setup_array_from_prealloc_mem(&mem_, &mem_capacity,
+                                        &workspace_array[i].scratch_space,
+                                        mem_for_workspace, 1, 1) != ARRAY_OK)
         return 3;
-
-    if (setup_array_from_prealloc_mem(
-            &mem_, &mem_capacity, (void **)&workspace_array[i].thread_best, 1,
-            sizeof(individual), alignof(individual)) != ARRAY_OK)
-      return 4;
-
-    if (setup_array_from_prealloc_mem(
-            &mem_, &mem_capacity, &workspace_array[i].thread_best->codification,
-            codification_size, codification_entry_size,
-            codification_entry_alignment) != ARRAY_OK)
-      return 5;
   }
   if (offspring_size_of_previous_threads != population_size)
     return 6;
@@ -163,17 +143,16 @@ int population_fitness_computing(
   const size_t end = thread_workspace->thread_offspring_size + beginning;
 
   individual *offspring = exec->offspring;
-  individual *thread_best = thread_workspace->thread_best;
+  individual **thread_best = &thread_workspace->ptr_to_thread_best;
+  double best_fitness_found = DBL_MAX; 
 
-  thread_best->codification = NULL;
-  thread_best->fitness = DBL_MAX;
   for (size_t i = beginning; i < end; i++) {
     individual *current = &offspring[i];
-    current->fitness =
-        fitness_f(current->codification, instance_details, thread_workspace);
-    if (current->fitness < thread_best->fitness) {
-      thread_best->codification = current->codification;
-      thread_best->fitness = current->fitness;
+    const double curr_fitness = fitness_f(current->codification, instance_details, thread_workspace);
+    current->fitness = curr_fitness;
+    if (curr_fitness < best_fitness_found) {
+      *thread_best = current;
+      best_fitness_found = curr_fitness;
     }
   }
   return 0;
