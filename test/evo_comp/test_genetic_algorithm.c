@@ -114,7 +114,7 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
         exec.offspring[i].fitness = random_double(&thread_workspace->state) * 100000.0;
       }
 
-      assert(population_fitness_computing(&exec, thread_workspace,
+      assert(population_fitness_computing(exec.offspring, thread_workspace,
                                           pr152_instance, tour_distance) == 0);
         
       individual *thread_best = thread_workspace->ptr_to_thread_best;

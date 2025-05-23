@@ -280,7 +280,7 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
 
     for (size_t _ = 0; _ < 50; _++) {
     //for (size_t _ = 0; _ < 10; _++) {
-      assert(population_fitness_computing(&exec, thread_workspace,
+      assert(population_fitness_computing(exec.offspring, thread_workspace,
                                           pr152_instance,
                                           lsearch_2opt_tour_distance) == 0);
 

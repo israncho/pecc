@@ -79,7 +79,7 @@ int setup_dynamic_mem_for_ga_execution(ga_execution *exec);
 int setup_from_prealloc_mem_arrays_for_ga_execution(
     void **ptr_to_mem, size_t *ptr_to_mem_capacity, ga_execution *exec);
 
-int population_fitness_computing(ga_execution *exec, ga_workspace *thread_workspace,
+int population_fitness_computing(individual *population, ga_workspace *thread_workspace,
                                  void *instance_details,
                                  double (*fitness_f)(void *, void *, ga_workspace *));
 
