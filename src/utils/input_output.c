@@ -3,10 +3,10 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 #include "../../include/utils/input_output.h"
 #include "../../include/utils/array.h"
 
@@ -134,16 +134,19 @@ FileReadStatus read_file(const char *file_name,
   return FILE_READ_SUCCESS;
 }
 
-FileWriteStatus write_to_file(const char *file_name,
-                              const file_line *array_of_lines,
-                              const size_t num_lines,
-                              const char *mode) {
+FileWriteStatus write_to_file_in_specific_order(const char *file_name,
+                                                const file_line *array_of_lines,
+                                                const size_t num_lines,
+                                                const size_t *permutation,
+                                                const char *mode) {
   if (file_name == NULL)
     return FILE_WRITE_NULL_FILENAME;
   if (mode == NULL)
     return FILE_WRITE_NULL_MODE;
   if (strcmp("w", mode) != 0 && strcmp("a", mode) != 0)
     return FILE_WRITE_ERR_WRONG_MODE;
+
+  bool default_order = permutation == NULL;
 
   FILE *file = fopen(file_name, mode);
 
@@ -158,13 +161,21 @@ FileWriteStatus write_to_file(const char *file_name,
   assert(array_of_lines != NULL);
 
   for (size_t i = 0; i < num_lines; i++) {
-    if (fputs(array_of_lines[i].content, file) == EOF) {
+    size_t k = (default_order) ? i : permutation[i];
+    if (fputs(array_of_lines[k].content, file) == EOF) {
       fclose(file);
       return FILE_WRITE_ERR_WHILE_WRITING;
     }
   }
   fclose(file);
   return FILE_WRITE_SUCCESS;
+}
+
+FileWriteStatus write_to_file(const char *file_name,
+                              const file_line *array_of_lines,
+                              const size_t num_lines, const char *mode) {
+  return write_to_file_in_specific_order(file_name, array_of_lines, num_lines,
+                                         NULL, mode);
 }
 
 int str_to_size_t(const char *str, size_t *result) {

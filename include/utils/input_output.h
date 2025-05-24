@@ -111,6 +111,12 @@ FileReadStatus read_file(const char *file_name,
                          file_line **ptr_to_array_of_lines,
                          size_t *ptr_to_num_lines);
 
+FileWriteStatus write_to_file_in_specific_order(const char *file_name,
+                                                const file_line *array_of_lines,
+                                                const size_t num_lines,
+                                                const size_t *permutation,
+                                                const char *mode);
+
 /**
  * @brief Writes the contents of an array of file_line structures to a file.
  *
@@ -146,8 +152,6 @@ FileReadStatus read_file(const char *file_name,
 FileWriteStatus write_to_file(const char *file_name,
                               const file_line *array_of_lines,
                               const size_t num_lines, const char *mode);
-
-
 
 int str_to_size_t(const char *str, size_t *result);
 
