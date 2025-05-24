@@ -83,8 +83,10 @@ double lsearch_2opt_tour_distance(void *solution, void *instance_details,
   const size_t permutation_size_1 = permutation_size - 1;
 
   double best_f_x = tour_distance(permutation, instance_details, NULL);
+  bool improvement = true;
 
-  for (size_t _ = 0; _ < local_serach_iterations; _++) {
+  for (size_t _ = 0; _ < local_serach_iterations && improvement; _++) {
+    improvement = false;
     for (size_t i = 0; i < permutation_size_1; i++)
       for (size_t j = i + 1; j < permutation_size; j++) {
         const size_t u = permutation[i];
@@ -97,6 +99,7 @@ double lsearch_2opt_tour_distance(void *solution, void *instance_details,
         if (delta < -1e-9) {
           best_f_x += delta;
           reverse_segment_size_t_arr(permutation, i, j);
+          improvement = true;
         }
       }
   }
