@@ -36,4 +36,8 @@ int init_tsp_euc_instance(const file_line *array_of_lines,
 
 void free_tsp_euc_instance_content(tsp_euc_instance *tsp_euc_instance_to_free);
 
+int init_and_setup_permutation_for_file_lines(
+    const size_t *solution, tsp_euc_instance *instance,
+    size_t **ptr_permutation_file_lines);
+
 #endif

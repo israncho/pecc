@@ -260,3 +260,36 @@ void free_tsp_euc_instance_content(tsp_euc_instance *tsp_euc_instance_to_free) {
   tsp_euc_instance_to_free->city_size = 0;
   tsp_euc_instance_to_free->number_of_cities = 0;
 }
+
+int init_and_setup_permutation_for_file_lines(
+    const size_t *solution, tsp_euc_instance *instance,
+    size_t **ptr_permutation_file_lines) {
+  if (solution == NULL)
+    return 1;
+  if (instance == NULL)
+    return 2;
+  if (ptr_permutation_file_lines == NULL || *ptr_permutation_file_lines != NULL)
+    return 3;
+  const size_t codification_size = instance->number_of_cities - 1; // <<<<<<<<<<<
+  // 7 is the number of other fields required to be written in the output file.
+  // and the last city is not counted for the permutations.
+  const size_t permutation_size_ = codification_size + 8;
+
+  const size_t end_codification = codification_size + 6;
+  if (init_array((void **)ptr_permutation_file_lines, permutation_size_,
+                 sizeof(size_t)) != ARRAY_OK)
+    return 5;
+  size_t *permutation = *ptr_permutation_file_lines;
+  size_t j = 0;
+  for (size_t i = 0; i < permutation_size_; i++) {
+    if (i <= 5 || end_codification <= i)
+      permutation[i] = i; // keep same place in the output file
+    else {
+      if (j >= codification_size)
+        return 6;
+      // 6 is the number of previous fields before the solution in the output file.
+      permutation[i] = solution[j++] + 6; // place of the given solution
+    }
+  }
+  return 0;
+}
