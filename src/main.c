@@ -9,7 +9,6 @@
 #include "../include/evo_comp/selection.h"
 #include "../include/tsp/euclidean.h"
 #include "../include/utils/input_output.h"
-#include "../include/utils/myrandom.h"
 #include "../include/utils/mytime.h"
 
 int main() {
@@ -20,9 +19,12 @@ int main() {
   const size_t codification_entry_alignment = alignof(size_t);
   const size_t seed1 = 0;
   const size_t seed2 = 0;
+  const size_t local_search_iters = 3;
   const char instance_file_path[] = "instances/euc_TSP/saturn.tsp";
+
   printf(instance_file_path);
   printf("\nthreads: %zu\n", n_threads);
+
   file_line *array_of_lines = NULL;
   size_t num_of_lines = 0;
   assert(read_file(instance_file_path, &array_of_lines, &num_of_lines) ==
@@ -40,15 +42,9 @@ int main() {
                            fill_and_shuffle_population_of_permutations) == 0);
 
   ga_workspace *workspace_array = NULL;
-  assert(setup_dynamic_mem_for_ga_workspace(
-             &workspace_array, &exec,
-             ox1_workspace_size(exec.codification_size), 0, 0, 0, 0) == 0);
-
-  for (size_t i = 0; i < n_threads; i++) {
-    set_up_seed(&workspace_array[i].state, 0, 0, i);
-    workspace_array[i].local_search_iterations = 3;
-    workspace_array[i].thread_id = i;
-  }
+  assert(init_ga_workspace(&workspace_array, &exec,
+                           ox1_workspace_size(exec.codification_size), 0, 0, 0,
+                           0, seed1, seed2, local_search_iters) == 0);
 
   double start = get_wall_time();
   parallel_genetic_algorithm(&exec, workspace_array, n_threads, tsp_instance,

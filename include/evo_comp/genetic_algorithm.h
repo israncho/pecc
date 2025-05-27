@@ -61,13 +61,16 @@ memory_needed_for_ga_execution(const ga_execution *exec) {
   return memory_needed;
 }
 
-int setup_dynamic_mem_for_ga_workspace(
+int init_ga_workspace(
     ga_workspace **ptr_to_workspace_array, const ga_execution *exec,
     const size_t crossover_workspace_size,
     const size_t selection_workspace_size,
     const size_t mutation_workspace_size,
     const size_t target_f_workspace_size,
-    const size_t replacement_workspace_size);
+    const size_t replacement_workspace_size,
+    const uint64_t seed1,
+    const uint64_t seed2,
+    const size_t local_search_iters);
 
 int setup_dynamic_mem_for_ga_execution(ga_execution *exec);
 

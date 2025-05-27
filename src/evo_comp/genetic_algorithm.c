@@ -83,12 +83,15 @@ int init_ga_execution(ga_execution *exec,
   return 0;
 }
 
-int setup_dynamic_mem_for_ga_workspace(
+int init_ga_workspace(
     ga_workspace **ptr_to_workspace_array, const ga_execution *exec,
     const size_t crossover_workspace_size,
     const size_t selection_workspace_size, const size_t mutation_workspace_size,
     const size_t target_f_workspace_size,
-    const size_t replacement_workspace_size) {
+    const size_t replacement_workspace_size,
+    const uint64_t seed1,
+    const uint64_t seed2,
+    const size_t local_search_iters) {
 
   if (exec == NULL)
     return 1; 
@@ -128,6 +131,8 @@ int setup_dynamic_mem_for_ga_workspace(
 
     workspace_array[i].mem = NULL;
     workspace_array[i].thread_id = i;
+    set_up_seed(&workspace_array[i].state, seed1, seed2, i);
+    workspace_array[i].local_search_iterations = local_search_iters;
 
     workspace_array[i].offspring_size_of_previous_threads =
         offspring_size_of_previous_threads;

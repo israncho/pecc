@@ -256,12 +256,9 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
              randsize_t_i(1223, 1227, &state), sizeof(size_t), alignof(size_t),
              0.0, 0, 0, fill_and_shuffle_population_of_permutations) == 0);
   ga_workspace *workspace_array = NULL;
-  assert(setup_dynamic_mem_for_ga_workspace(
-             &workspace_array, &exec,
-             ox1_workspace_size(exec.codification_size), 0, 0, 0, 0) == 0);
-
-  for (size_t i = 0; i < n_threads; i++)
-    set_up_seed(&workspace_array[i].state, 0, 0, i);
+  assert(init_ga_workspace(&workspace_array, &exec,
+                           ox1_workspace_size(exec.codification_size), 0, 0, 0,
+                           0, 0, 0, 0) == 0);
 
   const size_t selected_parents_i_size =
       exec.population_size + (exec.population_size & 1);

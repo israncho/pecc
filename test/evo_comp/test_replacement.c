@@ -127,11 +127,8 @@ static inline void test_threaded_full_gen_replacement(const size_t n_threads,
                            fill_and_shuffle_population_of_permutations) == 0);
 
   ga_workspace *workspace_array = NULL;
-  assert(setup_dynamic_mem_for_ga_workspace(&workspace_array, &exec,
-                                            0, 0, 0, 0, 0) == 0);
-
-  for (size_t i = 0; i < n_threads; i++)
-    set_up_seed(&workspace_array[i].state, 0, 0, i);
+  assert(init_ga_workspace(&workspace_array, &exec, 0, 0, 0, 0, 0, 0, 0, 0) ==
+         0);
 
   size_t *current_best_codification = exec.current_best->codification;
   for (size_t i = 0; i < exec.codification_size; i++)
