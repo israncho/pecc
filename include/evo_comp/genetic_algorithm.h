@@ -41,10 +41,6 @@ typedef struct {
   xorshiftr128plus_state state;
 } ga_workspace;
 
-int genetic_algorith(individual *array_of_individuals,
-                     individual *array_for_offpring,
-                     ga_execution *execution_data);
-
 static inline size_t
 memory_needed_for_ga_execution(const ga_execution *exec) {
   const size_t codification_entry_size = exec->codification_entry_size;
@@ -82,5 +78,18 @@ int setup_from_prealloc_mem_arrays_for_ga_execution(
 int population_fitness_computing(individual *population, ga_workspace *thread_workspace,
                                  void *instance_details,
                                  double (*fitness_f)(void *, void *, ga_workspace *));
+
+int update_current_best(ga_execution *exec, ga_workspace *workspace_array, const size_t n_threads);
+  
+int parallel_genetic_algorithm(ga_execution *exec,
+                               ga_workspace *workspace_array,
+                               const size_t n_threads,
+                               void *instance,
+                               int (*selection)(ga_execution*, ga_workspace*), 
+                               int (*crossover)(const individual *, const individual *, 
+                                individual *, individual *, const size_t, ga_workspace *),
+                               int (*mutation)(individual *, const size_t, ga_workspace *),
+                               double (*fitness_f)(void *, void *, ga_workspace *),
+                               int (*replacement)(ga_execution*, ga_workspace*));
 
 #endif
