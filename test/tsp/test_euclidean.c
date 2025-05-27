@@ -286,7 +286,7 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
         same += (thread_best == curr_individual) ? 1 : 0;
       }
       assert(same == 1);
-#pragma omp barrier
+      #pragma omp barrier
     }
   }
 
