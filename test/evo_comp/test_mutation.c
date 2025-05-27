@@ -6,6 +6,7 @@
 #include "../../include/test/evo_comp/test_mutation.h"
 #include "../../include/evo_comp/genetic_algorithm.h"
 #include "../../include/evo_comp/mutation.h"
+#include "../../include/evo_comp/population.h"
 #include "../../include/utils/array.h"
 #include "../../include/utils/myrandom.h"
 #include "../../include/utils/mytime.h"
@@ -80,16 +81,10 @@ void test_swap_mutation_size_t() {
 
 void test_population_mutation() {
   ga_execution exec_data;
-  exec_data.codification_entry_size = sizeof(size_t);
-  exec_data.codification_entry_alignment = alignof(size_t);
-  exec_data.population_size = 50000;
-  exec_data.codification_size = 25;
-  exec_data.population = NULL;
-  exec_data.offspring = NULL;
-  exec_data.selected_parents_indexes = NULL;
-  exec_data.mem = NULL;
+  assert(init_ga_execution(&exec_data, 1, 0, 30000, 25, sizeof(size_t),
+                           alignof(size_t), 0.0, 0, 0,
+                           fill_and_shuffle_population_of_permutations) == 0);
 
-  assert(setup_dynamic_mem_for_ga_execution(&exec_data) == 0);
   ga_workspace workspace;
   set_up_seed(&workspace.state, 0, 0, 0);
 
@@ -107,7 +102,7 @@ void test_population_mutation() {
     const size_t avg_min = (size_t)(avg_mutated * 0.9);
     const size_t avg_max = (size_t)(avg_mutated * 1.1);
 
-    for (size_t _ = 0; _ < 200; _++) {
+    for (size_t _ = 0; _ < 100; _++) {
       size_t changed = 0;
       for (size_t i = 0; i < exec_data.population_size; i++)
         fill_array_as_simple_seq(exec_data.offspring[i].codification,

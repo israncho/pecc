@@ -76,25 +76,18 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
   set_up_seed(&state, 0, 0, 0);
 
   ga_execution exec;
-  exec.codification_entry_size = sizeof(size_t);
-  exec.codification_entry_alignment = alignof(size_t);
-  exec.n_threads = n_threads;
-  exec.population = NULL;
-  exec.offspring = NULL;
-  exec.selected_parents_indexes = NULL;
-  exec.population_size = randsize_t_i(5569, 5573, &state);
-  exec.codification_size = pr152_instance->number_of_cities - 1;
-  exec.mem = NULL;
-  assert(setup_dynamic_mem_for_ga_execution(&exec) == 0);
+  assert(init_ga_execution(&exec, n_threads, 0,
+                           randsize_t_i(5569, 5573, &state),
+                           pr152_instance->number_of_cities - 1, sizeof(size_t),
+                           alignof(size_t), 0.0, 0, 0,
+                           fill_and_shuffle_population_of_permutations) == 0);
+
   ga_workspace *workspace_array = NULL;
   assert(setup_dynamic_mem_for_ga_workspace(&workspace_array, &exec, n_threads,
                                             0, 0, 0, 0, 0) == 0);
 
   for (size_t i = 0; i < n_threads; i++)
     set_up_seed(&workspace_array[i].state, 0, 0, i);
-
-  fill_and_shuffle_population_of_permutations(
-      exec.offspring, exec.population_size, exec.codification_size, &state);
 
   #pragma omp parallel num_threads(n_threads)
   {

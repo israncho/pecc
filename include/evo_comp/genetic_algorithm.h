@@ -72,6 +72,22 @@ int setup_dynamic_mem_for_ga_workspace(
 
 int setup_dynamic_mem_for_ga_execution(ga_execution *exec);
 
+int init_ga_execution(ga_execution *exec,
+                      const size_t n_threads,
+                      const size_t generations,
+                      const size_t population_size,
+                      const size_t codification_size,
+                      const size_t codification_entry_size,
+                      const size_t codification_entry_alignment,
+                      const double mutation_rate,
+                      const uint64_t seed1,
+                      const uint64_t seed2,
+                      int(*population_initializer)
+                        (individual*, 
+                         const size_t,
+                         const size_t,
+                         xorshiftr128plus_state*));
+
 int setup_from_prealloc_mem_arrays_for_ga_execution(
     void **ptr_to_mem, size_t *ptr_to_mem_capacity, ga_execution *exec);
 

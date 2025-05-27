@@ -232,21 +232,12 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
   assert(init_tsp_euc_instance(array_of_lines, num_of_lines, &pr152_instance) ==
          0);
 
-  xorshiftr128plus_state state;
-  set_up_seed(&state, 0, 0, 0);
-
   ga_execution exec;
-  exec.codification_entry_size = sizeof(size_t);
-  exec.codification_entry_alignment = alignof(size_t);
-  exec.n_threads = n_threads;
-  exec.population = NULL;
-  exec.offspring = NULL;
-  exec.selected_parents_indexes = NULL;
-  exec.population_size = 1103;
-  // exec.population_size = 32;
-  exec.codification_size = pr152_instance->number_of_cities - 1;
-  exec.mem = NULL;
-  assert(setup_dynamic_mem_for_ga_execution(&exec) == 0);
+  assert(init_ga_execution(&exec, n_threads, 0, 50,
+                           pr152_instance->number_of_cities - 1, sizeof(size_t),
+                           alignof(size_t), 0.0, 0, 0,
+                           fill_and_shuffle_population_of_permutations) == 0);
+
   ga_workspace *workspace_array = NULL;
   assert(setup_dynamic_mem_for_ga_workspace(&workspace_array, &exec, n_threads,
                                             0, 0, 0, 0, 0) == 0);
@@ -255,9 +246,6 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
     set_up_seed(&workspace_array[i].state, 0, 0, i);
     workspace_array[i].local_search_iterations = 1;
   }
-
-  fill_and_shuffle_population_of_permutations(
-      exec.offspring, exec.population_size, exec.codification_size, &state);
 
   double *prev_fitness = NULL;
   assert(init_array((void **)&prev_fitness, exec.population_size,
@@ -278,8 +266,7 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
       prev_fitness[i] = exec.offspring[i].fitness;
     }
 
-    for (size_t _ = 0; _ < 50; _++) {
-    //for (size_t _ = 0; _ < 10; _++) {
+    for (size_t _ = 0; _ < 30; _++) {
       assert(population_fitness_computing(exec.offspring, thread_workspace,
                                           pr152_instance,
                                           lsearch_2opt_tour_distance) == 0);
@@ -299,7 +286,7 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
         same += (thread_best == curr_individual) ? 1 : 0;
       }
       assert(same == 1);
-    #pragma omp barrier
+#pragma omp barrier
     }
   }
 

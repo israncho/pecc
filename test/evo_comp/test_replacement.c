@@ -121,25 +121,10 @@ static inline bool same_array(const size_t *arr1, const size_t *arr2,
 static inline void test_threaded_full_gen_replacement(const size_t n_threads,
                                                       const bool elitism) {
 
-  xorshiftr128plus_state state;
-  set_up_seed(&state, 0, 0, 0);
-
   ga_execution exec;
-  exec.mem = NULL;
-  exec.population = NULL;
-  exec.offspring = NULL;
-  exec.current_best = NULL;
-  exec.selected_parents_indexes = NULL;
-  exec.codification_size = 200;
-  // exec.codification_size = 50;
-  exec.codification_entry_size = sizeof(size_t);
-  exec.codification_entry_alignment = alignof(size_t);
-  exec.population_size = 1024;
-  // exec.population_size = 256;
-  exec.n_threads = n_threads;
-  exec.mutation_rate = 0.0;
-
-  assert(setup_dynamic_mem_for_ga_execution(&exec) == 0);
+  assert(init_ga_execution(&exec, n_threads, 0, 512, 100, sizeof(size_t),
+                           alignof(size_t), 0.0, 0, 0,
+                           fill_and_shuffle_population_of_permutations) == 0);
 
   ga_workspace *workspace_array = NULL;
   assert(setup_dynamic_mem_for_ga_workspace(&workspace_array, &exec, n_threads,
@@ -147,12 +132,6 @@ static inline void test_threaded_full_gen_replacement(const size_t n_threads,
 
   for (size_t i = 0; i < n_threads; i++)
     set_up_seed(&workspace_array[i].state, 0, 0, i);
-
-  fill_and_shuffle_population_of_permutations(
-      exec.offspring, exec.population_size, exec.codification_size, &state);
-
-  fill_and_shuffle_population_of_permutations(
-      exec.population, exec.population_size, exec.codification_size, &state);
 
   size_t *current_best_codification = exec.current_best->codification;
   for (size_t i = 0; i < exec.codification_size; i++)

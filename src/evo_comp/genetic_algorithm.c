@@ -10,6 +10,7 @@
 #include "../../include/evo_comp/population.h"
 #include "../../include/utils/array.h"
 #include "../../include/utils/myalgorithms.h"
+#include "../../include/utils/myrandom.h"
 
 int setup_dynamic_mem_for_ga_execution(ga_execution *exec) {
   const size_t codification_entry_size = exec->codification_entry_size;
@@ -39,6 +40,46 @@ int setup_dynamic_mem_for_ga_execution(ga_execution *exec) {
 
   exec->current_best->fitness = DBL_MAX;
 
+  return 0;
+}
+
+int init_ga_execution(ga_execution *exec,
+                      const size_t n_threads,
+                      const size_t generations,
+                      const size_t population_size,
+                      const size_t codification_size,
+                      const size_t codification_entry_size,
+                      const size_t codification_entry_alignment,
+                      const double mutation_rate,
+                      const uint64_t seed1,
+                      const uint64_t seed2,
+                      int(*population_initializer)
+                        (individual*, 
+                         const size_t,
+                         const size_t,
+                         xorshiftr128plus_state*)) {
+  if (exec == NULL)
+    return 1;
+
+  const size_t min_population_per_thread = population_size / 2;
+  exec->n_threads = (min_population_per_thread >= n_threads) ? n_threads : min_population_per_thread;
+  exec->generations = generations;
+  exec->population_size = population_size;
+  exec->codification_size = codification_size;
+  exec->codification_entry_size = codification_entry_size;
+  exec->codification_entry_alignment = codification_entry_alignment;
+  exec->mutation_rate = mutation_rate;
+
+  if (setup_dynamic_mem_for_ga_execution(exec) != 0)
+    return 2;
+
+  xorshiftr128plus_state state;
+  set_up_seed(&state, seed1, seed2, n_threads);
+
+  if (population_initializer(exec->population, population_size, codification_size, &state) != 0) 
+    return 3;
+  if (population_initializer(exec->offspring, population_size, codification_size, &state) != 0) 
+    return 4;
   return 0;
 }
 
@@ -211,11 +252,8 @@ int parallel_genetic_algorithm(
     const size_t thread_id = omp_get_thread_num();
     ga_workspace *thread_workspace = &workspace_array[thread_id];
     for (size_t _ = 0; _ < n_generations; _++) {
-      if (thread_id == 0) {
-        printf("gen: %zu\n", _);
-        fflush(stdout);
+      if (thread_id == 0)
         selection(exec, thread_workspace);
-      }
       #pragma omp barrier
       population_crossover(exec, thread_workspace, crossover);
       #pragma omp barrier

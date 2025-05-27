@@ -251,19 +251,10 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
   set_up_seed(&state, 0, 0, 0);
 
   ga_execution exec;
-  exec.codification_entry_size = sizeof(size_t);
-  exec.codification_entry_alignment = alignof(size_t);
-  exec.n_threads = n_threads;
-  exec.population = NULL;
-  exec.offspring = NULL;
-  exec.selected_parents_indexes = NULL;
-  exec.population_size = randsize_t_i(1223, 1227, &state);
-  exec.codification_size = randsize_t_i(1223, 1227, &state);
-  // exec.population_size = randsize_t_i(2011, 2017, &state);
-  // exec.codification_size = randsize_t_i(2011, 2017, &state);
-  exec.generations = 400;
-  exec.mem = NULL;
-  assert(setup_dynamic_mem_for_ga_execution(&exec) == 0);
+  assert(init_ga_execution(
+             &exec, n_threads, 400, randsize_t_i(1223, 1227, &state),
+             randsize_t_i(1223, 1227, &state), sizeof(size_t), alignof(size_t),
+             0.0, 0, 0, fill_and_shuffle_population_of_permutations) == 0);
   ga_workspace *workspace_array = NULL;
   assert(setup_dynamic_mem_for_ga_workspace(
              &workspace_array, &exec, n_threads,
@@ -271,9 +262,6 @@ static inline void test_threaded_population_crossover(const size_t n_threads) {
 
   for (size_t i = 0; i < n_threads; i++)
     set_up_seed(&workspace_array[i].state, 0, 0, i);
-
-  fill_and_shuffle_population_of_permutations(
-      exec.population, exec.population_size, exec.codification_size, &state);
 
   const size_t selected_parents_i_size =
       exec.population_size + (exec.population_size & 1);
