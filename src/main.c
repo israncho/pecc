@@ -41,7 +41,7 @@ int main() {
 
   ga_workspace *workspace_array = NULL;
   assert(setup_dynamic_mem_for_ga_workspace(
-             &workspace_array, &exec, n_threads,
+             &workspace_array, &exec,
              ox1_workspace_size(exec.codification_size), 0, 0, 0, 0) == 0);
 
   for (size_t i = 0; i < n_threads; i++) {

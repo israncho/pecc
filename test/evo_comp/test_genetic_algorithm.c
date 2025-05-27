@@ -83,7 +83,7 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
                            fill_and_shuffle_population_of_permutations) == 0);
 
   ga_workspace *workspace_array = NULL;
-  assert(setup_dynamic_mem_for_ga_workspace(&workspace_array, &exec, n_threads,
+  assert(setup_dynamic_mem_for_ga_workspace(&workspace_array, &exec,
                                             0, 0, 0, 0, 0) == 0);
 
   for (size_t i = 0; i < n_threads; i++)

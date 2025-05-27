@@ -63,7 +63,6 @@ memory_needed_for_ga_execution(const ga_execution *exec) {
 
 int setup_dynamic_mem_for_ga_workspace(
     ga_workspace **ptr_to_workspace_array, const ga_execution *exec,
-    const size_t n_threads,
     const size_t crossover_workspace_size,
     const size_t selection_workspace_size,
     const size_t mutation_workspace_size,
