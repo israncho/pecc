@@ -4,6 +4,7 @@
 #define INPUT_OUTPUT_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 /**
  * @enum FileReadStatus
@@ -156,4 +157,13 @@ FileWriteStatus write_to_file(const char *file_name,
 int str_to_size_t(const char *str, size_t *result);
 
 int str_to_double(const char *str, double *result);
+
+void get_arguments_for_exec(size_t *generations, size_t *population_size,
+                            double *mutation_rate, size_t *n_threads,
+                            uint64_t *seed1, uint64_t *seed2,
+                            size_t *local_search_iters,
+                            char **ptr_to_instance_file_path,
+                            char **ptr_to_output_file_path,
+                            const char *input_file_path);
+
 #endif

@@ -9,6 +9,7 @@
 #include <string.h>
 #include "../../include/utils/input_output.h"
 #include "../../include/utils/array.h"
+#include "../../include/utils/mystring.h"
 
 void free_file_line(file_line **ptr_to_file_line_to_free) {
   if (*ptr_to_file_line_to_free == NULL)
@@ -224,4 +225,86 @@ int str_to_double(const char *str, double *result) {
     return 7;
   *result = tmp;
   return 0;
+}
+
+void get_arguments_for_exec(size_t *generations, size_t *population_size,
+                            double *mutation_rate, size_t *n_threads,
+                            uint64_t *seed1, uint64_t *seed2,
+                            size_t *local_search_iters,
+                            char **ptr_to_instance_file_path,
+                            char **ptr_to_output_file_path,
+                            const char *input_file_path) {
+  file_line *array_of_lines = NULL;
+  size_t num_of_lines = 0;
+  assert(read_file(input_file_path, &array_of_lines, &num_of_lines) ==
+         FILE_READ_SUCCESS);
+  for (size_t i = 0; i < num_of_lines; i += 2) {
+    strip_in_place(&array_of_lines[i].content, &array_of_lines[i].length);
+    char *label = array_of_lines[i].content;
+    strip_in_place(&array_of_lines[i + 1].content,
+                   &array_of_lines[i + 1].length);
+    char *content = array_of_lines[i + 1].content;
+    const size_t content_len = array_of_lines[i + 1].length;
+
+    if (strcmp(label, "INSTANCE_FILE_PATH:") == 0) {
+      assert(init_array((void **)ptr_to_instance_file_path, content_len + 1,
+                        sizeof(char)) == ARRAY_OK);
+      strcpy(*ptr_to_instance_file_path, content);
+      printf("INSTANCE_FILE_PATH: %s\n", *ptr_to_instance_file_path);
+      continue;
+    }
+
+    if (strcmp(label, "OUTPUT_FILE_PATH:") == 0) {
+      assert(init_array((void **)ptr_to_output_file_path, content_len + 1,
+                        sizeof(char)) == ARRAY_OK);
+      strcpy(*ptr_to_output_file_path, content);
+      printf("OUTPUT_FILE_PATH: %s\n", *ptr_to_output_file_path);
+      continue;
+    }
+
+    if (strcmp(label, "SEED1:") == 0) {
+      str_to_size_t(content, seed1);
+      printf("SEED1: %lu\n", *seed1);
+      continue;
+    }
+
+    if (strcmp(label, "SEED2:") == 0) {
+      str_to_size_t(content, seed2);
+      printf("SEED2: %lu\n", *seed2);
+      continue;
+    }
+
+    if (strcmp(label, "N_GENERATIONS:") == 0) {
+      str_to_size_t(content, generations);
+      printf("N_GENERATIONS: %zu\n", *generations);
+      continue;
+    }
+
+    if (strcmp(label, "POPULATION_SIZE:") == 0) {
+      str_to_size_t(content, population_size);
+      printf("POPULATION_SIZE: %zu\n", *population_size);
+      continue;
+    }
+
+    if (strcmp(label, "MUTATION_RATE:") == 0) {
+      str_to_double(content, mutation_rate);
+      printf("MUTATION_RATE: %f\n", *mutation_rate);
+      continue;
+    }
+
+    if (strcmp(label, "L_SEARCH_ITERATIONS:") == 0) {
+      str_to_size_t(content, local_search_iters);
+      printf("L_SEARCH_ITERATIONS: %zu\n", *local_search_iters);
+      continue;
+    }
+
+    if (strcmp(label, "THREADS:") == 0) {
+      str_to_size_t(content, n_threads);
+      printf("THREADS: %zu\n", *n_threads);
+      continue;
+    }
+  }
+
+  free_lines_array_content(array_of_lines, num_of_lines);
+  free(array_of_lines);
 }
