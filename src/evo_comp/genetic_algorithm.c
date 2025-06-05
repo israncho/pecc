@@ -264,10 +264,7 @@ int parallel_genetic_algorithm(
         selection(exec, thread_workspace);
       #pragma omp barrier
       population_crossover(exec, thread_workspace, crossover);
-      #pragma omp barrier
-      if (thread_id == 0)
-        population_mutation(exec, thread_workspace, mutation);
-      #pragma omp barrier
+      population_mutation(exec, thread_workspace, mutation);
       population_fitness_computing(exec->offspring, thread_workspace, instance,
                                    fitness_f);
       #pragma omp barrier

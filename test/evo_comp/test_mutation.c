@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <omp.h>
 #include <stdalign.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -81,12 +82,15 @@ void test_swap_mutation_size_t() {
 
 void test_population_mutation() {
   ga_execution exec_data;
-  assert(init_ga_execution(&exec_data, 1, 0, 30000, 25, sizeof(size_t),
+  assert(init_ga_execution(&exec_data, 2, 0, 30000, 25, sizeof(size_t),
                            alignof(size_t), 0.0, 0, 0,
                            fill_and_shuffle_population_of_permutations) == 0);
 
-  ga_workspace workspace;
-  set_up_seed(&workspace.state, 0, 0, 0);
+
+  ga_workspace *workspace_array = NULL;
+  assert(init_ga_workspace(&workspace_array, &exec_data,
+                           0, 0, 0, 0,
+                           0, 0, 0, 0) == 0);
 
   size_t *target_array = NULL;
   assert(init_array((void **)&target_array, exec_data.codification_size,
@@ -107,8 +111,13 @@ void test_population_mutation() {
       for (size_t i = 0; i < exec_data.population_size; i++)
         fill_array_as_simple_seq(exec_data.offspring[i].codification,
                                  exec_data.codification_size);
-      assert(population_mutation(&exec_data, &workspace,
+       
+      #pragma omp parallel num_threads(2)
+      {
+        const size_t thread_id = omp_get_thread_num(); 
+        assert(population_mutation(&exec_data, &workspace_array[thread_id],
                                  swap_mutation_size_t) == 0);
+      }
       for (size_t i = 0; i < exec_data.population_size; i++)
         if (!same_arrays(target_array, exec_data.offspring[i].codification,
                          exec_data.codification_size))
@@ -118,4 +127,5 @@ void test_population_mutation() {
   }
   free(exec_data.mem);
   free(target_array);
+  free(workspace_array);
 }

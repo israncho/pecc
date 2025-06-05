@@ -22,7 +22,7 @@ static inline int swap_mutation_size_t(individual *individual,
 }
 
 int population_mutation(ga_execution *ptr_exec_data,
-                        ga_workspace *ptr_workspace,
+                        ga_workspace *thread_workspace,
                         int (*mutation)(individual *, const size_t, ga_workspace *));
 
 #endif

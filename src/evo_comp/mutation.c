@@ -4,17 +4,21 @@
 #include "../../include/utils/myrandom.h"
 
 int population_mutation(ga_execution *ptr_exec_data,
-                        ga_workspace *ptr_workspace,
+                        ga_workspace *thread_workspace,
                         int (*mutation)(individual *, const size_t,
                                         ga_workspace *)) {
-  const size_t population_size = ptr_exec_data->population_size;
   const size_t codification_size = ptr_exec_data->codification_size;
   const double mutation_rate = ptr_exec_data->mutation_rate;
-  xorshiftr128plus_state *state = &ptr_workspace->state;
-  for (size_t i = 0; i < population_size; i++) {
+
+  const size_t beginning = thread_workspace->offspring_size_of_previous_threads;
+  const size_t end = thread_workspace->thread_offspring_size + beginning;
+
+  xorshiftr128plus_state *state = &thread_workspace->state;
+
+  for (size_t i = beginning; i < end; i++) {
     if (random_double(state) < mutation_rate) {
       individual *individual_to_mutate = &ptr_exec_data->offspring[i];
-      mutation(individual_to_mutate, codification_size, ptr_workspace);
+      mutation(individual_to_mutate, codification_size, thread_workspace);
     }
   }
   return 0;
