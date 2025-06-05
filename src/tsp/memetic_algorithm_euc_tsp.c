@@ -27,6 +27,14 @@ int exec_memetic_algorithm_for_euc_tsp(const char *input_file_path) {
   get_arguments_for_exec(&generations, &population_size, &mutation_rate,
                          &n_threads, &seed1, &seed2, &local_search_iters,
                          &instance_file_path, &output_file, input_file_path);
+  
+  if (seed1 == 0 && seed2 == 0) {
+    xorshiftr128plus_state state;
+    set_up_seed(&state, 0, 0, 0);
+    seed1 = xorshiftr128plus(&state);
+    seed2 = xorshiftr128plus(&state);
+    printf("No seeds were given, using random seeds:\nSEED1: %lu\nSEED2: %lu\n", seed1, seed2);
+  }
 
   const size_t codification_entry_size = sizeof(size_t);
   const size_t codification_entry_alignment = alignof(size_t);
