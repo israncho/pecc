@@ -2,6 +2,7 @@
 #include <stdalign.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "../../include/evo_comp/crossover.h"
 #include "../../include/evo_comp/genetic_algorithm.h"
@@ -12,6 +13,7 @@
 #include "../../include/tsp/euclidean.h"
 #include "../../include/tsp/memetic_algorithm_euc_tsp.h"
 #include "../../include/utils/input_output.h"
+#include "../../include/utils/myrandom.h"
 #include "../../include/utils/mytime.h"
 
 int exec_memetic_algorithm_for_euc_tsp(const char *input_file_path) {
@@ -67,7 +69,7 @@ int exec_memetic_algorithm_for_euc_tsp(const char *input_file_path) {
                              full_gen_replacement_elitism);
   double elapsed_time = get_wall_time() - start;
 
-  printf("best fitness found: %f\n", exec.current_best->fitness);
+  printf("best fitness found: %.6f\n", exec.current_best->fitness);
   printf("elapsed time: %.6f secs\n", elapsed_time);
 
   size_t *permutation_of_file_lines = NULL;
@@ -75,8 +77,26 @@ int exec_memetic_algorithm_for_euc_tsp(const char *input_file_path) {
                                             tsp_instance,
                                             &permutation_of_file_lines);
 
-  write_to_file_in_specific_order(output_file, array_of_lines, num_of_lines,
-                                  permutation_of_file_lines, "w");
+  assert(write_to_file_in_specific_order(output_file, array_of_lines, num_of_lines,
+                                  permutation_of_file_lines, "w") == FILE_WRITE_SUCCESS);
+
+  const size_t time_file_path_len = strlen(output_file) + 7;
+  const size_t fitness_file_path_len = strlen(output_file) + 9;
+
+  char *time_file_path = malloc(time_file_path_len);
+  char *fitness_file_path = malloc(fitness_file_path_len);
+
+  snprintf(time_file_path, time_file_path_len, "%s.times", output_file);
+  snprintf(fitness_file_path, fitness_file_path_len, "%s.fitness", output_file);
+
+  char buffer[64];
+  file_line tmp[1] = {{buffer, 64}};
+
+  snprintf(buffer, 64, "%.6f\n", elapsed_time);
+  assert(write_to_file(time_file_path, tmp, 1, "a") == FILE_WRITE_SUCCESS);
+
+  snprintf(buffer, 64, "%.6f\n", exec.current_best->fitness);
+  assert(write_to_file(fitness_file_path, tmp, 1, "a") == FILE_WRITE_SUCCESS);
 
   free(permutation_of_file_lines);
 
@@ -93,5 +113,7 @@ int exec_memetic_algorithm_for_euc_tsp(const char *input_file_path) {
   free(array_of_lines);
   free(instance_file_path);
   free(output_file);
+  free(time_file_path);
+  free(fitness_file_path);
   return 0;
 }
