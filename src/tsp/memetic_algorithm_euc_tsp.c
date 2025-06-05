@@ -29,6 +29,15 @@ int exec_memetic_algorithm_for_euc_tsp(const char *input_file_path) {
   get_arguments_for_exec(&generations, &population_size, &mutation_rate,
                          &n_threads, &seed1, &seed2, &local_search_iters,
                          &instance_file_path, &output_file, input_file_path);
+
+  const size_t time_file_path_len = strlen(output_file) + 7;
+  const size_t fitness_file_path_len = strlen(output_file) + 9;
+
+  char *time_file_path = malloc(time_file_path_len);
+  char *fitness_file_path = malloc(fitness_file_path_len);
+
+  snprintf(time_file_path, time_file_path_len, "%s.times", output_file);
+  snprintf(fitness_file_path, fitness_file_path_len, "%s.fitness", output_file);
   
   if (seed1 == 0 && seed2 == 0) {
     xorshiftr128plus_state state;
@@ -70,7 +79,7 @@ int exec_memetic_algorithm_for_euc_tsp(const char *input_file_path) {
   double elapsed_time = get_wall_time() - start;
 
   printf("best fitness found: %.6f\n", exec.current_best->fitness);
-  printf("elapsed time: %.6f secs\n", elapsed_time);
+  printf("elapsed time: %.6f secs\n\n", elapsed_time);
 
   size_t *permutation_of_file_lines = NULL;
   init_and_setup_permutation_for_file_lines(exec.current_best->codification,
@@ -79,15 +88,6 @@ int exec_memetic_algorithm_for_euc_tsp(const char *input_file_path) {
 
   assert(write_to_file_in_specific_order(output_file, array_of_lines, num_of_lines,
                                   permutation_of_file_lines, "w") == FILE_WRITE_SUCCESS);
-
-  const size_t time_file_path_len = strlen(output_file) + 7;
-  const size_t fitness_file_path_len = strlen(output_file) + 9;
-
-  char *time_file_path = malloc(time_file_path_len);
-  char *fitness_file_path = malloc(fitness_file_path_len);
-
-  snprintf(time_file_path, time_file_path_len, "%s.times", output_file);
-  snprintf(fitness_file_path, fitness_file_path_len, "%s.fitness", output_file);
 
   char buffer[64];
   file_line tmp[1] = {{buffer, 64}};
