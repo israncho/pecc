@@ -69,7 +69,7 @@ inline double tour_distance(void *solution, void *instance_details, ga_workspace
   return total_distance;
 }
 
-double lsearch_2opt_tour_distance(void *solution, void *instance_details,
+double lsearch_2opt_td_cascade(void *solution, void *instance_details,
                                   ga_workspace *thread_workspace) {
   const size_t local_serach_iterations =
       thread_workspace->local_search_iterations;

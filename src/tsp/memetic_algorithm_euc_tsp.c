@@ -74,7 +74,7 @@ int exec_memetic_algorithm_for_euc_tsp(const char *input_file_path) {
   double start = get_wall_time();
   parallel_genetic_algorithm(&exec, workspace_array, n_threads, tsp_instance,
                              random_selection, order_crossover_ox1,
-                             swap_mutation_size_t, lsearch_2opt_tour_distance,
+                             swap_mutation_size_t, lsearch_2opt_td_cascade,
                              full_gen_replacement_elitism);
   double elapsed_time = get_wall_time() - start;
 

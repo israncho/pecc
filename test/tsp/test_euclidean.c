@@ -264,7 +264,7 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
     for (size_t _ = 0; _ < 30; _++) {
       assert(population_fitness_computing(exec.offspring, thread_workspace,
                                           pr152_instance,
-                                          lsearch_2opt_tour_distance) == 0);
+                                          lsearch_2opt_td_cascade) == 0);
 
       individual *thread_best = thread_workspace->ptr_to_thread_best;
       size_t same = 0;
