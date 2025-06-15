@@ -30,6 +30,8 @@ double tour_distance(void *solution, void *instance_details, ga_workspace *_);
 
 double lsearch_2opt_td_cascade(void *solution, void *instance_details, ga_workspace *thread_workspace);
 
+double lsearch_2opt_td_fst_improvement(void *solution, void *instance_details, ga_workspace *thread_workspace);
+
 int init_tsp_euc_instance(const file_line *array_of_lines,
                           const size_t number_of_lines,
                           tsp_euc_instance **ptr_to_tsp_instance);
