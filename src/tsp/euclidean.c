@@ -121,28 +121,24 @@ double lsearch_2opt_td_fst_improvement(void *solution, void *instance_details, g
   double best_f_x = tour_distance(permutation, instance_details, NULL);
   bool improvement = true;
 
-  for (size_t _ = 0; _ < local_serach_iterations && improvement; _++) {
+  for (size_t iters = 0; iters < local_serach_iterations && improvement; iters++) {
     improvement = false;
-    for (size_t i = 0; i < permutation_size_1; i++) {
-      const size_t u = permutation[i];
-      const size_t u_1 = (i == 0) ? last_city_i : permutation[i - 1];
-      const double distance_u_1_u = distances[u_1][u];
-      for (size_t j = i + 1; j < permutation_size; j++) {
+    for (size_t i = 0; i < permutation_size_1 && iters < local_serach_iterations; i++)
+      for (size_t j = i + 1; j < permutation_size && iters < local_serach_iterations; j++) {
+        const size_t u = permutation[i];
+        const size_t u_1 = (i == 0) ? last_city_i : permutation[i - 1];
         const size_t v = permutation[j];
         const size_t v_1 =
             (j == permutation_size_1) ? last_city_i : permutation[j + 1];
         const double delta = (distances[u_1][v] + distances[u][v_1]) -
-                             (distance_u_1_u + distances[v][v_1]);
-        if (delta < -1e-8) {
-          improvement = true;
+                             (distances[u_1][u] + distances[v][v_1]);
+        if (delta < -1e-9) {
           best_f_x += delta;
           reverse_segment_size_t_arr(permutation, i, j);
-          break;
+          improvement = true;
+          iters++;
         }
       }
-      if (improvement)
-        break;
-    }
   }
   return best_f_x;
 } 
