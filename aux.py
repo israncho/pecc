@@ -1,8 +1,10 @@
+from typing import List
+from pathlib import Path
 from os import makedirs
 from os.path import dirname
-from sys import argv
 from traceback import print_exc
 from collections import deque
+
 
 def read_file(file_path: str) -> deque[str]:
     '''Reads a file using utf-8 encongind
@@ -46,31 +48,6 @@ def write_file(file_path: str, lines_of_the_file: deque[str], mode: str = 'w') -
         print_exc()
 
 
-def give_format(list_of_strs: deque[str]) -> deque[str]:
-    '''Gives format to the list of strings to generate a file with
-    format to use GNUPlot from a TSPLIB file.'''
-    str_ = list_of_strs.popleft()
-
-    while str_ != 'NODE_COORD_SECTION':
-        str_ = list_of_strs.popleft()
-
-    if list_of_strs[-1] == 'EOF':
-        list_of_strs.pop()
-
-    n = len(list_of_strs)
-    for _ in range(n):
-        str_ = list_of_strs.popleft()
-        tokens = str_.split()
-        str_ = ' '.join(tokens[1:]) + '\n'
-        list_of_strs.append(str_)
-
-    list_of_strs.append(list_of_strs[0]) 
-
-    return list_of_strs
-
-
-if __name__ == "__main__":
-    input_file = argv[1]
-    output_file = argv[2]
-    list_of_strs = read_file(input_file)
-    write_file(output_file, give_format(list_of_strs))
+def list_files(path: str, pattern: str) -> List[str]:
+    path = Path(path)
+    return [str(file_path) for file_path in path.glob(pattern)]
