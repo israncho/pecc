@@ -254,11 +254,11 @@ int update_current_best(ga_execution *exec, ga_workspace *workspace_array,
   return 0;
 }
 
-static inline double avg_population_fitness(const size_t population_size, const size_t n_threads, ga_workspace *workspace_array) {
+static inline double avg_population_fitness(const size_t n_threads, ga_workspace *workspace_array) {
   double population_fitness_sum = 0;
   for (size_t thread_i = 0; thread_i < n_threads; thread_i++) 
     population_fitness_sum += workspace_array[thread_i].curr_gen_avg_fitness;
-  return population_fitness_sum / population_size; 
+  return population_fitness_sum / n_threads; 
 }
 
 int parallel_genetic_algorithm(
@@ -277,7 +277,6 @@ int parallel_genetic_algorithm(
     return 3;
 
   const size_t n_generations = exec->generations;
-  const size_t population_size = exec->population_size;
   population_fitness_computing(exec->population, &workspace_array[0], instance,
                                fitness_f);
 
@@ -299,7 +298,7 @@ int parallel_genetic_algorithm(
       if (thread_id == 0) {
         update_current_best(exec, workspace_array, n_threads);
         exec->best_fitness_found_per_gen[current_gen] = exec->current_best->fitness;
-        exec->avg_population_fitness_per_gen[current_gen] = avg_population_fitness(population_size, n_threads, workspace_array);
+        exec->avg_population_fitness_per_gen[current_gen] = avg_population_fitness(n_threads, workspace_array);
       }
       #pragma omp barrier
       replacement(exec, thread_workspace);
