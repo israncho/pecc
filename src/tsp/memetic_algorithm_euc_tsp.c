@@ -32,12 +32,18 @@ int exec_memetic_algorithm_for_euc_tsp(const char *input_file_path) {
 
   const size_t time_file_path_len = strlen(output_file) + 7;
   const size_t fitness_file_path_len = strlen(output_file) + 9;
+  const size_t data_avgs_file_path_len = strlen(output_file) + 11;
+  const size_t data_bests_file_path_len = strlen(output_file) + 12;
 
   char *time_file_path = malloc(time_file_path_len);
   char *fitness_file_path = malloc(fitness_file_path_len);
+  char *data_avgs_file_path = malloc(data_avgs_file_path_len);
+  char *data_bests_file_path = malloc(data_bests_file_path_len);
 
   snprintf(time_file_path, time_file_path_len, "%s.times", output_file);
   snprintf(fitness_file_path, fitness_file_path_len, "%s.fitness", output_file);
+  snprintf(data_avgs_file_path, data_avgs_file_path_len, "%s.data_avgs", output_file);
+  snprintf(data_bests_file_path, data_bests_file_path_len, "%s.data_bests", output_file);
   
   if (seed1 == 0 && seed2 == 0) {
     xorshiftr128plus_state state;
@@ -92,6 +98,9 @@ int exec_memetic_algorithm_for_euc_tsp(const char *input_file_path) {
   write_doubles_with_csv_format(time_file_path, &elapsed_time, 1, "a");
   write_doubles_with_csv_format(fitness_file_path, &exec.current_best->fitness, 1, "a");
 
+  write_doubles_with_csv_format(data_avgs_file_path, exec.avg_population_fitness_per_gen, generations, "a");
+  write_doubles_with_csv_format(data_bests_file_path, exec.best_fitness_found_per_gen, generations, "a");
+
   free(permutation_of_file_lines);
 
   for (size_t i = 0; i < n_threads; i++)
@@ -109,5 +118,7 @@ int exec_memetic_algorithm_for_euc_tsp(const char *input_file_path) {
   free(output_file);
   free(time_file_path);
   free(fitness_file_path);
+  free(data_avgs_file_path);
+  free(data_bests_file_path);
   return 0;
 }
