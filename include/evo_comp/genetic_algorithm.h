@@ -17,6 +17,8 @@ typedef struct {
   individual *population;
   individual *offspring;
   individual *current_best;
+  double *best_fitness_found_per_gen;
+  double *avg_population_fitness_per_gen;
   size_t *selected_parents_indexes;
   size_t codification_size;
   size_t codification_entry_size;
@@ -33,6 +35,7 @@ typedef struct {
   void *mem;
   void *scratch_space;
   individual *ptr_to_thread_best;
+  double curr_gen_avg_fitness;
   size_t scratch_space_capacity;
   size_t offspring_size_of_previous_threads;
   size_t thread_offspring_size;
@@ -58,6 +61,8 @@ memory_needed_for_ga_execution(const ga_execution *exec) {
   // bytes for array of indexes of selected parents
   memory_needed += sizeof(size_t) * (population_size + (population_size & 1)) +
                    alignof(size_t);
+  // bytes for array of population average fitness and array of best found through generations
+  memory_needed += exec->generations * sizeof(double) * 2 + alignof(double);
   return memory_needed;
 }
 

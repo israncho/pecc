@@ -17,6 +17,8 @@ int setup_dynamic_mem_for_ga_execution(ga_execution *exec) {
   const size_t codification_entry_alignment =
       exec->codification_entry_alignment;
   const size_t total_memory_needed = memory_needed_for_ga_execution(exec);
+  const size_t n_generations = exec->generations;
+
   exec->mem = NULL;
   if (init_array(&exec->mem, total_memory_needed, 1) != ARRAY_OK)
     return 1;
@@ -37,6 +39,17 @@ int setup_dynamic_mem_for_ga_execution(ga_execution *exec) {
           exec->codification_size, codification_entry_size,
           codification_entry_alignment) != ARRAY_OK)
     return 4;
+
+  if (setup_array_from_prealloc_mem(
+          &mem_, &memory_capacity, (void **)&exec->best_fitness_found_per_gen,
+          n_generations, sizeof(double), alignof(double)) != ARRAY_OK)
+    return 5;
+
+  if (setup_array_from_prealloc_mem(
+          &mem_, &memory_capacity,
+          (void **)&exec->avg_population_fitness_per_gen, n_generations,
+          sizeof(double), alignof(double)) != ARRAY_OK)
+    return 6;
 
   exec->current_best->fitness = DBL_MAX;
 
@@ -94,7 +107,7 @@ int init_ga_workspace(
     const size_t local_search_iters) {
 
   if (exec == NULL)
-    return 1; 
+    return 1;
   const size_t n_threads = exec->n_threads;
   if (init_array((void **)ptr_to_workspace_array, n_threads,
                  sizeof(ga_workspace)) != 0)
@@ -196,7 +209,10 @@ int population_fitness_computing(individual *population,
     return !population ? 1 : (!thread_workspace ? 2 : 3);
 
   const size_t beginning = thread_workspace->offspring_size_of_previous_threads;
-  const size_t end = thread_workspace->thread_offspring_size + beginning;
+  const size_t thread_population_size = thread_workspace->thread_offspring_size;
+  const size_t end = thread_population_size + beginning;
+
+  double thread_population_fitness_sum = 0;
 
   individual **thread_best = &thread_workspace->ptr_to_thread_best;
   double best_fitness_found = DBL_MAX;
@@ -205,12 +221,16 @@ int population_fitness_computing(individual *population,
     individual *current = &population[i];
     const double curr_fitness =
         fitness_f(current->codification, instance_details, thread_workspace);
+    thread_population_fitness_sum += curr_fitness;
     current->fitness = curr_fitness;
     if (curr_fitness < best_fitness_found) {
       *thread_best = current;
       best_fitness_found = curr_fitness;
     }
   }
+
+  thread_workspace->curr_gen_avg_fitness = thread_population_fitness_sum / thread_population_size;
+
   return 0;
 }
 
@@ -234,6 +254,13 @@ int update_current_best(ga_execution *exec, ga_workspace *workspace_array,
   return 0;
 }
 
+static inline double avg_population_fitness(const size_t population_size, const size_t n_threads, ga_workspace *workspace_array) {
+  double population_fitness_sum = 0;
+  for (size_t thread_i = 0; thread_i < n_threads; thread_i++) 
+    population_fitness_sum += workspace_array[thread_i].curr_gen_avg_fitness;
+  return population_fitness_sum / population_size; 
+}
+
 int parallel_genetic_algorithm(
     ga_execution *exec, ga_workspace *workspace_array, const size_t n_threads,
     void *instance, int (*selection)(ga_execution *, ga_workspace *),
@@ -250,6 +277,7 @@ int parallel_genetic_algorithm(
     return 3;
 
   const size_t n_generations = exec->generations;
+  const size_t population_size = exec->population_size;
   population_fitness_computing(exec->population, &workspace_array[0], instance,
                                fitness_f);
 
@@ -259,7 +287,7 @@ int parallel_genetic_algorithm(
   {
     const size_t thread_id = omp_get_thread_num();
     ga_workspace *thread_workspace = &workspace_array[thread_id];
-    for (size_t _ = 0; _ < n_generations; _++) {
+    for (size_t current_gen = 0; current_gen < n_generations; current_gen++) {
       if (thread_id == 0)
         selection(exec, thread_workspace);
       #pragma omp barrier
@@ -268,8 +296,11 @@ int parallel_genetic_algorithm(
       population_fitness_computing(exec->offspring, thread_workspace, instance,
                                    fitness_f);
       #pragma omp barrier
-      if (thread_id == 0)
+      if (thread_id == 0) {
         update_current_best(exec, workspace_array, n_threads);
+        exec->best_fitness_found_per_gen[current_gen] = exec->current_best->fitness;
+        exec->avg_population_fitness_per_gen[current_gen] = avg_population_fitness(population_size, n_threads, workspace_array);
+      }
       #pragma omp barrier
       replacement(exec, thread_workspace);
       #pragma omp barrier
