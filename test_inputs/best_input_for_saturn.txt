@@ -1,7 +1,7 @@
 INSTANCE_FILE_PATH:
 instances/euc_TSP/saturn.tsp
 OUTPUT_FILE_PATH:
-saturn_solution.tsp
+results/test-saturn-solution.tsp
 SEED1:
 0
 SEED2:
