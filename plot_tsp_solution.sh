@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -ne 1 ]; then
-    echo "Use: $0 <archivo.tsp>"
+    echo "Use: $0 <file.tsp>"
     exit 1
 fi
 
@@ -15,12 +15,12 @@ python3 format_for_plotting_solution.py "$INPUT_TSP" "$TEMP_FILE" || {
     exit 1
 }
 
-echo "Generating plot con GNUPlot..."
+echo "Generating plot with GNUPlot..."
 gnuplot <<- EOF
     set terminal pngcairo enhanced font "Arial,12"
     set output "$OUTPUT_PNG"
     set title "TSP Solution: $(basename "$INPUT_TSP")"
-    plot "$TEMP_FILE" using 1:2 with linespoints lc "blue" pt 7 ps 0.5 title "Route"
+    plot "$TEMP_FILE" using 1:2 with linespoints lc "blue" pt 5 ps 0.25 title "Route"
 EOF
 
 rm -f "$TEMP_FILE"

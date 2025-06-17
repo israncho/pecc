@@ -4,7 +4,7 @@ from collections import deque
 from aux import read_file, write_file, list_files
 
 
-def give_format(files: List[str]) -> deque[str]:
+def give_format_for_boxplotting(files: List[str]) -> deque[str]:
     output: deque[str] = deque()
     list_of_deques: List[deque[str]] = []
 
@@ -35,4 +35,4 @@ if __name__ == "__main__":
     print('pattern: ', pattern)
     list_of_files = sorted(list_files(input_path, pattern))
 
-    write_file(output_file, give_format(list_of_files)) 
+    write_file(output_file, give_format_for_boxplotting(list_of_files)) 

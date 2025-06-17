@@ -3,7 +3,7 @@ from collections import deque
 from aux import read_file, write_file
 
 
-def give_format(list_of_strs: deque[str]) -> deque[str]:
+def give_format_for_plotting_solution(list_of_strs: deque[str]) -> deque[str]:
     '''Gives format to the list of strings to generate a file with
     format to use GNUPlot from a TSPLIB file.'''
     str_ = list_of_strs.popleft()
@@ -30,4 +30,4 @@ if __name__ == "__main__":
     input_file = argv[1]
     output_file = argv[2]
     list_of_strs = read_file(input_file)
-    write_file(output_file, give_format(list_of_strs))
+    write_file(output_file, give_format_for_plotting_solution(list_of_strs))
