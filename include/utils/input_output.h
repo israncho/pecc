@@ -166,4 +166,9 @@ void get_arguments_for_exec(size_t *generations, size_t *population_size,
                             char **ptr_to_output_file_path,
                             const char *input_file_path);
 
+FileWriteStatus write_doubles_with_csv_format(const char *file_name,
+                                              const double *array,
+                                              const size_t array_len,
+                                              const char *mode);
+
 #endif

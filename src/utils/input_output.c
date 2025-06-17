@@ -308,3 +308,37 @@ void get_arguments_for_exec(size_t *generations, size_t *population_size,
   free_lines_array_content(array_of_lines, num_of_lines);
   free(array_of_lines);
 }
+
+FileWriteStatus write_doubles_with_csv_format(const char *file_name,
+                                              const double *array,
+                                              const size_t array_len, 
+                                              const char *mode) {
+  if (file_name == NULL)
+    return FILE_WRITE_NULL_FILENAME;
+  if (mode == NULL)
+    return FILE_WRITE_NULL_MODE;
+  if (strcmp("w", mode) != 0 && strcmp("a", mode) != 0)
+    return FILE_WRITE_ERR_WRONG_MODE;
+
+  FILE *file = fopen(file_name, mode);
+
+  if (!file)
+    return FILE_WRITE_ERR_OPEN_FAILED;
+
+  if (array_len == 0) {
+    fclose(file);
+    return FILE_WRITE_SUCCESS;
+  }
+
+  assert(array != NULL);
+
+  fprintf(file, "%.7f", array[0]);
+  for (size_t i = 1; i < array_len; i++)
+    fprintf(file, ",%.7f", array[i]);
+
+  fprintf(file, "\n");
+
+  fclose(file);
+
+  return FILE_WRITE_SUCCESS;
+}

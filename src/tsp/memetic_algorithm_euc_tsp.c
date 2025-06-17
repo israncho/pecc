@@ -89,14 +89,8 @@ int exec_memetic_algorithm_for_euc_tsp(const char *input_file_path) {
   assert(write_to_file_in_specific_order(output_file, array_of_lines, num_of_lines,
                                   permutation_of_file_lines, "w") == FILE_WRITE_SUCCESS);
 
-  char buffer[64];
-  file_line tmp[1] = {{buffer, 64}};
-
-  snprintf(buffer, 64, "%.6f\n", elapsed_time);
-  assert(write_to_file(time_file_path, tmp, 1, "a") == FILE_WRITE_SUCCESS);
-
-  snprintf(buffer, 64, "%.6f\n", exec.current_best->fitness);
-  assert(write_to_file(fitness_file_path, tmp, 1, "a") == FILE_WRITE_SUCCESS);
+  write_doubles_with_csv_format(time_file_path, &elapsed_time, 1, "a");
+  write_doubles_with_csv_format(fitness_file_path, &exec.current_best->fitness, 1, "a");
 
   free(permutation_of_file_lines);
 
