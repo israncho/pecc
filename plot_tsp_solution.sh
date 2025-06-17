@@ -10,7 +10,7 @@ OUTPUT_PNG="${INPUT_TSP%.tsp}.png"
 TEMP_FILE="temp_formatted.tsp"
 
 echo "Giving format to '$INPUT_TSP' with Python..."
-python3 format_for_plotting_solution.py "$INPUT_TSP" "$TEMP_FILE" || {
+python3 python/format_for_plotting_solution.py "$INPUT_TSP" "$TEMP_FILE" || {
     echo "Error while processing .tsp with Python."
     exit 1
 }

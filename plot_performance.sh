@@ -10,7 +10,7 @@ OUTPUT_PNG="${INPUT_TSP%.tsp}_performance.png"
 TEMP_FILE="temp_performance_data.dat"
 
 echo "Processing performance data..."
-python3 format_for_plotting_performance.py "$INPUT_TSP" "$TEMP_FILE" || {
+python3 python/format_for_plotting_performance.py "$INPUT_TSP" "$TEMP_FILE" || {
     echo "Error while processing .tsp with Python."
     exit 1
 }
