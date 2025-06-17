@@ -12,13 +12,13 @@ int full_generational_replacement(ga_execution *exec,
 
   const size_t codification_size = exec->codification_size;
   const size_t codification_entry_size = exec->codification_entry_size;
-  const size_t thread_offspring_size = thread_workspace->thread_offspring_size;
+  const size_t thread_population_size = thread_workspace->thread_population_size;
 
   const size_t beginning = thread_workspace->offspring_size_of_previous_threads;
-  const size_t end = beginning + thread_offspring_size;
+  const size_t end = beginning + thread_population_size;
 
   const size_t total_bytes_to_copy =
-      codification_size * codification_entry_size * thread_offspring_size;
+      codification_size * codification_entry_size * thread_population_size;
 
   individual *offspring = exec->offspring;
   individual *population = exec->population;
@@ -46,18 +46,18 @@ int full_gen_replacement_elitism(ga_execution *exec,
   const size_t thread_id = thread_workspace->thread_id;
   const size_t codification_size = exec->codification_size;
   const size_t codification_entry_size = exec->codification_entry_size;
-  size_t thread_offspring_size = thread_workspace->thread_offspring_size;
+  size_t thread_population_size = thread_workspace->thread_population_size;
 
   size_t beginning = thread_workspace->offspring_size_of_previous_threads;
-  const size_t end = beginning + thread_offspring_size;
+  const size_t end = beginning + thread_population_size;
 
   if (thread_id == 0) {
     beginning++;
-    thread_offspring_size--;
+    thread_population_size--;
   }
 
   const size_t total_bytes_to_copy =
-      codification_size * codification_entry_size * thread_offspring_size;
+      codification_size * codification_entry_size * thread_population_size;
 
   individual *offspring = exec->offspring;
   individual *population = exec->population;

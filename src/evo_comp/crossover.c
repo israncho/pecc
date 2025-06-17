@@ -196,7 +196,7 @@ int population_crossover(
   const size_t population_size = ptr_exec_data->population_size; 
   const size_t codification_size = ptr_exec_data->codification_size; 
   const size_t beginning = thread_workspace->offspring_size_of_previous_threads;
-  const size_t end = thread_workspace->thread_offspring_size + beginning;
+  const size_t end = thread_workspace->thread_population_size + beginning;
   for (size_t i = beginning; i < end; i += 2) {
     size_t parent1_i = selected_parents_indexes[i];
     size_t parent2_i = selected_parents_indexes[i + 1];

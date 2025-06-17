@@ -11,7 +11,7 @@ int population_mutation(ga_execution *ptr_exec_data,
   const double mutation_rate = ptr_exec_data->mutation_rate;
 
   const size_t beginning = thread_workspace->offspring_size_of_previous_threads;
-  const size_t end = thread_workspace->thread_offspring_size + beginning;
+  const size_t end = thread_workspace->thread_population_size + beginning;
 
   xorshiftr128plus_state *state = &thread_workspace->state;
 

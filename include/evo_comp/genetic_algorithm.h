@@ -38,7 +38,7 @@ typedef struct {
   double curr_gen_avg_fitness;
   size_t scratch_space_capacity;
   size_t offspring_size_of_previous_threads;
-  size_t thread_offspring_size;
+  size_t thread_population_size;
   size_t local_search_iterations;
   size_t thread_id;
   xorshiftr128plus_state state;

@@ -133,13 +133,13 @@ int init_ga_workspace(
   size_t offspring_size_of_previous_threads = 0;
 
   for (size_t i = 0; i < n_threads; i++) {
-    size_t thread_offspring_size = min_offspring_per_thread;
+    size_t thread_population_size = min_offspring_per_thread;
     if (remainder >= 2) {
       remainder -= 2;
-      thread_offspring_size += 2;
+      thread_population_size += 2;
     } else if (remainder == 1 && i + 1 == n_threads) {
       remainder -= 1;
-      thread_offspring_size++;
+      thread_population_size++;
     }
 
     workspace_array[i].mem = NULL;
@@ -149,8 +149,8 @@ int init_ga_workspace(
 
     workspace_array[i].offspring_size_of_previous_threads =
         offspring_size_of_previous_threads;
-    workspace_array[i].thread_offspring_size = thread_offspring_size;
-    offspring_size_of_previous_threads += thread_offspring_size;
+    workspace_array[i].thread_population_size = thread_population_size;
+    offspring_size_of_previous_threads += thread_population_size;
 
     if (mem_for_workspace > 0)
       if (init_array(&workspace_array[i].mem, mem_for_workspace, 1) != ARRAY_OK)
@@ -209,7 +209,7 @@ int population_fitness_computing(individual *population,
     return !population ? 1 : (!thread_workspace ? 2 : 3);
 
   const size_t beginning = thread_workspace->offspring_size_of_previous_threads;
-  const size_t thread_population_size = thread_workspace->thread_offspring_size;
+  const size_t thread_population_size = thread_workspace->thread_population_size;
   const size_t end = thread_population_size + beginning;
 
   double thread_population_fitness_sum = 0;

@@ -253,7 +253,7 @@ test_threaded_population_fitness_computing(const size_t n_threads) {
 
     const size_t beginning =
         thread_workspace->offspring_size_of_previous_threads;
-    const size_t end = thread_workspace->thread_offspring_size + beginning;
+    const size_t end = thread_workspace->thread_population_size + beginning;
 
     for (size_t i = beginning; i < end; i++) {
       exec.offspring[i].fitness =
