@@ -8,7 +8,7 @@ fi
 
 ALG_TYPE=$1
 TEST_DIR=$2
-RUNS=${3:-50} # default value 50 
+RUNS=${3:-75} # default value 50 
 ALG_BIN="./bin/pecc"
 
 # Validaciones básicas
