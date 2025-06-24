@@ -56,6 +56,10 @@ graph of the algorithm.
 
 ![saturn_performance](results/test-saturn-solution_performance.png)
 
+Average performance of multiple executions with the inputs inside `test_input/saturn/`
+
+![saturn_avg_performance](results/saturn_avg_performance.png)
+
 ### pr152
 
 ![pr152_solution](results/test-pr152-solution.png)

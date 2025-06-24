@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Callable
 from pathlib import Path
 from os import makedirs
 from os.path import dirname
@@ -51,3 +51,22 @@ def write_file(file_path: str, lines_of_the_file: deque[str], mode: str = 'w') -
 def list_files(path: str, pattern: str) -> List[str]:
     path = Path(path)
     return [str(file_path) for file_path in path.glob(pattern)]
+
+
+def is_number(str_test: str, transform_func: Callable) -> bool:
+    '''Checks if a given string can be converted to a number using
+    the specified transformation function.'''
+    try:
+        transform_func(str_test)
+        return True
+    except ValueError:
+        return False
+
+
+def to_number(num_as_str: str) -> float | int:
+    '''Converts a string to either an integer or a float. '''
+    if is_number(num_as_str, int):
+        return int(num_as_str)
+    if is_number(num_as_str, float):
+        return float(num_as_str)
+    raise ValueError(f"'{num_as_str}' is not a valid number")
